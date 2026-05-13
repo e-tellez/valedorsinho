@@ -9,7 +9,7 @@ from checkout.pages import bp as pages_bp
 from checkout.api import bp as api_bp
 
 
-def create_app():
+def create_app() -> Flask:
     """Application factory.
 
     Creates and configures the Flask app, pointing it at the project-level

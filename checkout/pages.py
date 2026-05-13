@@ -1,4 +1,4 @@
-from flask import Blueprint, request, render_template, session, redirect, url_for
+from flask import Blueprint, Response, request, render_template, session, redirect, url_for
 
 from checkout.config import CLIENT_KEY, ADYEN_ENVIRONMENT
 from checkout.helpers import COUNTRY_CURRENCY_MAP
@@ -8,7 +8,7 @@ bp = Blueprint("pages", __name__)
 
 
 @bp.route("/", methods=["GET", "POST"])
-def index():
+def index() -> str | Response:
     """Step 1 – collect username and order amount.
 
     GET  renders the order details form.
@@ -66,7 +66,7 @@ def index():
 
 
 @bp.route("/implementations")
-def select_integration():
+def select_integration() -> str | Response:
     """Step 2 – choose an integration type.
 
     Requires step 1 to have been completed (shopper_reference in session).
@@ -92,7 +92,7 @@ def select_integration():
     note="(Only Card Component implemented for now)",
     order=2,
 )
-def components_checkout():
+def components_checkout() -> str | Response:
     """Card Component funnel – Step 3: render the Card Component."""
     if not session.get("shopper_reference"):
         return redirect(url_for("pages.index"))
@@ -115,7 +115,7 @@ def components_checkout():
     description="Pre-built UI with all available payment methods in your MA.",
     order=1,
 )
-def dropin_checkout():
+def dropin_checkout() -> str | Response:
     """Drop-in funnel – Step 3: render the Drop-in payment form.
 
     Redirects back to step 1 if the shopper has not entered their details yet.
@@ -138,7 +138,7 @@ def dropin_checkout():
 
 
 @bp.route("/result")
-def result():
+def result() -> str | Response:
     """Render the payment result page and clear the session."""
     payment_result = session.pop("payment_result", None)
     if not payment_result:

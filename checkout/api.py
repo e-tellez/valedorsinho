@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, session, redirect, url_for
+from flask import Blueprint, Response, request, jsonify, session, redirect, url_for
 
 from checkout.config import adyen_client, MERCHANT_ACCOUNT
 from checkout.helpers import generate_reference
@@ -7,7 +7,7 @@ bp = Blueprint("api", __name__)
 
 
 @bp.route("/result/store", methods=["POST"])
-def result_store():
+def result_store() -> Response:
     """Receive the payment outcome from the browser and store it in the session.
 
     The JS calls this endpoint instead of redirecting with query params, so the
@@ -24,7 +24,7 @@ def result_store():
 
 
 @bp.route("/api/paymentMethods", methods=["GET"])
-def payment_methods():
+def payment_methods() -> Response:
     """Retrieve the payment methods available for this merchant.
 
     The Adyen Drop-in calls this endpoint on load to know which payment
@@ -53,7 +53,7 @@ def payment_methods():
 
 
 @bp.route("/api/payments", methods=["POST"])
-def payments():
+def payments() -> Response:
     """Initiate a payment.
 
     The browser sends the encrypted payment data (stateData.paymentMethod)
@@ -136,7 +136,7 @@ def payments():
 
 
 @bp.route("/api/payments/details", methods=["POST"])
-def payments_details():
+def payments_details() -> Response:
     """Submit additional authentication details after a 3DS2 challenge.
 
     When the Drop-in completes a native 3DS2 fingerprint or challenge it
@@ -162,7 +162,7 @@ def payments_details():
 
 
 @bp.route("/dropin/handleShopperRedirect", methods=["GET", "POST"])
-def handle_shopper_redirect():
+def handle_shopper_redirect() -> Response:
     """Handle the redirect back from the issuer ACS page.
 
     This endpoint is only reached when the issuer does NOT support native

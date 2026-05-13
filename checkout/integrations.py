@@ -5,10 +5,19 @@ automatically appear on the integration-selection page.  No other file needs
 to be edited.
 """
 
-_REGISTRY = []
+from typing import Any, Callable, TypeVar
+
+F = TypeVar("F", bound=Callable[..., Any])
+
+_REGISTRY: list[dict[str, Any]] = []
 
 
-def register_integration(name, description, note=None, order=100):
+def register_integration(
+    name: str,
+    description: str,
+    note: str | None = None,
+    order: int = 100,
+) -> Callable[[F], F]:
     """Decorator that registers a Flask view function as a selectable integration.
 
     Parameters
@@ -22,7 +31,7 @@ def register_integration(name, description, note=None, order=100):
     order : int
         Controls display order — lower numbers appear first.
     """
-    def decorator(func):
+    def decorator(func: F) -> F:
         _REGISTRY.append({
             "name": name,
             "description": description,
@@ -34,6 +43,6 @@ def register_integration(name, description, note=None, order=100):
     return decorator
 
 
-def get_integrations():
+def get_integrations() -> list[dict[str, Any]]:
     """Return registered integrations sorted by ``order``."""
     return sorted(_REGISTRY, key=lambda i: i["order"])
