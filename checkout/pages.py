@@ -35,7 +35,7 @@ def index():
 
         if errors or amount_warning:
             return render_template(
-                "order.html",
+                "pages/order.html",
                 form_action="/",
                 username=username,
                 amount=amount_raw,
@@ -55,7 +55,7 @@ def index():
     amount_stored = session.get("amount_minor_units")
     amount_display = "{:.2f}".format(amount_stored / 100) if amount_stored else "10.00"
     return render_template(
-        "order.html",
+        "pages/order.html",
         form_action="/",
         username=session.get("shopper_reference", ""),
         amount=amount_display,
@@ -76,7 +76,7 @@ def select_integration():
 
     amount_minor_units = session.get("amount_minor_units", 1000)
     return render_template(
-        "implementation_index.html",
+        "pages/implementation_index.html",
         shopper_reference=session["shopper_reference"],
         amount=amount_minor_units / 100,
         country_code=session.get("country_code", "MX"),
@@ -100,7 +100,7 @@ def components_checkout():
     session["integration_type"] = "Card Component"
     amount_minor_units = session.get("amount_minor_units", 1000)
     return render_template(
-        "card_component.html",
+        "pages/card_component.html",
         client_key=CLIENT_KEY,
         environment=ADYEN_ENVIRONMENT,
         shopper_reference=session["shopper_reference"],
@@ -126,7 +126,7 @@ def dropin_checkout():
     session["integration_type"] = "Drop-in"
     amount_minor_units = session.get("amount_minor_units", 1000)
     return render_template(
-        "dropin.html",
+        "pages/dropin.html",
         client_key=CLIENT_KEY,
         environment=ADYEN_ENVIRONMENT,
         shopper_reference=session["shopper_reference"],
@@ -148,7 +148,7 @@ def result():
     session.clear()
 
     return render_template(
-        "result.html",
+        "pages/result.html",
         result=payment_result["status"],
         result_code=payment_result["result_code"],
         adyen_response=payment_result["adyen_response"],
