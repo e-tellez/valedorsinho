@@ -5,29 +5,40 @@
 
 # <center> Adyen Checkout – Python / Flask</center>
 
-A minimal Flask application that shows how to integrate Adyen's **Drop-in Component** and run a **native 3DS2** (in-browser) authentication flow.
+A Flask application that implements Adyen's **Drop-in** and **Card Component** integrations and covers **native 3DS2** authentication and **tokenisation**.
+
+## Features
+
+- **Drop-in** – pre-built UI with all available payment methods configured in your account
+- **Card Component** – card-only fields with full UI control
+- **Native 3DS2** – in-browser fingerprint and challenge flows
+- **Tokenisation** – save cards for returning shoppers (with shopper consent)
 
 ## Flow overview
 
 ```
-Browser                     Flask (app.py)              Adyen API
-──────                      ──────────────              ─────────
-GET /                  →    render checkout.html
-GET /api/paymentMethods →   POST /paymentMethods    →   payment method list
-                             ←───────────────────────────
-[shopper fills card]
-onSubmit fires         →    POST /api/payments       →   POST /payments
-                             ←  action{type:threeDS2} ←──
-Drop-in renders 3DS2
-fingerprint/challenge
-onAdditionalDetails    →    POST /api/payments/details → POST /payments/details
-                             ←  resultCode:Authorised  ←─
-handleFinalResult      →    GET /result?status=success
+Browser                        Flask server                 Adyen API
+───────                        ────────────                 ─────────
+1. GET /                  →    render order form
+2. POST /                 →    validate & store in session
+3. GET /implementations   →    render integration selector
+4. GET /dropin/checkout   →    render Drop-in page
+5. GET /api/paymentMethods →   POST /paymentMethods     →   payment method list
+                                                              (incl. stored cards)
+6. [shopper fills card / picks stored card]
+   onSubmit               →    POST /api/payments        →   POST /payments
+                                ← action{type:threeDS2}  ←──
+7. Drop-in renders 3DS2
+   fingerprint/challenge
+   onAdditionalDetails    →    POST /api/payments/details → POST /payments/details
+                                ← resultCode:Authorised   ←─
+8. POST /result/store     →    store result in session
+9. GET /result            →    render result page & clear session
 ```
 
-If the card issuer does not support native 3DS2, Adyen falls back to a full-page redirect to the issuer's ACS. After authentication the shopper is sent back to `/api/handleShopperRedirect`.
-<br><br>
-# <center>Setup</center>
+If the issuer does not support native 3DS2, Adyen falls back to a redirect. After authentication the shopper returns to `/dropin/handleShopperRedirect`.
+
+## Setup
 
 ### 1. Clone & create a virtual environment
 
@@ -56,22 +67,50 @@ You need:
 python app.py
 ```
 
-Open http://localhost:8080 in your browser.
+Open http://localhost:3000 in your browser or configure app.py to use a different port.
 
 ## Test cards
 
 Use Adyen's test card numbers to trigger different 3DS2 scenarios:
 https://docs.adyen.com/development-resources/testing/test-card-numbers
 
+## Tokenisation
+
+Tokenisation uses `recurringProcessingModel: CardOnFile` with shopper consent:
+
+1. Enter a username (used as `shopperReference`)
+2. Pay with a new card — a "Save for my next payment" checkbox appears
+3. If the shopper consents, we ask Adyen to tokenise the card
+4. On the next visit with the same username, stored cards appear in the Drop-in or Card Component
+
+New cards should be sent with `shopperInteraction: Ecommerce`; stored cards with `ContAuth`.
 
 ## Project structure
 
 ```
 .
-├── app.py                  # Flask server – all API routes
+├── app.py                          # Entry point
 ├── requirements.txt
 ├── .env.example
-└── templates/
-    ├── checkout.html       # Drop-in Component + 3DS2 JS logic
-    └── result.html         # Success / failure result page
+├── checkout/
+│   ├── __init__.py                 # App factory – registers blueprints
+│   ├── config.py                   # Adyen client, env vars, SSL fix
+│   ├── helpers.py                  # Shared constants & utilities
+│   ├── integrations.py             # @register_integration decorator & registry
+│   ├── pages.py                    # Blueprint: HTML-serving routes
+│   └── api.py                      # Blueprint: JSON API + redirect handlers
+├── templates/
+│   ├── pages/
+│   │   ├── order.html              # Step 1 – shopper & amount form
+│   │   ├── implementation_index.html # Step 2 – integration selector
+│   │   ├── dropin.html             # Step 3 – Drop-in checkout
+│   │   ├── card_component.html     # Step 3 – Card Component checkout
+│   │   └── result.html             # Payment result page
+│   └── errors/
+│       └── 404.html
+└── static/
+    ├── css/
+    └── js/
+        ├── dropin.js               # Drop-in initialisation & 3DS2 handling
+        └── card_component.js       # Card Component initialisation
 ```
