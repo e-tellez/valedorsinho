@@ -1,140 +1,9 @@
-import uuid
+from flask import Blueprint, request, jsonify, session, redirect, url_for
 
-from flask import Blueprint, request, jsonify, render_template, session, redirect, url_for
+from checkout.config import adyen_client, MERCHANT_ACCOUNT
+from checkout.helpers import generate_reference
 
-from checkout.config import adyen_client, MERCHANT_ACCOUNT, CLIENT_KEY, ADYEN_ENVIRONMENT
-
-# All routes are registered on a Blueprint so __init__.py stays a thin factory.
-bp = Blueprint("checkout", __name__)
-
-COUNTRY_CURRENCY_MAP = {
-    "MX": ("MX", "MXN"),
-    "US": ("US", "USD"),
-    "BR": ("BR", "BRL"),
-}
-
-def generate_reference():
-    """Return a unique order reference so every payment can be identified."""
-    return "order-" + str(uuid.uuid4())
-
-
-@bp.route("/", methods=["GET", "POST"])
-def index():
-    """Step 1 – collect username and order amount.
-
-    GET  renders the order details form.
-    POST validates input, stores values in session, redirects to step 2.
-    """
-    if request.method == "POST":
-        username = request.form.get("username", "").strip()
-        amount_raw = request.form.get("amount", "").strip()
-        country = request.form.get("country", "MX").upper()
-
-        errors = {}
-        amount_warning = None
-        if not username:
-            errors["error"] = "Please enter a username."
-        try:
-            amount = float(amount_raw)
-            if amount < 0:
-                raise ValueError
-        except ValueError:
-            errors["amount_error"] = "Please enter a valid amount."
-
-        if not errors and amount == 0:
-            amount_warning = "Amount is 0 \u2014 this flow would be used just to tokenize. This has not been implemented yet."
-
-        if errors or amount_warning:
-            return render_template(
-                "order.html",
-                form_action="/",
-                username=username,
-                amount=amount_raw,
-                country=country,
-                amount_warning=amount_warning,
-                **errors,
-            )
-
-        country_code, currency = COUNTRY_CURRENCY_MAP.get(country, ("MX", "MXN"))
-
-        session["shopper_reference"] = username
-        session["amount_minor_units"] = round(amount * 100)
-        session["country_code"] = country_code
-        session["currency"] = currency
-        return redirect(url_for("checkout.select_integration"))
-
-    amount_stored = session.get("amount_minor_units")
-    amount_display = "{:.2f}".format(amount_stored / 100) if amount_stored else "10.00"
-    return render_template(
-        "order.html",
-        form_action="/",
-        username=session.get("shopper_reference", ""),
-        amount=amount_display,
-        country=session.get("country_code", "MX"),
-        error=None,
-        amount_error=None,
-    )
-
-
-@bp.route("/implementations")
-def select_integration():
-    """Step 2 – choose an integration type.
-
-    Requires step 1 to have been completed (shopper_reference in session).
-    """
-    if not session.get("shopper_reference"):
-        return redirect(url_for("checkout.index"))
-
-    amount_minor_units = session.get("amount_minor_units", 1000)
-    return render_template(
-        "implementation_index.html",
-        shopper_reference=session["shopper_reference"],
-        amount=amount_minor_units / 100,
-        country_code=session.get("country_code", "MX"),
-        currency=session.get("currency", "MXN"),
-    )
-
-
-@bp.route("/components/checkout")
-def components_checkout():
-    """Card Component funnel – Step 3: render the Card Component."""
-    if not session.get("shopper_reference"):
-        return redirect(url_for("checkout.index"))
-
-    session["integration_type"] = "Card Component"
-    amount_minor_units = session.get("amount_minor_units", 1000)
-    return render_template(
-        "card_component.html",
-        client_key=CLIENT_KEY,
-        environment=ADYEN_ENVIRONMENT,
-        shopper_reference=session["shopper_reference"],
-        amount_minor_units=amount_minor_units,
-        amount=amount_minor_units / 100,
-    )
-
-
-
-@bp.route("/dropin/checkout")
-def dropin_checkout():
-    """Drop-in funnel – Step 3: render the Drop-in payment form.
-
-    Redirects back to step 1 if the shopper has not entered their details yet.
-    """
-    if not session.get("shopper_reference"):
-        return redirect(url_for("checkout.index"))
-
-    session["integration_type"] = "Drop-in"
-    amount_minor_units = session.get("amount_minor_units", 1000)
-    return render_template(
-        "dropin.html",
-        client_key=CLIENT_KEY,
-        environment=ADYEN_ENVIRONMENT,
-        shopper_reference=session["shopper_reference"],
-        amount_minor_units=amount_minor_units,
-        amount=amount_minor_units / 100,
-        country_code=session.get("country_code", "MX"),
-        currency=session.get("currency", "MXN"),
-    )
+bp = Blueprint("api", __name__)
 
 
 @bp.route("/result/store", methods=["POST"])
@@ -151,26 +20,7 @@ def result_store():
         "result_code": body.get("resultCode", "Unknown"),
         "adyen_response": body.get("adyenResponse"),
     }
-    return jsonify({"redirect": url_for("checkout.result")})
-
-
-@bp.route("/result")
-def result():
-    """Render the payment result page and clear the session."""
-    payment_result = session.pop("payment_result", None)
-    if not payment_result:
-        return redirect(url_for("checkout.index"))
-
-    integration_type = session.get("integration_type", "Unknown")
-    session.clear()
-
-    return render_template(
-        "result.html",
-        result=payment_result["status"],
-        result_code=payment_result["result_code"],
-        adyen_response=payment_result["adyen_response"],
-        integration_type=integration_type,
-    )
+    return jsonify({"redirect": url_for("pages.result")})
 
 
 @bp.route("/api/paymentMethods", methods=["GET"])
@@ -346,4 +196,4 @@ def handle_shopper_redirect():
         "adyen_response": response.message if status == "success" else None,
         "integration_type": session.get("integration_type", "Unknown"),
     }
-    return redirect(url_for("checkout.result"))
+    return redirect(url_for("pages.result"))

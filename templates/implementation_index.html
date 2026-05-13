@@ -29,32 +29,20 @@
   </div>
 
   <ul class="integration-list">
-
+    {% for integration in integrations %}
     <li class="integration-card">
-      <a href="/dropin/checkout" class="integration-link">
+      <a href="{{ url_for('pages.' + integration.endpoint) }}" class="integration-link">
         <div class="integration-info">
-          <span class="integration-name">Drop-in</span>
+          <span class="integration-name">{{ integration.name }}</span>
           <span class="integration-desc">
-            Pre-built UI with all available payment methods in your MA.
+            {% if integration.note %}<p>{{ integration.note }}</p>{% endif %}
+            {{ integration.description }}
           </span>
         </div>
         <span class="integration-arrow">›</span>
       </a>
     </li>
-
-    <li class="integration-card">
-      <a href="/components/checkout" class="integration-link">
-        <div class="integration-info">
-          <span class="integration-name">Components</span>
-          <span class="integration-desc">
-            <p>(Only Card Component implemented for now)</p>
-            Card fields only — you control the surrounding UI and pay button.
-          </span>
-        </div>
-        <span class="integration-arrow">›</span>
-      </a>
-    </li>
-
+    {% endfor %}
   </ul>
 
   <a href="/" class="btn-back">← Back</a>

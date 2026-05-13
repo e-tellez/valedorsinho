@@ -5,7 +5,8 @@ from flask import Flask, render_template
 # config must be imported first – it loads .env and applies the SSL fix
 # before the Adyen client (initialised inside config) makes any requests.
 from checkout.config import FLASK_SECRET_KEY
-from checkout.routes import bp
+from checkout.pages import bp as pages_bp
+from checkout.api import bp as api_bp
 
 
 def create_app():
@@ -28,8 +29,9 @@ def create_app():
     # Secret key required by Flask to sign the session cookie
     app.secret_key = FLASK_SECRET_KEY
 
-    # Register all checkout routes (pages + API endpoints)
-    app.register_blueprint(bp)
+    # Register blueprints – pages serve HTML, api handles JSON + redirects
+    app.register_blueprint(pages_bp)
+    app.register_blueprint(api_bp)
 
     @app.errorhandler(404)
     def page_not_found(e):
