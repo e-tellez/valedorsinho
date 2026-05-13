@@ -29,10 +29,20 @@ def index():
             errors["error"] = "Please enter a username."
         try:
             amount = float(amount_raw)
-            if amount <= 0:
+            if amount < 0:
                 raise ValueError
         except ValueError:
-            errors["amount_error"] = "Please enter a valid amount greater than 0."
+            errors["amount_error"] = "Please enter a valid amount."
+
+        if not errors and amount == 0:
+            return render_template(
+                "order.html",
+                form_action="/",
+                username=username,
+                amount=amount_raw,
+                country=request.form.get("country", "MX").upper(),
+                amount_warning="Amount is 0 — this flow would be used just to tokenize. This has not been implemented yet.",
+            )
 
         if errors:
             return render_template(
