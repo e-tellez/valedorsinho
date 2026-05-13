@@ -125,12 +125,15 @@ def components_result():
     if not payment_result:
         return redirect(url_for("checkout.index"))
 
+    integration_type = session.get("integration_type", "Unknown")
+    session.clear()
+
     return render_template(
         "result.html",
         result=payment_result["status"],
         result_code=payment_result["result_code"],
         adyen_response=payment_result["adyen_response"],
-        integration_type=session.get("integration_type", "Unknown"),
+        integration_type=integration_type,
     )
 
 
@@ -184,12 +187,15 @@ def result():
     if not payment_result:
         return redirect(url_for("checkout.index"))
 
+    integration_type = session.get("integration_type", "Unknown")
+    session.clear()
+
     return render_template(
         "result.html",
         result=payment_result["status"],
         result_code=payment_result["result_code"],
         adyen_response=payment_result["adyen_response"],
-        integration_type=session.get("integration_type", "Unknown"),
+        integration_type=integration_type,
     )
 
 
