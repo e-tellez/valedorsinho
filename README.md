@@ -63,11 +63,6 @@ Open http://localhost:8080 in your browser.
 Use Adyen's test card numbers to trigger different 3DS2 scenarios:
 https://docs.adyen.com/development-resources/testing/test-card-numbers
 
-| Scenario               | Card number         | Expiry   | CVC |
-|------------------------|---------------------|----------|-----|
-| 3DS2 native challenge  | 4917 6100 0000 0000 | any future | any |
-| Frictionless (no UX)   | 5454 5454 5454 5454 | any future | any |
-| Refused                | 4111 1111 1111 1111 | any future | any |
 
 ## Project structure
 
