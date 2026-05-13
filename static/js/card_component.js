@@ -149,6 +149,8 @@ async function handleFinalResult(resultCode, response) {
         hasHolderName: true,
         holderNameRequired: true,
         billingAddressRequired: false,
+        // Show "Save for my next payment" checkbox (tokenisation)
+        enableStoreDetails: true,
       })
       .mount("#card-container");
 

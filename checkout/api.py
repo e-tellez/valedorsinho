@@ -46,6 +46,9 @@ def payment_methods() -> Response:
         "countryCode": country_code,
         "shopperLocale": shopper_locale,
         "channel": "Web",
+        # Include shopperReference so Adyen returns any stored (tokenised)
+        # payment methods for this shopper.
+        "shopperReference": session.get("shopper_reference", ""),
     }
 
     response = adyen_client.checkout.payments_api.payment_methods(request_body)
@@ -108,10 +111,21 @@ def payments() -> Response:
         #     "allow3DS2": "true",
         # },
 
+        # ------------------------------------------------------------------
+        # Tokenisation – CardOnFile with shopper consent
+        # ------------------------------------------------------------------
+        "shopperReference": session.get("shopper_reference", body.get("shopperReference", "shopper-001")),
+        "recurringProcessingModel": "CardOnFile",
+        # The Drop-in / Component shows a "Save for my next payment" checkbox
+        # and sends storePaymentMethod: true/false in state.data.
+        "storePaymentMethod": body.get("storePaymentMethod", False),
+        # Ecommerce = shopper is present and using a new card
+        # ContAuth   = shopper is using a previously stored (tokenised) card
+        "shopperInteraction": "ContAuth" if body.get("paymentMethod", {}).get("storedPaymentMethodId") else "Ecommerce",
+
         # Shopper info – required by some issuers for 3DS2 risk scoring
         "shopperIP": request.remote_addr,
         "shopperEmail": body.get("shopperEmail", "shopper@example.com"),
-        "shopperReference": body.get("shopperReference", "shopper-001"),
 
         # Billing address – improves 3DS2 authorisation rates
         "billingAddress": body.get("billingAddress", {

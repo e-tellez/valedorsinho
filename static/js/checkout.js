@@ -110,6 +110,17 @@ async function handleFinalResult(resultCode, response) {
         enabled: true,
       },
 
+      paymentMethodsConfiguration: {
+        card: {
+          hasHolderName: true,
+          holderNameRequired: true,
+          // billingAddressRequired: true
+          billingAddressRequired: false,
+          // Show "Save for my next payment" checkbox (tokenisation)
+          enableStoreDetails: true,
+        },
+      },
+
       // onSubmit – called when the shopper clicks "Pay"
       onSubmit: async (state, dropin) => {
         dropin.setStatus("loading");
@@ -156,16 +167,8 @@ async function handleFinalResult(resultCode, response) {
 
     const dropin = checkout
       .create("dropin", {
-
-        paymentMethodsConfiguration: {
-          card: {
-            hasHolderName: true,
-            holderNameRequired: true,
-            // billingAddressRequired: true
-            billingAddressRequired: false,
-          },
-        },
-
+        // Show any stored (tokenised) payment methods for this shopper
+        showStoredPaymentMethods: true,
         // openFirstPaymentMethod: false
         openFirstPaymentMethod: true,
       })
