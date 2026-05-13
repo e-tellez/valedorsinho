@@ -1,4 +1,3 @@
-import json
 import uuid
 
 from flask import Blueprint, request, jsonify, render_template, session, redirect, url_for
@@ -7,6 +6,12 @@ from checkout.config import adyen_client, MERCHANT_ACCOUNT, CLIENT_KEY, ADYEN_EN
 
 # All routes are registered on a Blueprint so __init__.py stays a thin factory.
 bp = Blueprint("checkout", __name__)
+
+COUNTRY_CURRENCY_MAP = {
+    "MX": ("MX", "MXN"),
+    "US": ("US", "USD"),
+    "BR": ("BR", "BRL"),
+}
 
 def generate_reference():
     """Return a unique order reference so every payment can be identified."""
@@ -23,8 +28,10 @@ def index():
     if request.method == "POST":
         username = request.form.get("username", "").strip()
         amount_raw = request.form.get("amount", "").strip()
+        country = request.form.get("country", "MX").upper()
 
         errors = {}
+        amount_warning = None
         if not username:
             errors["error"] = "Please enter a username."
         try:
@@ -35,32 +42,20 @@ def index():
             errors["amount_error"] = "Please enter a valid amount."
 
         if not errors and amount == 0:
-            return render_template(
-                "order.html",
-                form_action="/",
-                username=username,
-                amount=amount_raw,
-                country=request.form.get("country", "MX").upper(),
-                amount_warning="Amount is 0 — this flow would be used just to tokenize. This has not been implemented yet.",
-            )
+            amount_warning = "Amount is 0 \u2014 this flow would be used just to tokenize. This has not been implemented yet."
 
-        if errors:
+        if errors or amount_warning:
             return render_template(
                 "order.html",
                 form_action="/",
                 username=username,
                 amount=amount_raw,
-                country=request.form.get("country", "MX").upper(),
+                country=country,
+                amount_warning=amount_warning,
                 **errors,
             )
 
-        country = request.form.get("country", "MX").strip().upper()
-        country_currency_map = {
-            "MX": ("MX", "MXN"),
-            "US": ("US", "USD"),
-            "BR": ("BR", "BRL"),
-        }
-        country_code, currency = country_currency_map.get(country, ("MX", "MXN"))
+        country_code, currency = COUNTRY_CURRENCY_MAP.get(country, ("MX", "MXN"))
 
         session["shopper_reference"] = username
         session["amount_minor_units"] = round(amount * 100)
@@ -118,24 +113,6 @@ def components_checkout():
     )
 
 
-@bp.route("/components/result")
-def components_result():
-    """Card Component funnel – Result page."""
-    payment_result = session.pop("payment_result", None)
-    if not payment_result:
-        return redirect(url_for("checkout.index"))
-
-    integration_type = session.get("integration_type", "Unknown")
-    session.clear()
-
-    return render_template(
-        "result.html",
-        result=payment_result["status"],
-        result_code=payment_result["result_code"],
-        adyen_response=payment_result["adyen_response"],
-        integration_type=integration_type,
-    )
-
 
 @bp.route("/dropin/checkout")
 def dropin_checkout():
@@ -174,15 +151,12 @@ def result_store():
         "result_code": body.get("resultCode", "Unknown"),
         "adyen_response": body.get("adyenResponse"),
     }
-    # Redirect to the result page that belongs to the active integration funnel
-    integration = session.get("integration_type", "")
-    result_url = "/components/result" if integration == "Card Component" else "/dropin/result"
-    return jsonify({"redirect": result_url})
+    return jsonify({"redirect": url_for("checkout.result")})
 
 
-@bp.route("/dropin/result")
+@bp.route("/result")
 def result():
-    """Drop-in funnel – Result page."""
+    """Render the payment result page and clear the session."""
     payment_result = session.pop("payment_result", None)
     if not payment_result:
         return redirect(url_for("checkout.index"))
@@ -365,18 +339,11 @@ def handle_shopper_redirect():
     result_code = response.message.get("resultCode", "")
 
     # Store the result in the session so /result can render a clean URL
-    if result_code in ("Authorised", "Pending", "Received"):
-        session["payment_result"] = {
-            "status": "success",
-            "result_code": result_code,
-            "adyen_response": response.message,
-            "integration_type": session.get("integration_type", "Unknown"),
-        }
-    else:
-        session["payment_result"] = {
-            "status": "failure",
-            "result_code": result_code,
-            "adyen_response": None,
-            "integration_type": session.get("integration_type", "Unknown"),
-        }
+    status = "success" if result_code in ("Authorised", "Pending", "Received") else "failure"
+    session["payment_result"] = {
+        "status": status,
+        "result_code": result_code,
+        "adyen_response": response.message if status == "success" else None,
+        "integration_type": session.get("integration_type", "Unknown"),
+    }
     return redirect(url_for("checkout.result"))
