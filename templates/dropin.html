@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Checkout – Step 3 of 3</title>
+
+  <link
+    rel="stylesheet"
+    href="https://checkoutshopper-test.cdn.adyen.com/checkoutshopper/sdk/5.67.0/adyen.css"
+  />
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/checkout.css') }}" />
+</head>
+<body>
+<div class="checkout-container">
+
+  <!-- Step indicator -->
+  <div class="step-indicator">
+    <span class="step">1</span>
+    <span class="step-line"></span>
+    <span class="step">2</span>
+    <span class="step-line"></span>
+    <span class="step active">3</span>
+  </div>
+
+  <h1>Complete your order</h1>
+
+  <!-- Order summary – values locked in at step 1, shown here for confirmation -->
+  <div class="order-summary">
+    <strong>Order total:</strong> {{ currency }} {{ "%.2f"|format(amount) }}<br/>
+    <strong>Shopper:</strong> {{ shopper_reference }}
+  </div>
+
+  <div id="dropin-container"></div>
+
+  <a href="/implementations" class="btn-back">← Back</a>
+
+  <details class="response-details" style="margin-top:24px;">
+    <summary>/paymentMethods request body</summary>
+    <pre id="pm-request" class="response-json"></pre>
+  </details>
+
+  <details class="response-details" style="margin-top:8px;">
+    <summary>/paymentMethods response</summary>
+    <pre id="pm-response" class="response-json"></pre>
+  </details>
+</div>
+
+<!--  This must match the CSS version imported in <head>.  -->
+<script src="https://checkoutshopper-test.cdn.adyen.com/checkoutshopper/sdk/5.67.0/adyen.js"></script>
+
+<script>
+  const CHECKOUT_CONFIG = {
+    clientKey: "{{ client_key }}",
+    environment: "{{ environment }}",
+    // Both values come from step 1 and are stored server-side in the session
+    shopperReference: "{{ shopper_reference }}",
+    amountMinorUnits: "{{ amount_minor_units }}"
+  };
+</script>
+
+<script src="{{ url_for('static', filename='js/checkout.js') }}"></script>
+</body>
+</html>

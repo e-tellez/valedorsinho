@@ -1,0 +1,358 @@
+/* ------------------------------------------------------------------ */
+/* Step indicator (shared by shopper.html and checkout.html)           */
+/* ------------------------------------------------------------------ */
+.step-indicator {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.step {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #e0e0e0;
+  color: #888;
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.step.active {
+  background: #0070f3;
+  color: #fff;
+}
+
+.step-line {
+  flex: 1;
+  height: 2px;
+  background: #e0e0e0;
+  margin: 0 8px;
+}
+
+/* Subtitle under the h1 on step 1 */
+.step-subtitle {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 20px;
+}
+
+/* Shopper bar on step 2 */
+.shopper-bar {
+  font-size: 0.85rem;
+  color: #555;
+  background: #f0f6ff;
+  border: 1px solid #cce0ff;
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-bottom: 16px;
+}
+
+.shopper-bar a {
+  color: #0070f3;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.shopper-bar a:hover { text-decoration: underline; }
+
+/* Country selector */
+.country-selector {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.country-option {
+  cursor: pointer;
+}
+
+.country-option input[type="radio"] {
+  display: none;
+}
+
+.country-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  color: #444;
+  background: #fff;
+  transition: border-color .15s, background .15s, color .15s;
+  user-select: none;
+}
+
+.country-pill small {
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.country-option input[type="radio"]:checked + .country-pill {
+  border-color: #0070f3;
+  background: #e8f0fe;
+  color: #1a5fcc;
+}
+
+.country-option input[type="radio"]:checked + .country-pill small {
+  color: #1a5fcc;
+}
+
+/* Generic text field row (used in shopper.html) */
+.field-row {
+  margin-bottom: 20px;
+}
+
+.field-row label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #444;
+  margin-bottom: 6px;
+}
+
+.field-row input[type="text"] {
+  width: 100%;
+  height: 40px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 0 12px;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+
+.field-row input[type="text"]:focus {
+  border-color: #0070f3;
+  box-shadow: 0 0 0 2px rgba(0,112,243,.15);
+}
+
+.field-error {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.8rem;
+  color: #cf222e;
+}
+
+/* Primary CTA button */
+.btn-primary {
+  display: block;
+  width: 100%;
+  height: 44px;
+  background: #0070f3;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s;
+}
+
+.btn-primary:hover { background: #005fd4; }
+
+.btn-back {
+  display: inline-block;
+  margin-top: 16px;
+  font-size: 0.875rem;
+  color: #555;
+  text-decoration: none;
+  padding: 6px 0;
+}
+
+.btn-back:hover { color: #0070f3; }
+
+/* ------------------------------------------------------------------ */
+/* Integration index page                                               */
+/* ------------------------------------------------------------------ */
+.index-header {
+  margin-bottom: 24px;
+}
+
+.index-logo {
+  height: 28px;
+  margin-bottom: 16px;
+}
+
+.integration-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.integration-card {
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  transition: border-color .15s, box-shadow .15s;
+}
+
+.integration-card:hover {
+  border-color: #0070f3;
+  box-shadow: 0 0 0 3px rgba(0,112,243,.1);
+}
+
+.integration-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  text-decoration: none;
+  color: inherit;
+  gap: 12px;
+}
+
+.integration-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.integration-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.integration-desc {
+  font-size: 0.82rem;
+  color: #666;
+  line-height: 1.4;
+}
+
+.integration-arrow {
+  font-size: 1.4rem;
+  color: #aaa;
+  flex-shrink: 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* Basic page layout                                                    */
+/* ------------------------------------------------------------------ */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: #f5f5f5;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding: 40px 16px;
+}
+
+.checkout-container {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.1);
+  padding: 32px;
+  width: 100%;
+  max-width: 480px;
+}
+
+h1 {
+  font-size: 1.4rem;
+  margin-bottom: 8px;
+  color: #1a1a1a;
+}
+
+.order-summary {
+  background: #f9f9f9;
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-bottom: 24px;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.order-summary strong { color: #1a1a1a; }
+
+/* Amount input row */
+.amount-input-row {
+  margin-bottom: 16px;
+}
+
+.amount-input-row label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #444;
+  margin-bottom: 6px;
+}
+
+.amount-input-wrap {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.amount-input-wrap:focus-within {
+  border-color: #0070f3;
+  box-shadow: 0 0 0 2px rgba(0,112,243,.15);
+}
+
+.currency-symbol {
+  padding: 0 10px;
+  font-size: 1rem;
+  color: #555;
+  background: #f5f5f5;
+  border-right: 1px solid #ccc;
+  line-height: 40px;
+  user-select: none;
+}
+
+.amount-input-wrap input {
+  border: none;
+  outline: none;
+  padding: 0 12px;
+  height: 40px;
+  font-size: 1rem;
+  width: 100%;
+  background: transparent;
+}
+
+/* Remove browser spinner arrows from number input */
+.amount-input-wrap input::-webkit-outer-spin-button,
+.amount-input-wrap input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.amount-input-wrap input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+
+/* Drop-in mounts here */
+#dropin-container { min-height: 100px; }
+
+/* Collapsible JSON debug block (shared with result page) */
+.response-details {
+  margin: 12px 0 0;
+  width: 100%;
+}
+
+.response-details summary {
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #0070f3;
+  user-select: none;
+  margin-bottom: 8px;
+}
+
+.response-details summary:hover { text-decoration: underline; }
+
+.response-json {
+  background: #1e1e1e;
+  color: #d4d4d4;
+  border-radius: 6px;
+  padding: 14px;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  overflow-x: auto;
+  white-space: pre;
+  text-align: left;
+}

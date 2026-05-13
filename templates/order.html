@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Checkout – Step 1 of 3</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/checkout.css') }}" />
+</head>
+<body>
+<div class="checkout-container">
+
+  <!-- Step indicator -->
+  <div class="step-indicator">
+    <span class="step active">1</span>
+    <span class="step-line"></span>
+    <span class="step">2</span>
+    <span class="step-line"></span>
+    <span class="step">3</span>
+  </div>
+
+  <h1>Your order</h1>
+  <p class="step-subtitle">Enter your details to continue.</p>
+
+  <form method="POST" action="{{ form_action }}" novalidate>
+    <div class="field-row">
+      <label for="username">Username</label>
+      <input
+        id="username"
+        name="username"
+        type="text"
+        placeholder="e.g. john_doe"
+        value="{{ username or '' }}"
+        autocomplete="username"
+        required
+      />
+      {% if error %}
+        <span class="field-error">{{ error }}</span>
+      {% endif %}
+    </div>
+
+    <div class="field-row">
+      <label>Country</label>
+      <div class="country-selector">
+        <label class="country-option">
+          <input type="radio" name="country" value="MX" {% if country == 'MX' or not country %}checked{% endif %} />
+          <span class="country-pill">🇲🇽 Mexico <small>MXN</small></span>
+        </label>
+        <label class="country-option">
+          <input type="radio" name="country" value="US" {% if country == 'US' %}checked{% endif %} />
+          <span class="country-pill">🇺🇸 United States <small>USD</small></span>
+        </label>
+        <label class="country-option">
+          <input type="radio" name="country" value="BR" {% if country == 'BR' %}checked{% endif %} />
+          <span class="country-pill">🇧🇷 Brazil <small>BRL</small></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="field-row">
+      <label for="amount">Order total</label>
+      <div class="amount-input-wrap">
+        <span class="currency-symbol" id="currency-symbol">$</span>
+        <input
+          id="amount"
+          name="amount"
+          type="number"
+          min="0.01"
+          step="0.01"
+          placeholder="0.00"
+          value="{{ amount or '10.00' }}"
+          required
+        />
+      </div>
+      {% if amount_error %}
+        <span class="field-error">{{ amount_error }}</span>
+      {% endif %}
+    </div>
+
+    <script>
+      const CURRENCY_MAP = { MX: 'MXN', US: 'USD', BR: 'BRL' };
+      const SYMBOL_MAP   = { MX: '$',   US: '$',   BR: 'R$'  };
+      function updateCurrency() {
+        const selected = document.querySelector('input[name="country"]:checked').value;
+        document.getElementById('currency-symbol').textContent = SYMBOL_MAP[selected];
+      }
+      document.querySelectorAll('input[name="country"]').forEach(r =>
+        r.addEventListener('change', updateCurrency)
+      );
+      updateCurrency();
+    </script>
+
+    <button type="submit" class="btn-primary">Continue</button>
+  </form>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Payment Result</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/result.css') }}" />
+</head>
+<body>
+  <!--
+    This page is rendered by Flask after:
+      a) A native 3DS2 flow completes in-browser (JS redirect via handleFinalResult)
+      b) The shopper is redirected back from an issuer ACS page (/api/handleShopperRedirect)
+  -->
+  <div class="result-card {{ result }}">
+    {% if result == "success" %}
+      <div class="icon">✅</div>
+      <h1>Payment successful</h1>
+    {% else %}
+      <div class="icon">❌</div>
+      <h1>Payment failed</h1>
+    {% endif %}
+
+    <span class="integration-badge">{{ integration_type }}</span>
+
+    <p class="result-code-row">Raw acquirer response: <strong>{{ result_code }}</strong></p>
+
+    {% if adyen_response %}
+      {% if adyen_response.pspReference %}
+        <!-- PSP reference is the unique Adyen transaction ID – highlighted prominently -->
+        <div class="psp-block">
+          <span class="psp-label">PSP Reference</span>
+          <span class="psp-value">{{ adyen_response.pspReference }}</span>
+        </div>
+      {% endif %}
+
+      <!-- Full Adyen response object for inspection / debugging -->
+      <details class="response-details">
+        <summary>Full Adyen response</summary>
+        <pre class="response-json">{{ adyen_response | tojson(indent=2) }}</pre>
+      </details>
+    {% endif %}
+
+    <br/>
+    <a href="/">Try again</a>
+  </div>
+</body>
+</html>
