@@ -1,33 +1,44 @@
 """Data models for Adyen API requests.
 
 Each model maps Python-style attributes to the camelCase keys expected by the
-Adyen Checkout API.  Using dataclasses gives us type safety, IDE autocompletion,
-and a single place to see every field a request can carry.
+Adyen Checkout API.  Using Pydantic gives us automatic validation, camelCase
+serialisation via aliases, and a single place to see every field a request can
+carry — with zero manual to_dict() boilerplate.
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 from typing import Any
+
+from pydantic import BaseModel, Field, computed_field
+from pydantic.alias_generators import to_camel
+
+
+class AdyenModel(BaseModel):
+    """Base for all Adyen request models.
+
+    - Accepts snake_case on init, serialises to camelCase via aliases.
+    - populate_by_name lets callers use either style.
+    """
+
+    model_config = {
+        "alias_generator": to_camel,
+        "populate_by_name": True,
+    }
 
 
 # ---------------------------------------------------------------------------
 # Shared value objects
 # ---------------------------------------------------------------------------
 
-@dataclass
-class Amount:
+class Amount(AdyenModel):
     """Monetary amount in minor units (e.g. 1000 = $10.00)."""
 
     value: int
     currency: str
 
-    def to_dict(self) -> dict[str, Any]:
-        return {"value": self.value, "currency": self.currency}
 
-
-@dataclass
-class BillingAddress:
+class BillingAddress(AdyenModel):
     """Billing address sent with a payment request."""
 
     street: str = "Teststreet 1"
@@ -37,35 +48,27 @@ class BillingAddress:
     state_or_province: str = "NH"
     country: str = "NL"
 
-    @classmethod
-    def from_dict(cls, data: dict[str, str]) -> BillingAddress:
-        """Build a BillingAddress from a camelCase dict (e.g. from the browser)."""
-        return cls(
-            street=data.get("street", cls.street),
-            house_number_or_name=data.get("houseNumberOrName", cls.house_number_or_name),
-            postal_code=data.get("postalCode", cls.postal_code),
-            city=data.get("city", cls.city),
-            state_or_province=data.get("stateOrProvince", cls.state_or_province),
-            country=data.get("country", cls.country),
-        )
 
-    def to_dict(self) -> dict[str, str]:
-        return {
-            "street": self.street,
-            "houseNumberOrName": self.house_number_or_name,
-            "postalCode": self.postal_code,
-            "city": self.city,
-            "stateOrProvince": self.state_or_province,
-            "country": self.country,
-        }
+class ThreeDSRequestData(AdyenModel):
+    """3DS configuration nested inside authenticationData."""
+
+    native_three_ds: str = Field(default="preferred", alias="nativeThreeDS")
+
+
+class AuthenticationData(AdyenModel):
+    """Wrapper for 3DS request configuration."""
+
+    three_ds_request_data: ThreeDSRequestData = Field(
+        default_factory=ThreeDSRequestData,
+        alias="threeDSRequestData",
+    )
 
 
 # ---------------------------------------------------------------------------
 # /paymentMethods request
 # ---------------------------------------------------------------------------
 
-@dataclass
-class PaymentMethodsRequest:
+class PaymentMethodsRequest(AdyenModel):
     """Body for POST /paymentMethods."""
 
     merchant_account: str
@@ -75,23 +78,12 @@ class PaymentMethodsRequest:
     shopper_locale: str = "en-US"
     channel: str = "Web"
 
-    def to_dict(self) -> dict[str, Any]:
-        return {
-            "merchantAccount": self.merchant_account,
-            "amount": self.amount.to_dict(),
-            "countryCode": self.country_code,
-            "shopperLocale": self.shopper_locale,
-            "channel": self.channel,
-            "shopperReference": self.shopper_reference,
-        }
-
 
 # ---------------------------------------------------------------------------
 # /payments request
 # ---------------------------------------------------------------------------
 
-@dataclass
-class PaymentRequest:
+class PaymentRequest(AdyenModel):
     """Body for POST /payments."""
 
     merchant_account: str
@@ -102,15 +94,16 @@ class PaymentRequest:
     return_url: str
     origin: str
     shopper_reference: str
-    shopper_ip: str
+    shopper_ip: str = Field(alias="shopperIP")
     shopper_email: str = "shopper@example.com"
     browser_info: dict[str, Any] | None = None
-    billing_address: BillingAddress = field(default_factory=BillingAddress)
+    billing_address: BillingAddress = Field(default_factory=BillingAddress)
     store_payment_method: bool = False
     recurring_processing_model: str = "CardOnFile"
-    native_three_ds: str = "preferred"
+    authentication_data: AuthenticationData = Field(default_factory=AuthenticationData)
     channel: str = "Web"
 
+    @computed_field  # type: ignore[prop-decorator]
     @property
     def shopper_interaction(self) -> str:
         """Ecommerce for new cards, ContAuth for stored (tokenised) cards."""
@@ -118,45 +111,13 @@ class PaymentRequest:
             return "ContAuth"
         return "Ecommerce"
 
-    def to_dict(self) -> dict[str, Any]:
-        return {
-            "merchantAccount": self.merchant_account,
-            "reference": self.reference,
-            "amount": self.amount.to_dict(),
-            "countryCode": self.country_code,
-            "paymentMethod": self.payment_method,
-            "authenticationData": {
-                "threeDSRequestData": {
-                    "nativeThreeDS": self.native_three_ds,
-                },
-            },
-            "channel": self.channel,
-            "returnUrl": self.return_url,
-            "browserInfo": self.browser_info,
-            "origin": self.origin,
-            "shopperReference": self.shopper_reference,
-            "recurringProcessingModel": self.recurring_processing_model,
-            "storePaymentMethod": self.store_payment_method,
-            "shopperInteraction": self.shopper_interaction,
-            "shopperIP": self.shopper_ip,
-            "shopperEmail": self.shopper_email,
-            "billingAddress": self.billing_address.to_dict(),
-        }
-
 
 # ---------------------------------------------------------------------------
 # /payments/details request
 # ---------------------------------------------------------------------------
 
-@dataclass
-class PaymentDetailsRequest:
+class PaymentDetailsRequest(AdyenModel):
     """Body for POST /payments/details."""
 
     details: dict[str, Any]
     payment_data: str | None = None
-
-    def to_dict(self) -> dict[str, Any]:
-        result: dict[str, Any] = {"details": self.details}
-        if self.payment_data:
-            result["paymentData"] = self.payment_data
-        return result

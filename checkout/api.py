@@ -63,7 +63,7 @@ def payment_methods() -> Response:
         shopper_reference=session.get("shopper_reference", ""),
     )
 
-    request_body = payment_methods_request.to_dict()
+    request_body = payment_methods_request.model_dump(by_alias=True, exclude_none=True)
     try:
         response = adyen_client.checkout.payments_api.payment_methods(request_body)
     except Adyen.AdyenError as error:
@@ -107,13 +107,15 @@ def payments() -> Response:
         shopper_ip=request.remote_addr,
         shopper_email=body.get("shopperEmail", "shopper@example.com"),
         browser_info=body.get("browserInfo"),
-        billing_address=BillingAddress.from_dict(raw_billing) if raw_billing else BillingAddress(),
+        billing_address=BillingAddress(**raw_billing) if raw_billing else BillingAddress(),
         store_payment_method=body.get("storePaymentMethod", False),
     )
 
     # Send the payment request to Adyen
     try:
-        response = adyen_client.checkout.payments_api.payments(payment_request.to_dict())
+        response = adyen_client.checkout.payments_api.payments(
+            payment_request.model_dump(by_alias=True, exclude_none=True)
+        )
     except Adyen.AdyenError as error:
         return _adyen_error_response(error)
     response_body = response.message
@@ -141,7 +143,9 @@ def payments_details() -> Response:
     )
 
     try:
-        response = adyen_client.checkout.payments_api.payments_details(details_request.to_dict())
+        response = adyen_client.checkout.payments_api.payments_details(
+            details_request.model_dump(by_alias=True, exclude_none=True)
+        )
     except Adyen.AdyenError as error:
         return _adyen_error_response(error)
     return jsonify(response.message)
@@ -168,7 +172,9 @@ def handle_shopper_redirect() -> Response:
     )
 
     try:
-        response = adyen_client.checkout.payments_api.payments_details(details_request.to_dict())
+        response = adyen_client.checkout.payments_api.payments_details(
+            details_request.model_dump(by_alias=True, exclude_none=True)
+        )
     except Adyen.AdyenError as error:
         logger.error("Redirect handler Adyen error: %s", error)
         session["payment_result"] = {
