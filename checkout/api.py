@@ -2,6 +2,13 @@ from flask import Blueprint, Response, request, jsonify, session, redirect, url_
 
 from checkout.config import adyen_client, MERCHANT_ACCOUNT
 from checkout.helpers import generate_reference
+from checkout.models import (
+    Amount,
+    BillingAddress,
+    PaymentDetailsRequest,
+    PaymentMethodsRequest,
+    PaymentRequest,
+)
 
 bp = Blueprint("api", __name__)
 
@@ -30,27 +37,21 @@ def payment_methods() -> Response:
     The Adyen Drop-in calls this endpoint on load to know which payment
     method icons and forms to display to the shopper.
     """
-    amount_minor_units = session.get("amount_minor_units", 1000)
     _cc = request.args.get("countryCode", "")
     _cur = request.args.get("currency", "")
-    country_code = _cc if _cc and _cc != "undefined" else session.get("country_code", "MX")
-    currency = _cur if _cur and _cur != "undefined" else session.get("currency", "MXN")
-    shopper_locale = request.args.get("shopperLocale", "en-US")
 
-    request_body = {
-        "merchantAccount": MERCHANT_ACCOUNT,
-        "amount": {
-            "value": amount_minor_units,
-            "currency": currency,
-        },
-        "countryCode": country_code,
-        "shopperLocale": shopper_locale,
-        "channel": "Web",
-        # Include shopperReference so Adyen returns any stored (tokenised)
-        # payment methods for this shopper.
-        "shopperReference": session.get("shopper_reference", ""),
-    }
+    payment_methods_request = PaymentMethodsRequest(
+        merchant_account=MERCHANT_ACCOUNT,
+        amount=Amount(
+            value=session.get("amount_minor_units", 1000),
+            currency=_cur if _cur and _cur != "undefined" else session.get("currency", "MXN"),
+        ),
+        country_code=_cc if _cc and _cc != "undefined" else session.get("country_code", "MX"),
+        shopper_locale=request.args.get("shopperLocale", "en-US"),
+        shopper_reference=session.get("shopper_reference", ""),
+    )
 
+    request_body = payment_methods_request.to_dict()
     response = adyen_client.checkout.payments_api.payment_methods(request_body)
     return jsonify({"requestBody": request_body, "response": response.message})
 
@@ -70,76 +71,29 @@ def payments() -> Response:
     order_ref = generate_reference()
     session["order_ref"] = order_ref
 
-    # Read the amount entered by the shopper (sent as minor units from the browser)
-    # and fall back to $10.00 if not provided.
-    amount_minor_units = session.get("amount_minor_units") or body.get("amountMinorUnits", 1000)
-    currency = session.get("currency", "MXN")
-    country_code = session.get("country_code", "MX")
-
-    # Build the /payments request
-    payment_request = {
-        "merchantAccount": MERCHANT_ACCOUNT,
-        "reference": order_ref,
-        "amount": {
-            "value": amount_minor_units,
-            "currency": currency,
-        },
-        "countryCode": country_code,
-
-        # ------------------------------------------------------------------
-        # Payment method data – comes directly from the Drop-in / Component
-        # ------------------------------------------------------------------
-        "paymentMethod": body.get("paymentMethod"),
-
-        # ------------------------------------------------------------------
-        # 3DS2 / Native 3DS parameters
-        # ------------------------------------------------------------------
-        # "authenticationData" tells Adyen to attempt native 3DS2 (in-app /
-        # in-browser authentication) before falling back to a redirect.
-        "authenticationData": {
-            "threeDSRequestData": {
-                "nativeThreeDS": "preferred",
-            },
-        },
-
-        "channel": "Web",
-        "returnUrl": request.host_url + "dropin/handleShopperRedirect",
-        "browserInfo": body.get("browserInfo"),
-        "origin": request.host_url.rstrip("/"),
-
-        # "additionalData": {
-        #     "allow3DS2": "true",
-        # },
-
-        # ------------------------------------------------------------------
-        # Tokenisation – CardOnFile with shopper consent
-        # ------------------------------------------------------------------
-        "shopperReference": session.get("shopper_reference", body.get("shopperReference", "shopper-001")),
-        "recurringProcessingModel": "CardOnFile",
-        # The Drop-in / Component shows a "Save for my next payment" checkbox
-        # and sends storePaymentMethod: true/false in state.data.
-        "storePaymentMethod": body.get("storePaymentMethod", False),
-        # Ecommerce = shopper is present and using a new card
-        # ContAuth   = shopper is using a previously stored (tokenised) card
-        "shopperInteraction": "ContAuth" if body.get("paymentMethod", {}).get("storedPaymentMethodId") else "Ecommerce",
-
-        # Shopper info – required by some issuers for 3DS2 risk scoring
-        "shopperIP": request.remote_addr,
-        "shopperEmail": body.get("shopperEmail", "shopper@example.com"),
-
-        # Billing address – improves 3DS2 authorisation rates
-        "billingAddress": body.get("billingAddress", {
-            "street": "Teststreet 1",
-            "houseNumberOrName": "1",
-            "postalCode": "12345",
-            "city": "Amsterdam",
-            "stateOrProvince": "NH",
-            "country": "NL",
-        }),
-    }
+    # Build the /payments request using the PaymentRequest model
+    raw_billing = body.get("billingAddress")
+    payment_request = PaymentRequest(
+        merchant_account=MERCHANT_ACCOUNT,
+        reference=order_ref,
+        amount=Amount(
+            value=session.get("amount_minor_units") or body.get("amountMinorUnits", 1000),
+            currency=session.get("currency", "MXN"),
+        ),
+        country_code=session.get("country_code", "MX"),
+        payment_method=body.get("paymentMethod", {}),
+        return_url=request.host_url + "dropin/handleShopperRedirect",
+        origin=request.host_url.rstrip("/"),
+        shopper_reference=session.get("shopper_reference", body.get("shopperReference", "shopper-001")),
+        shopper_ip=request.remote_addr,
+        shopper_email=body.get("shopperEmail", "shopper@example.com"),
+        browser_info=body.get("browserInfo"),
+        billing_address=BillingAddress.from_dict(raw_billing) if raw_billing else BillingAddress(),
+        store_payment_method=body.get("storePaymentMethod", False),
+    )
 
     # Send the payment request to Adyen
-    response = adyen_client.checkout.payments_api.payments(payment_request)
+    response = adyen_client.checkout.payments_api.payments(payment_request.to_dict())
     response_body = response.message
 
     # Persist the payment state data returned by Adyen so that subsequent
@@ -159,19 +113,12 @@ def payments_details() -> Response:
     """
     body = request.get_json()
 
-    details_request = {
-        # `details` contains the 3DS2 result data (e.g. threeDSResult,
-        # fingerprint, or challengeResult) returned by the Web Component
-        "details": body.get("details"),
-    }
+    details_request = PaymentDetailsRequest(
+        details=body.get("details", {}),
+        payment_data=body.get("paymentData") or session.get("payment_data"),
+    )
 
-    # paymentData is the opaque string Adyen returned in the /payments
-    # response; it must be sent back to tie the details to the payment
-    payment_data = body.get("paymentData") or session.get("payment_data")
-    if payment_data:
-        details_request["paymentData"] = payment_data
-
-    response = adyen_client.checkout.payments_api.payments_details(details_request)
+    response = adyen_client.checkout.payments_api.payments_details(details_request.to_dict())
     return jsonify(response.message)
 
 
@@ -190,16 +137,12 @@ def handle_shopper_redirect() -> Response:
     else:
         redirect_result = request.form.get("redirectResult", "")
 
-    details_request = {
-        "details": {
-            # redirectResult is the encoded authentication outcome from the
-            # issuer; passing it to /payments/details finalises the payment
-            "redirectResult": redirect_result,
-        },
-        "paymentData": session.get("payment_data", ""),
-    }
+    details_request = PaymentDetailsRequest(
+        details={"redirectResult": redirect_result},
+        payment_data=session.get("payment_data", ""),
+    )
 
-    response = adyen_client.checkout.payments_api.payments_details(details_request)
+    response = adyen_client.checkout.payments_api.payments_details(details_request.to_dict())
     result_code = response.message.get("resultCode", "")
 
     # Store the result in the session so /result can render a clean URL

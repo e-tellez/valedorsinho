@@ -97,6 +97,7 @@ New cards should be sent with `shopperInteraction: Ecommerce`; stored cards with
 │   ├── config.py                   # Adyen client, env vars, SSL fix
 │   ├── helpers.py                  # Shared constants & utilities
 │   ├── integrations.py             # @register_integration decorator & registry
+│   ├── models.py                   # Dataclass models for Adyen API requests
 │   ├── pages.py                    # Blueprint: HTML-serving routes
 │   └── api.py                      # Blueprint: JSON API + redirect handlers
 ├── templates/
