@@ -1,4 +1,4 @@
-// checkout.js – Adyen Drop-in - with native 3DS2
+// dropin.js – Adyen Drop-in with native 3DS2
 
 // -------------------------------------------------------------------------
 // Amount helper

@@ -31,7 +31,7 @@ def index() -> str | Response:
             errors["amount_error"] = "Please enter a valid amount."
 
         if not errors and amount == 0:
-            amount_warning = "Amount is 0 \u2014 this flow would be used just to tokenize. This has not been implemented yet."
+            amount_warning = "Amount is 0 \u2014 this will create a zero-value authorisation to tokenize the card."
 
         if errors or amount_warning:
             return render_template(

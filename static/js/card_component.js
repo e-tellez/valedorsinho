@@ -114,7 +114,7 @@ async function handleFinalResult(resultCode, response) {
           console.error("onSubmit error:", err);
           document.getElementById("pay-button").disabled = false;
           document.getElementById("pay-button").textContent =
-            "Pay $" + (getAmountMinorUnits() / 100).toFixed(2);
+            "Pay " + CHECKOUT_CONFIG.currency + " " + (getAmountMinorUnits() / 100).toFixed(2);
         }
       },
 
