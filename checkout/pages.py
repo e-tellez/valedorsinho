@@ -44,7 +44,8 @@ def index() -> str | Response:
                 **errors,
             )
 
-        country_code, currency = COUNTRY_CURRENCY_MAP.get(country, ("MX", "MXN"))
+        currency = COUNTRY_CURRENCY_MAP.get(country, "MXN")
+        country_code = country
 
         session["shopper_reference"] = username
         session["amount_minor_units"] = round(amount * 100)

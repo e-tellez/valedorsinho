@@ -14,10 +14,10 @@ def require_session(view_func):
     return wrapped
 
 
-COUNTRY_CURRENCY_MAP = {
-    "MX": ("MX", "MXN"),
-    "US": ("US", "USD"),
-    "BR": ("BR", "BRL"),
+COUNTRY_CURRENCY_MAP: dict[str, str] = {
+    "MX": "MXN",
+    "US": "USD",
+    "BR": "BRL",
 }
 
 

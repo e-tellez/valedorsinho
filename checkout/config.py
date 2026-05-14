@@ -3,7 +3,7 @@ import os
 import Adyen
 
 
-def _load_env_file(*candidates):
+def _load_env_file(*candidates: str) -> None:
     """Parse a .env-style file and populate os.environ.
 
     Tries each path in *candidates* in order and loads the first one found.

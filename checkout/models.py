@@ -108,6 +108,7 @@ class PaymentRequest:
     billing_address: BillingAddress = field(default_factory=BillingAddress)
     store_payment_method: bool = False
     recurring_processing_model: str = "CardOnFile"
+    native_three_ds: str = "preferred"
     channel: str = "Web"
 
     @property
@@ -126,7 +127,7 @@ class PaymentRequest:
             "paymentMethod": self.payment_method,
             "authenticationData": {
                 "threeDSRequestData": {
-                    "nativeThreeDS": "preferred",
+                    "nativeThreeDS": self.native_three_ds,
                 },
             },
             "channel": self.channel,

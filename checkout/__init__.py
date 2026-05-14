@@ -34,7 +34,7 @@ def create_app() -> Flask:
     app.register_blueprint(api_bp)
 
     @app.errorhandler(404)
-    def page_not_found(e):
+    def page_not_found(e) -> tuple[str, int]:
         return render_template("errors/404.html"), 404
 
     return app

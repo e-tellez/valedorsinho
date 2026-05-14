@@ -49,16 +49,16 @@ def payment_methods() -> Response:
     The Adyen Drop-in calls this endpoint on load to know which payment
     method icons and forms to display to the shopper.
     """
-    _cc = request.args.get("countryCode", "")
-    _cur = request.args.get("currency", "")
+    country_code = request.args.get("countryCode", "")
+    currency = request.args.get("currency", "")
 
     payment_methods_request = PaymentMethodsRequest(
         merchant_account=MERCHANT_ACCOUNT,
         amount=Amount(
             value=session.get("amount_minor_units", 1000),
-            currency=_cur if _cur and _cur != "undefined" else session.get("currency", "MXN"),
+            currency=currency if currency and currency != "undefined" else session.get("currency", "MXN"),
         ),
-        country_code=_cc if _cc and _cc != "undefined" else session.get("country_code", "MX"),
+        country_code=country_code if country_code and country_code != "undefined" else session.get("country_code", "MX"),
         shopper_locale=request.args.get("shopperLocale", "en-US"),
         shopper_reference=session.get("shopper_reference", ""),
     )
