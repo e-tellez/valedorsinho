@@ -112,6 +112,7 @@ New cards should be sent with `shopperInteraction: Ecommerce`; stored cards with
 └── static/
     ├── css/
     └── js/
+        ├── adyen_api.js            # Shared API helpers (fetch, payments, result)
         ├── dropin.js               # Drop-in initialisation & 3DS2 handling
         └── card_component.js       # Card Component initialisation
 ```

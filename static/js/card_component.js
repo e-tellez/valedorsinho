@@ -4,89 +4,9 @@
 // the Card Component renders only the card input fields.  The pay button and
 // any surrounding UI are owned by this page, giving full control over layout.
 //
-// CHECKOUT_CONFIG is injected by the Flask template:
-//   .clientKey        – Adyen client key
-//   .environment      – "test" or "live"
-//   .shopperReference – username from step 1
-//   .amountMinorUnits – amount in cents from step 1
+// Requires adyen_api.js to be loaded first (shared helpers).
 
-// -------------------------------------------------------------------------
-// Amount helper
-// -------------------------------------------------------------------------
-function getAmountMinorUnits() {
-  return CHECKOUT_CONFIG.amountMinorUnits;
-}
-
-// -------------------------------------------------------------------------
-// API helpers
-// -------------------------------------------------------------------------
-async function fetchPaymentMethods() {
-  const params = new URLSearchParams({
-    countryCode: CHECKOUT_CONFIG.countryCode,
-    currency: CHECKOUT_CONFIG.currency,
-  });
-  const response = await fetch(`/api/paymentMethods?${params}`);
-  if (!response.ok) throw new Error("Could not load payment methods");
-  const data = await response.json();
-  return { paymentMethodsResponse: data.response, requestBody: data.requestBody };
-}
-
-async function callPayments(stateData) {
-  const response = await fetch("/api/payments", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(stateData),
-  });
-  if (!response.ok) throw new Error("Payment request failed");
-  return response.json();
-}
-
-async function callPaymentsDetails(stateData) {
-  const response = await fetch("/api/payments/details", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(stateData),
-  });
-  if (!response.ok) throw new Error("Payment details request failed");
-  return response.json();
-}
-
-// -------------------------------------------------------------------------
-// handleServerResponse – routes Adyen response to the correct next action
-// -------------------------------------------------------------------------
-async function handleServerResponse(response, cardComponent) {
-  if (response.action) {
-    // Let the Card Component handle 3DS2 fingerprint / challenge / redirect
-    cardComponent.handleAction(response.action);
-  } else {
-    await handleFinalResult(response.resultCode, response);
-  }
-}
-
-// -------------------------------------------------------------------------
-// handleFinalResult – POST outcome to server, then navigate to result page
-// -------------------------------------------------------------------------
-async function handleFinalResult(resultCode, response) {
-  const status = ["Authorised", "Pending", "Received"].includes(resultCode)
-    ? "success"
-    : "failure";
-
-  const res = await fetch("/result/store", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      status,
-      resultCode,
-      adyenResponse: status === "success" ? response : null,
-    }),
-  });
-  const { redirect } = await res.json();
-  window.location.href = redirect;
-}
-
-// -------------------------------------------------------------------------
 // Main initialisation
-// -------------------------------------------------------------------------
 (async () => {
   try {
     const { paymentMethodsResponse, requestBody: pmRequestBody } = await fetchPaymentMethods();
