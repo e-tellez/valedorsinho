@@ -1,4 +1,7 @@
+import logging
+
 from flask import Blueprint, Response, request, jsonify, session, redirect, url_for
+import Adyen
 
 from checkout.config import adyen_client, MERCHANT_ACCOUNT
 from checkout.helpers import generate_reference
@@ -10,7 +13,16 @@ from checkout.models import (
     PaymentRequest,
 )
 
+logger = logging.getLogger(__name__)
+
 bp = Blueprint("api", __name__)
+
+
+def _adyen_error_response(error: Adyen.AdyenError) -> tuple[Response, int]:
+    """Build a JSON error response from an Adyen SDK exception."""
+    logger.error("Adyen API error: %s – %s", type(error).__name__, error)
+    status_code = getattr(error, "status_code", 500) or 500
+    return jsonify({"error": str(error), "type": type(error).__name__}), status_code
 
 
 @bp.route("/result/store", methods=["POST"])
@@ -52,7 +64,10 @@ def payment_methods() -> Response:
     )
 
     request_body = payment_methods_request.to_dict()
-    response = adyen_client.checkout.payments_api.payment_methods(request_body)
+    try:
+        response = adyen_client.checkout.payments_api.payment_methods(request_body)
+    except Adyen.AdyenError as error:
+        return _adyen_error_response(error)
     return jsonify({"requestBody": request_body, "response": response.message})
 
 
@@ -65,6 +80,10 @@ def payments() -> Response:
     order details and 3DS2 / native 3DS parameters.
     """
     body = request.get_json()
+
+    shopper_reference = session.get("shopper_reference")
+    if not shopper_reference:
+        return jsonify({"error": "Missing shopper reference. Please start from the order form."}), 400
 
     # Store the order reference in the server-side session so we can match
     # the /payments/details callback to the correct order later
@@ -84,7 +103,7 @@ def payments() -> Response:
         payment_method=body.get("paymentMethod", {}),
         return_url=request.host_url + "dropin/handleShopperRedirect",
         origin=request.host_url.rstrip("/"),
-        shopper_reference=session.get("shopper_reference", body.get("shopperReference", "shopper-001")),
+        shopper_reference=shopper_reference,
         shopper_ip=request.remote_addr,
         shopper_email=body.get("shopperEmail", "shopper@example.com"),
         browser_info=body.get("browserInfo"),
@@ -93,7 +112,10 @@ def payments() -> Response:
     )
 
     # Send the payment request to Adyen
-    response = adyen_client.checkout.payments_api.payments(payment_request.to_dict())
+    try:
+        response = adyen_client.checkout.payments_api.payments(payment_request.to_dict())
+    except Adyen.AdyenError as error:
+        return _adyen_error_response(error)
     response_body = response.message
 
     # Persist the payment state data returned by Adyen so that subsequent
@@ -118,7 +140,10 @@ def payments_details() -> Response:
         payment_data=body.get("paymentData") or session.get("payment_data"),
     )
 
-    response = adyen_client.checkout.payments_api.payments_details(details_request.to_dict())
+    try:
+        response = adyen_client.checkout.payments_api.payments_details(details_request.to_dict())
+    except Adyen.AdyenError as error:
+        return _adyen_error_response(error)
     return jsonify(response.message)
 
 
@@ -142,7 +167,17 @@ def handle_shopper_redirect() -> Response:
         payment_data=session.get("payment_data", ""),
     )
 
-    response = adyen_client.checkout.payments_api.payments_details(details_request.to_dict())
+    try:
+        response = adyen_client.checkout.payments_api.payments_details(details_request.to_dict())
+    except Adyen.AdyenError as error:
+        logger.error("Redirect handler Adyen error: %s", error)
+        session["payment_result"] = {
+            "status": "failure",
+            "result_code": "Error",
+            "adyen_response": None,
+            "integration_type": session.get("integration_type", "Unknown"),
+        }
+        return redirect(url_for("pages.result"))
     result_code = response.message.get("resultCode", "")
 
     # Store the result in the session so /result can render a clean URL

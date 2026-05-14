@@ -14,6 +14,19 @@ function getAmountMinorUnits() {
 }
 
 // -------------------------------------------------------------------------
+// Generic fetch wrapper with error logging
+// -------------------------------------------------------------------------
+async function fetchApi(url, options = {}) {
+  const response = await fetch(url, options);
+  if (!response.ok) {
+    const errorBody = await response.json().catch(() => null);
+    console.error(`[${url}]`, response.status, errorBody);
+    throw new Error(errorBody?.error || `Request to ${url} failed`);
+  }
+  return response.json();
+}
+
+// -------------------------------------------------------------------------
 // Fetch available payment methods from the server
 // -------------------------------------------------------------------------
 async function fetchPaymentMethods() {
@@ -21,9 +34,7 @@ async function fetchPaymentMethods() {
     countryCode: CHECKOUT_CONFIG.countryCode,
     currency: CHECKOUT_CONFIG.currency,
   });
-  const response = await fetch(`/api/paymentMethods?${params}`);
-  if (!response.ok) throw new Error("Could not load payment methods");
-  const data = await response.json();
+  const data = await fetchApi(`/api/paymentMethods?${params}`);
   return { paymentMethodsResponse: data.response, requestBody: data.requestBody };
 }
 
@@ -31,26 +42,22 @@ async function fetchPaymentMethods() {
 // Call the server's /payments endpoint
 // -------------------------------------------------------------------------
 async function callPayments(stateData) {
-  const response = await fetch("/api/payments", {
+  return fetchApi("/api/payments", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(stateData),
   });
-  if (!response.ok) throw new Error("Payment request failed");
-  return response.json();
 }
 
 // -------------------------------------------------------------------------
 // Call the server's /payments/details endpoint
 // -------------------------------------------------------------------------
 async function callPaymentsDetails(stateData) {
-  const response = await fetch("/api/payments/details", {
+  return fetchApi("/api/payments/details", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(stateData),
   });
-  if (!response.ok) throw new Error("Payment details request failed");
-  return response.json();
 }
 
 // -------------------------------------------------------------------------
