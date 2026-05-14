@@ -13,27 +13,45 @@ A Flask application that implements Adyen's **Drop-in** and **Card Component** i
 - **Card Component** – card-only fields with full UI control
 - **Native 3DS2** – in-browser fingerprint and challenge flows
 - **Tokenisation** – save cards for returning shoppers (with shopper consent)
+- **Guest checkout** – pay without creating an account (no tokenisation, no stored cards)
 
 ## Flow overview
+
+The checkout has **4 steps**:
+
+| Step | Route | Description |
+|------|-------|-------------|
+| 1 | `GET /` | Choose between **Guest** and **Account** checkout |
+| 2 | `GET /order` → `POST /order` | Enter order details (+ username for account flow) |
+| 3 | `GET /implementations` | Choose integration type (Drop-in / Components) |
+| 4 | `GET /dropin/checkout` or `GET /components/checkout` | Pay |
+
+### Guest vs Account
+
+- **Guest** – no `shopperReference` is sent to Adyen; tokenisation fields (`storePaymentMethod`, `recurringProcessingModel`, `shopperInteraction`) are omitted; the "Save for my next payment" checkbox is hidden.
+- **Account** – a username is collected and used as `shopperReference`; tokenisation is enabled with `recurringProcessingModel: CardOnFile`.
+
+### Sequence diagram
 
 ```
 Browser                        Flask server                 Adyen API
 ───────                        ────────────                 ─────────
-1. GET /                  →    render order form
-2. POST /                 →    validate & store in session
-3. GET /implementations   →    render integration selector
-4. GET /dropin/checkout   →    render Drop-in page
-5. GET /api/paymentMethods →   POST /paymentMethods     →   payment method list
-                                                              (incl. stored cards)
-6. [shopper fills card / picks stored card]
+1. GET /                  →    render flow choice
+2. GET /order?flow=…      →    render order form
+3. POST /order            →    validate & store in session
+4. GET /implementations   →    render integration selector
+5. GET /dropin/checkout   →    render Drop-in page
+6. GET /api/paymentMethods →   POST /paymentMethods     →   payment method list
+                                                              (incl. stored cards for account)
+7. [shopper fills card / picks stored card]
    onSubmit               →    POST /api/payments        →   POST /payments
                                 ← action{type:threeDS2}  ←──
-7. Drop-in renders 3DS2
+8. Drop-in renders 3DS2
    fingerprint/challenge
    onAdditionalDetails    →    POST /api/payments/details → POST /payments/details
                                 ← resultCode:Authorised   ←─
-8. POST /result/store     →    store result in session
-9. GET /result            →    render result page & clear session
+9. POST /result/store     →    store result in session
+10. GET /result           →    render result page & clear session
 ```
 
 If the issuer does not support native 3DS2, Adyen falls back to a redirect. After authentication the shopper returns to `/dropin/handleShopperRedirect`.
@@ -74,16 +92,19 @@ Open http://localhost:3000 in your browser or configure app.py to use a differen
 Use Adyen's test card numbers to trigger different 3DS2 scenarios:
 https://docs.adyen.com/development-resources/testing/test-card-numbers
 
-## Tokenisation
+## Tokenisation (Account flow only)
 
 Tokenisation uses `recurringProcessingModel: CardOnFile` with shopper consent:
 
-1. Enter a username (used as `shopperReference`)
-2. Pay with a new card — a "Save for my next payment" checkbox appears
-3. If the shopper consents, we ask Adyen to tokenise the card
-4. On the next visit with the same username, stored cards appear in the Drop-in or Card Component
+1. Choose **Account** on step 1
+2. Enter a username (used as `shopperReference`)
+3. Pay with a new card — a "Save for my next payment" checkbox appears
+4. If the shopper consents, we ask Adyen to tokenise the card
+5. On the next visit with the same username, stored cards appear in the Drop-in or Card Component
 
-New cards should be sent with `shopperInteraction: Ecommerce`; stored cards with `ContAuth`.
+New cards are sent with `shopperInteraction: Ecommerce`; stored cards with `ContAuth`.
+
+Guest payments skip all of this — no reference, no checkbox, no stored cards.
 
 ## Project structure
 
@@ -97,15 +118,16 @@ New cards should be sent with `shopperInteraction: Ecommerce`; stored cards with
 │   ├── config.py                   # Adyen client, env vars, SSL fix
 │   ├── helpers.py                  # Shared constants & utilities
 │   ├── integrations.py             # @register_integration decorator & registry
-│   ├── models.py                   # Dataclass models for Adyen API requests
+│   ├── models.py                   # Pydantic models for Adyen API requests
 │   ├── pages.py                    # Blueprint: HTML-serving routes
 │   └── api.py                      # Blueprint: JSON API + redirect handlers
 ├── templates/
 │   ├── pages/
-│   │   ├── order.html              # Step 1 – shopper & amount form
-│   │   ├── implementation_index.html # Step 2 – integration selector
-│   │   ├── dropin.html             # Step 3 – Drop-in checkout
-│   │   ├── card_component.html     # Step 3 – Card Component checkout
+│   │   ├── choose_flow.html        # Step 1 – guest vs account
+│   │   ├── order.html              # Step 2 – shopper & amount form
+│   │   ├── implementation_index.html # Step 3 – integration selector
+│   │   ├── dropin.html             # Step 4 – Drop-in checkout
+│   │   ├── card_component.html     # Step 4 – Card Component checkout
 │   │   └── result.html             # Payment result page
 │   └── errors/
 │       └── 404.html
