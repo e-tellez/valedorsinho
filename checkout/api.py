@@ -60,7 +60,7 @@ def payment_methods() -> Response:
         ),
         country_code=country_code if country_code and country_code != "undefined" else session.get("country_code", "MX"),
         shopper_locale=request.args.get("shopperLocale", "en-US"),
-        shopper_reference=session.get("shopper_reference", ""),
+        shopper_reference=session.get("shopper_reference", "") or None,
     )
 
     request_body = payment_methods_request.model_dump(by_alias=True, exclude_none=True)
@@ -80,10 +80,8 @@ def payments() -> Response:
     order details and 3DS2 / native 3DS parameters.
     """
     body = request.get_json()
-
-    shopper_reference = session.get("shopper_reference")
-    if not shopper_reference:
-        return jsonify({"error": "Missing shopper reference. Please start from the order form."}), 400
+    is_guest = session.get("is_guest", False)
+    shopper_reference = session.get("shopper_reference", "") or None
 
     # Store the order reference in the server-side session so we can match
     # the /payments/details callback to the correct order later
@@ -108,7 +106,8 @@ def payments() -> Response:
         shopper_email=body.get("shopperEmail", "shopper@example.com"),
         browser_info=body.get("browserInfo"),
         billing_address=BillingAddress(**raw_billing) if raw_billing else BillingAddress(),
-        store_payment_method=body.get("storePaymentMethod", False),
+        store_payment_method=body.get("storePaymentMethod", False) if not is_guest else None,
+        recurring_processing_model="CardOnFile" if not is_guest else None,
     )
 
     # Send the payment request to Adyen

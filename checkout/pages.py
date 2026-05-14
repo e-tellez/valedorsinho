@@ -7,21 +7,30 @@ from checkout.integrations import register_integration, get_integrations
 bp = Blueprint("pages", __name__)
 
 
-@bp.route("/", methods=["GET", "POST"])
+@bp.route("/")
 def index() -> str | Response:
-    """Step 1 – collect username and order amount.
+    """Step 1 – choose between guest and account checkout flows."""
+    return render_template("pages/choose_flow.html")
 
-    GET  renders the order details form.
-    POST validates input, stores values in session, redirects to step 2.
+
+@bp.route("/order", methods=["GET", "POST"])
+def order() -> str | Response:
+    """Step 2 – collect order details (and username for the account flow).
+
+    GET  renders the order form.
+    POST validates input, stores values in session, redirects to step 3.
     """
+    is_guest = request.args.get("flow") == "guest" or session.get("is_guest", False)
+
     if request.method == "POST":
         username = request.form.get("username", "").strip()
         amount_raw = request.form.get("amount", "").strip()
         country = request.form.get("country", "MX").upper()
+        is_guest = request.form.get("is_guest") == "true"
 
         errors = {}
         amount_warning = None
-        if not username:
+        if not is_guest and not username:
             errors["error"] = "Please enter a username."
         try:
             amount = float(amount_raw)
@@ -36,7 +45,8 @@ def index() -> str | Response:
         if errors or amount_warning:
             return render_template(
                 "pages/order.html",
-                form_action="/",
+                form_action="/order",
+                is_guest=is_guest,
                 username=username,
                 amount=amount_raw,
                 country=country,
@@ -47,7 +57,8 @@ def index() -> str | Response:
         currency = COUNTRY_CURRENCY_MAP.get(country, "MXN")
         country_code = country
 
-        session["shopper_reference"] = username
+        session["is_guest"] = is_guest
+        session["shopper_reference"] = username if not is_guest else ""
         session["amount_minor_units"] = round(amount * 100)
         session["country_code"] = country_code
         session["currency"] = currency
@@ -57,7 +68,8 @@ def index() -> str | Response:
     amount_display = "{:.2f}".format(amount_stored / 100) if amount_stored else "10.00"
     return render_template(
         "pages/order.html",
-        form_action="/",
+        form_action="/order",
+        is_guest=is_guest,
         username=session.get("shopper_reference", ""),
         amount=amount_display,
         country=session.get("country_code", "MX"),
@@ -77,7 +89,8 @@ def select_integration() -> str | Response:
     amount_minor_units = session.get("amount_minor_units", 1000)
     return render_template(
         "pages/implementation_index.html",
-        shopper_reference=session["shopper_reference"],
+        shopper_reference=session.get("shopper_reference", ""),
+        is_guest=session.get("is_guest", False),
         amount=amount_minor_units / 100,
         country_code=session.get("country_code", "MX"),
         currency=session.get("currency", "MXN"),
@@ -102,9 +115,12 @@ def components_checkout() -> str | Response:
         "pages/card_component.html",
         client_key=CLIENT_KEY,
         environment=ADYEN_ENVIRONMENT,
-        shopper_reference=session["shopper_reference"],
+        shopper_reference=session.get("shopper_reference", ""),
+        is_guest=session.get("is_guest", False),
         amount_minor_units=amount_minor_units,
         amount=amount_minor_units / 100,
+        country_code=session.get("country_code", "MX"),
+        currency=session.get("currency", "MXN"),
     )
 
 
@@ -124,7 +140,8 @@ def dropin_checkout() -> str | Response:
         "pages/dropin.html",
         client_key=CLIENT_KEY,
         environment=ADYEN_ENVIRONMENT,
-        shopper_reference=session["shopper_reference"],
+        shopper_reference=session.get("shopper_reference", ""),
+        is_guest=session.get("is_guest", False),
         amount_minor_units=amount_minor_units,
         amount=amount_minor_units / 100,
         country_code=session.get("country_code", "MX"),

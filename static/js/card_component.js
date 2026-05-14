@@ -69,8 +69,8 @@
         hasHolderName: true,
         holderNameRequired: true,
         billingAddressRequired: false,
-        // Show "Save for my next payment" checkbox (tokenisation)
-        enableStoreDetails: true,
+        // Show "Save for my next payment" checkbox (tokenisation) – guests cannot store
+        enableStoreDetails: !CHECKOUT_CONFIG.isGuest,
       })
       .mount("#card-container");
 

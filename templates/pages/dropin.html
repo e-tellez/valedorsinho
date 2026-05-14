@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Checkout – Step 3 of 3</title>
+  <title>Checkout – Step 4 of 4</title>
 
   <link
     rel="stylesheet"
@@ -21,7 +21,9 @@
     <span class="step-line"></span>
     <span class="step">2</span>
     <span class="step-line"></span>
-    <span class="step active">3</span>
+    <span class="step">3</span>
+    <span class="step-line"></span>
+    <span class="step active">4</span>
   </div>
 
   <h1>Complete your order</h1>
@@ -29,7 +31,7 @@
   <!-- Order summary – values locked in at step 1, shown here for confirmation -->
   <div class="order-summary">
     <strong>Order total:</strong> {{ currency }} {{ "%.2f"|format(amount) }}<br/>
-    <strong>Shopper:</strong> {{ shopper_reference }}
+    <strong>Shopper:</strong> {{ shopper_reference or 'Guest' }}
   </div>
 
   <div id="dropin-container"></div>
@@ -59,6 +61,7 @@
     amountMinorUnits: "{{ amount_minor_units }}",
     countryCode: "{{ country_code }}",
     currency: "{{ currency }}",
+    isGuest: {{ 'true' if is_guest else 'false' }},
   };
 </script>
 

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Checkout – Step 1 of 3</title>
+  <title>Checkout – Step 2 of 4</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/checkout.css') }}" />
 </head>
 <body>
@@ -11,17 +11,23 @@
 
   <!-- Step indicator -->
   <div class="step-indicator">
-    <span class="step active">1</span>
+    <span class="step">1</span>
     <span class="step-line"></span>
-    <span class="step">2</span>
+    <span class="step active">2</span>
     <span class="step-line"></span>
     <span class="step">3</span>
+    <span class="step-line"></span>
+    <span class="step">4</span>
   </div>
 
   <h1>Your order</h1>
-  <p class="step-subtitle">Enter your details to continue.</p>
+  <p class="step-subtitle">
+    {% if is_guest %}Confirm your order details.{% else %}Enter your details to continue.{% endif %}
+  </p>
 
   <form method="POST" action="{{ form_action }}" novalidate>
+    <input type="hidden" name="is_guest" value="{{ 'true' if is_guest else 'false' }}" />
+    {% if not is_guest %}
     <div class="field-row">
       <label for="username">Username</label>
       <input
@@ -37,6 +43,7 @@
         <span class="field-error">{{ error }}</span>
       {% endif %}
     </div>
+    {% endif %}
 
     <div class="field-row">
       <label>Country</label>
@@ -94,6 +101,8 @@
 
     <button type="submit" class="btn-primary">Continue</button>
   </form>
+
+  <a href="/" class="btn-back">← Back</a>
 
 </div>
 </body>

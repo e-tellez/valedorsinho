@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Checkout – Step 2 of 3</title>
+  <title>Checkout – Step 3 of 4</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/checkout.css') }}" />
 </head>
 <body>
@@ -13,9 +13,11 @@
   <div class="step-indicator">
     <span class="step">1</span>
     <span class="step-line"></span>
-    <span class="step active">2</span>
+    <span class="step">2</span>
     <span class="step-line"></span>
-    <span class="step">3</span>
+    <span class="step active">3</span>
+    <span class="step-line"></span>
+    <span class="step">4</span>
   </div>
 
   <h1>Integration type</h1>
@@ -24,7 +26,7 @@
   <!-- Order summary from step 1 -->
   <div class="order-summary">
     <strong>Order total:</strong> {{ currency }} {{ "%.2f"|format(amount) }}<br/>
-    <strong>Shopper:</strong> {{ shopper_reference }}<br/>
+    <strong>Shopper:</strong> {{ shopper_reference or 'Guest' }}<br/>
     <strong>Country:</strong> {{ country_code }}
   </div>
 
@@ -45,7 +47,7 @@
     {% endfor %}
   </ul>
 
-  <a href="/" class="btn-back">← Back</a>
+  <a href="/order" class="btn-back">← Back</a>
 
 </div>
 </body>

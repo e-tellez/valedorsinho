@@ -23,8 +23,8 @@
           holderNameRequired: true,
           // billingAddressRequired: true
           billingAddressRequired: false,
-          // Show "Save for my next payment" checkbox (tokenisation)
-          enableStoreDetails: true,
+          // Show "Save for my next payment" checkbox (tokenisation) – guests cannot store
+          enableStoreDetails: !CHECKOUT_CONFIG.isGuest,
         },
       },
 
@@ -74,8 +74,8 @@
 
     const dropin = checkout
       .create("dropin", {
-        // Show any stored (tokenised) payment methods for this shopper
-        showStoredPaymentMethods: true,
+        // Show any stored (tokenised) payment methods for this shopper – guests have none
+        showStoredPaymentMethods: !CHECKOUT_CONFIG.isGuest,
         // openFirstPaymentMethod: false
         openFirstPaymentMethod: true,
       })
