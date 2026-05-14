@@ -1,7 +1,7 @@
 from flask import Blueprint, Response, request, render_template, session, redirect, url_for
 
 from checkout.config import CLIENT_KEY, ADYEN_ENVIRONMENT
-from checkout.helpers import COUNTRY_CURRENCY_MAP
+from checkout.helpers import COUNTRY_CURRENCY_MAP, require_session
 from checkout.integrations import register_integration, get_integrations
 
 bp = Blueprint("pages", __name__)
@@ -66,13 +66,12 @@ def index() -> str | Response:
 
 
 @bp.route("/implementations")
+@require_session
 def select_integration() -> str | Response:
     """Step 2 – choose an integration type.
 
     Requires step 1 to have been completed (shopper_reference in session).
     """
-    if not session.get("shopper_reference"):
-        return redirect(url_for("pages.index"))
 
     amount_minor_units = session.get("amount_minor_units", 1000)
     return render_template(
@@ -92,10 +91,9 @@ def select_integration() -> str | Response:
     note="(Only Card Component implemented for now)",
     order=2,
 )
+@require_session
 def components_checkout() -> str | Response:
     """Card Component funnel – Step 3: render the Card Component."""
-    if not session.get("shopper_reference"):
-        return redirect(url_for("pages.index"))
 
     session["integration_type"] = "Card Component"
     amount_minor_units = session.get("amount_minor_units", 1000)
@@ -115,13 +113,9 @@ def components_checkout() -> str | Response:
     description="Pre-built UI with all available payment methods in your MA.",
     order=1,
 )
+@require_session
 def dropin_checkout() -> str | Response:
-    """Drop-in funnel – Step 3: render the Drop-in payment form.
-
-    Redirects back to step 1 if the shopper has not entered their details yet.
-    """
-    if not session.get("shopper_reference"):
-        return redirect(url_for("pages.index"))
+    """Drop-in funnel – Step 3: render the Drop-in payment form."""
 
     session["integration_type"] = "Drop-in"
     amount_minor_units = session.get("amount_minor_units", 1000)

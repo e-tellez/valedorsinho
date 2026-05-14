@@ -1,4 +1,18 @@
+import functools
 import uuid
+
+from flask import session, redirect, url_for
+
+
+def require_session(view_func):
+    """Redirect to step 1 if the shopper has not completed the order form."""
+    @functools.wraps(view_func)
+    def wrapped(*args, **kwargs):
+        if not session.get("shopper_reference"):
+            return redirect(url_for("pages.index"))
+        return view_func(*args, **kwargs)
+    return wrapped
+
 
 COUNTRY_CURRENCY_MAP = {
     "MX": ("MX", "MXN"),
