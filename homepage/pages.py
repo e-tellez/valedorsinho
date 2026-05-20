@@ -14,15 +14,6 @@ def dashboard() -> str:
 # ---------------------------------------------------------------------------
 
 
-@bp.route("/payload-suggested")
-def payload_suggested() -> str:
-    """Placeholder for the suggested payload generator."""
-    return render_template(
-        "pages/placeholder.html",
-        title="Payload Suggested",
-        description="Generate recommended payloads per merchant vertical. This feature is under development.",
-    )
-
 
 @bp.route("/nfc-formatter")
 def nfc_formatter() -> str:
