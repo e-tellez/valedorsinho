@@ -13,18 +13,6 @@ def dashboard() -> str:
 # Placeholder routes – each will be replaced by its own blueprint/logic later
 # ---------------------------------------------------------------------------
 
-
-
-@bp.route("/nfc-formatter")
-def nfc_formatter() -> str:
-    """Placeholder for the NFC credential formatter."""
-    return render_template(
-        "pages/placeholder.html",
-        title="NFC Formatter",
-        description="Configure NFC credentials for merchant tap-to-pay. This feature is under development.",
-    )
-
-
 @bp.route("/webhook-logs")
 def webhook_logs() -> str:
     """Placeholder for the webhook log viewer."""

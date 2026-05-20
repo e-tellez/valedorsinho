@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NFC Formatter – Valedorsinho</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/homepage.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/nfc_formatter.css') }}" />
+</head>
+<body>
+<div class="nfc-container">
+
+  <a href="{{ url_for('homepage.dashboard') }}" class="btn-back">&larr; Back to Dashboard</a>
+
+  <h1>NFC Formatter</h1>
+  <p class="nfc-subtitle">Configure NFC credentials for Mifare Classic 1K and generate the card acquisition payload.</p>
+
+  <!-- Form -->
+  <div class="nfc-form">
+
+    <div class="field-row">
+      <label for="key-a">Key A <span class="field-hint">(hex, e.g. FFFFFFFFFFFF)</span></label>
+      <input type="text" id="key-a" placeholder="FFFFFFFFFFFF" maxlength="12" spellcheck="false" autocomplete="off" />
+      <span id="key-a-error" class="field-error hidden">Must be a 12-character hex string.</span>
+    </div>
+
+    <div class="field-row">
+      <label for="key-b">Key B <span class="field-hint">(hex, e.g. FFFFFFFFFFFF)</span></label>
+      <input type="text" id="key-b" placeholder="FFFFFFFFFFFF" maxlength="12" spellcheck="false" autocomplete="off" />
+      <span id="key-b-error" class="field-error hidden">Must be a 12-character hex string.</span>
+    </div>
+
+    <label class="checkbox-row">
+      <input type="checkbox" id="do-in-background" checked />
+      <span class="checkbox-label">Turn off Adyen UI</span>
+      <span class="checkbox-desc">Run card acquisition in the background without displaying the Adyen screen.</span>
+    </label>
+
+  </div>
+
+  <!-- Actions -->
+  <div class="actions-row">
+    <button id="btn-copy" class="btn-primary">Copy to Clipboard</button>
+    <button id="btn-download" class="btn-secondary">Download .json</button>
+  </div>
+
+  <!-- Copied banner -->
+  <div id="copy-banner" class="copy-banner hidden">Copied to clipboard!</div>
+
+  <!-- Preview -->
+  <div class="preview-wrap">
+    <pre id="payload-preview" class="payload-preview"></pre>
+  </div>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/nfc_formatter.js') }}"></script>
+</body>
+</html>

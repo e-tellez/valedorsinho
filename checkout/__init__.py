@@ -12,6 +12,7 @@ from setup.pages import bp as setup_bp
 from payload_validator.pages import bp as validator_pages_bp
 from payload_validator.api import bp as validator_api_bp
 from payload_suggested.pages import bp as suggested_bp
+from nfc_formatter.pages import bp as nfc_bp
 
 
 def create_app() -> Flask:
@@ -40,6 +41,7 @@ def create_app() -> Flask:
     app.register_blueprint(validator_pages_bp)
     app.register_blueprint(validator_api_bp)
     app.register_blueprint(suggested_bp)
+    app.register_blueprint(nfc_bp)
     app.register_blueprint(pages_bp)
     app.register_blueprint(api_bp)
 
