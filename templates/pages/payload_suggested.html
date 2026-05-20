@@ -13,13 +13,13 @@
   <a href="{{ url_for('homepage.dashboard') }}" class="btn-back">&larr; Back to Dashboard</a>
 
   <h1>Payload Suggested</h1>
-  <p class="suggested-subtitle">Select a merchant vertical to generate a recommended <code>/payments</code> payload.</p>
+  <p class="suggested-subtitle">Select one or more merchant verticals to generate a recommended <code>/payments</code> payload.</p>
 
   <!-- Vertical checkboxes -->
   <div class="verticals-grid">
     {% for vertical in verticals %}
     <label class="vertical-option">
-      <input type="radio" name="vertical" value="{{ vertical.key }}"
+      <input type="checkbox" name="vertical" value="{{ vertical.key }}"
              data-payload='{{ vertical.payload | tojson }}'
              {% if loop.first %}checked{% endif %} />
       <div class="vertical-pill">

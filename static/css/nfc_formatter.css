@@ -3,7 +3,18 @@
 /* ------------------------------------------------------------------ */
 .nfc-container {
   width: 100%;
-  max-width: 640px;
+  max-width: 900px;
+}
+
+.nfc-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 700px) {
+  .nfc-layout { grid-template-columns: 1fr; }
 }
 
 .nfc-subtitle {

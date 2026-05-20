@@ -43,7 +43,7 @@
   cursor: pointer;
 }
 
-.vertical-option input[type="radio"] {
+.vertical-option input[type="checkbox"] {
   display: none;
 }
 
@@ -59,7 +59,7 @@
   height: 100%;
 }
 
-.vertical-option input[type="radio"]:checked + .vertical-pill {
+.vertical-option input[type="checkbox"]:checked + .vertical-pill {
   border-color: #0070f3;
   background: #f0f6ff;
   box-shadow: 0 0 0 2px rgba(0,112,243,.15);

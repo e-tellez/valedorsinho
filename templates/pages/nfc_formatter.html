@@ -15,41 +15,47 @@
   <h1>NFC Formatter</h1>
   <p class="nfc-subtitle">Configure NFC credentials for Mifare Classic 1K and generate the card acquisition payload.</p>
 
-  <!-- Form -->
-  <div class="nfc-form">
+  <div class="nfc-layout">
 
-    <div class="field-row">
-      <label for="key-a">Key A <span class="field-hint">(hex, e.g. FFFFFFFFFFFF)</span></label>
-      <input type="text" id="key-a" placeholder="FFFFFFFFFFFF" maxlength="12" spellcheck="false" autocomplete="off" />
-      <span id="key-a-error" class="field-error hidden">Must be a 12-character hex string.</span>
+    <!-- Left: Form + Actions -->
+    <div class="nfc-left">
+      <div class="nfc-form">
+
+        <div class="field-row">
+          <label for="key-a">Key A <span class="field-hint">(hex, e.g. FFFFFFFFFFFF)</span></label>
+          <input type="text" id="key-a" placeholder="FFFFFFFFFFFF" maxlength="12" spellcheck="false" autocomplete="off" />
+          <span id="key-a-error" class="field-error hidden">Must be a 12-character hex string.</span>
+        </div>
+
+        <div class="field-row">
+          <label for="key-b">Key B <span class="field-hint">(hex, e.g. FFFFFFFFFFFF)</span></label>
+          <input type="text" id="key-b" placeholder="FFFFFFFFFFFF" maxlength="12" spellcheck="false" autocomplete="off" />
+          <span id="key-b-error" class="field-error hidden">Must be a 12-character hex string.</span>
+        </div>
+
+        <label class="checkbox-row">
+          <input type="checkbox" id="do-in-background" checked />
+          <span class="checkbox-label">Turn off Adyen UI</span>
+          <span class="checkbox-desc">Run card acquisition in the background without displaying the Adyen screen.</span>
+        </label>
+
+      </div>
+
+      <div class="actions-row">
+        <button id="btn-copy" class="btn-primary">Copy to Clipboard</button>
+        <button id="btn-download" class="btn-secondary">Download .json</button>
+      </div>
+
+      <div id="copy-banner" class="copy-banner hidden">Copied to clipboard!</div>
     </div>
 
-    <div class="field-row">
-      <label for="key-b">Key B <span class="field-hint">(hex, e.g. FFFFFFFFFFFF)</span></label>
-      <input type="text" id="key-b" placeholder="FFFFFFFFFFFF" maxlength="12" spellcheck="false" autocomplete="off" />
-      <span id="key-b-error" class="field-error hidden">Must be a 12-character hex string.</span>
+    <!-- Right: Preview -->
+    <div class="nfc-right">
+      <div class="preview-wrap">
+        <pre id="payload-preview" class="payload-preview"></pre>
+      </div>
     </div>
 
-    <label class="checkbox-row">
-      <input type="checkbox" id="do-in-background" checked />
-      <span class="checkbox-label">Turn off Adyen UI</span>
-      <span class="checkbox-desc">Run card acquisition in the background without displaying the Adyen screen.</span>
-    </label>
-
-  </div>
-
-  <!-- Actions -->
-  <div class="actions-row">
-    <button id="btn-copy" class="btn-primary">Copy to Clipboard</button>
-    <button id="btn-download" class="btn-secondary">Download .json</button>
-  </div>
-
-  <!-- Copied banner -->
-  <div id="copy-banner" class="copy-banner hidden">Copied to clipboard!</div>
-
-  <!-- Preview -->
-  <div class="preview-wrap">
-    <pre id="payload-preview" class="payload-preview"></pre>
   </div>
 
 </div>
