@@ -13,16 +13,6 @@ def dashboard() -> str:
 # Placeholder routes – each will be replaced by its own blueprint/logic later
 # ---------------------------------------------------------------------------
 
-@bp.route("/setup-placeholder")
-def setup_placeholder() -> str:
-    """Placeholder for the setup/credentials page."""
-    return render_template(
-        "pages/placeholder.html",
-        title="Set Up",
-        description="Configure Adyen credentials and environment settings. This feature is under development.",
-    )
-
-
 @bp.route("/payload-validator")
 def payload_validator() -> str:
     """Placeholder for the payment payload validator."""

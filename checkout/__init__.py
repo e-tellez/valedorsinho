@@ -8,6 +8,7 @@ from checkout.config import FLASK_SECRET_KEY
 from checkout.pages import bp as pages_bp
 from checkout.api import bp as api_bp
 from homepage.pages import bp as homepage_bp
+from setup.pages import bp as setup_bp
 
 
 def create_app() -> Flask:
@@ -32,6 +33,7 @@ def create_app() -> Flask:
 
     # Register blueprints – pages serve HTML, api handles JSON + redirects
     app.register_blueprint(homepage_bp)
+    app.register_blueprint(setup_bp)
     app.register_blueprint(pages_bp)
     app.register_blueprint(api_bp)
 
