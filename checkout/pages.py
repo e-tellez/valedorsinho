@@ -7,7 +7,7 @@ from checkout.integrations import register_integration, get_integrations
 bp = Blueprint("pages", __name__)
 
 
-@bp.route("/")
+@bp.route("/checkout")
 def index() -> str | Response:
     """Step 1 – choose between guest and account checkout flows."""
     return render_template("pages/choose_flow.html")

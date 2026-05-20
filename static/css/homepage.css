@@ -1,0 +1,211 @@
+/* ------------------------------------------------------------------ */
+/* Base reset & typography                                              */
+/* ------------------------------------------------------------------ */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: #f5f5f5;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 40px 16px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Dashboard wrapper                                                    */
+/* ------------------------------------------------------------------ */
+.dashboard {
+  width: 100%;
+  max-width: 840px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Header                                                               */
+/* ------------------------------------------------------------------ */
+.dash-header {
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.dash-header h1 {
+  font-size: 1.8rem;
+  color: #1a1a1a;
+  margin-bottom: 4px;
+}
+
+.dash-subtitle {
+  font-size: 0.95rem;
+  color: #666;
+}
+
+/* ------------------------------------------------------------------ */
+/* Card row / layout                                                    */
+/* ------------------------------------------------------------------ */
+.card-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.card-row .card-full {
+  grid-column: 1 / -1;
+}
+
+.bottom-row {
+  grid-template-columns: 1fr;
+}
+
+/* ------------------------------------------------------------------ */
+/* Two-column section                                                   */
+/* ------------------------------------------------------------------ */
+.columns-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.column-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.column-group .dash-card {
+  flex: 1;
+}
+
+.column-heading {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #888;
+  padding-bottom: 4px;
+  border-bottom: 2px solid #e5e5e5;
+}
+
+/* ------------------------------------------------------------------ */
+/* Individual card                                                      */
+/* ------------------------------------------------------------------ */
+.dash-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 16px;
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color .15s, box-shadow .15s, background .15s;
+  cursor: pointer;
+}
+
+.dash-card:hover {
+  border-color: #0070f3;
+  box-shadow: 0 0 0 3px rgba(0,112,243,.1);
+  background: #f8fbff;
+}
+
+/* Disabled card (coming soon) */
+.card-disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.card-disabled:hover {
+  border-color: #e5e5e5;
+  box-shadow: none;
+  background: #fff;
+}
+
+/* ------------------------------------------------------------------ */
+/* Card icon                                                            */
+/* ------------------------------------------------------------------ */
+.card-icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: #e8f0fe;
+  color: #0070f3;
+}
+
+.card-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.icon-blue  { background: #e8f0fe; color: #0070f3; }
+.icon-green { background: #e6f7ed; color: #1a8a4a; }
+.icon-orange { background: #fff3e0; color: #e67e22; }
+.icon-gray  { background: #f0f0f0; color: #999; }
+
+/* ------------------------------------------------------------------ */
+/* Card body                                                            */
+/* ------------------------------------------------------------------ */
+.card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.card-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.card-desc {
+  font-size: 0.8rem;
+  color: #666;
+  line-height: 1.4;
+}
+
+/* Badge */
+.card-badge {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  width: fit-content;
+}
+
+.badge-soon {
+  background: #f0f0f0;
+  color: #888;
+}
+
+.badge-completed {
+  background: #e6f7ed;
+  color: #1a8a4a;
+}
+
+.badge-wip {
+  background: #fff3e0;
+  color: #e67e22;
+}
+
+/* Arrow */
+.card-arrow {
+  flex-shrink: 0;
+  font-size: 1.4rem;
+  color: #aaa;
+}
+
+/* ------------------------------------------------------------------ */
+/* Responsive                                                           */
+/* ------------------------------------------------------------------ */
+@media (max-width: 640px) {
+  .card-row { grid-template-columns: 1fr; }
+  .columns-row { grid-template-columns: 1fr; }
+}

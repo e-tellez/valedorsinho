@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ title }} – Valedorsinho</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/homepage.css') }}" />
+  <style>
+    .placeholder-container {
+      width: 100%;
+      max-width: 540px;
+    }
+    .placeholder-box {
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 10px;
+      padding: 48px 24px;
+      text-align: center;
+    }
+    .placeholder-box h2 {
+      font-size: 1.2rem;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+    }
+    .placeholder-box p {
+      font-size: 0.9rem;
+      color: #666;
+    }
+    .btn-back {
+      display: inline-block;
+      margin-bottom: 16px;
+      font-size: 0.875rem;
+      color: #555;
+      text-decoration: none;
+    }
+    .btn-back:hover { color: #0070f3; }
+  </style>
+</head>
+<body>
+<div class="placeholder-container">
+  <a href="{{ url_for('homepage.dashboard') }}" class="btn-back">&larr; Back to Dashboard</a>
+  <div class="placeholder-box">
+    <h2>{{ title }}</h2>
+    <p>{{ description }}</p>
+  </div>
+</div>
+</body>
+</html>
