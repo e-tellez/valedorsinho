@@ -13,15 +13,6 @@ def dashboard() -> str:
 # Placeholder routes – each will be replaced by its own blueprint/logic later
 # ---------------------------------------------------------------------------
 
-@bp.route("/payload-validator")
-def payload_validator() -> str:
-    """Placeholder for the payment payload validator."""
-    return render_template(
-        "pages/placeholder.html",
-        title="Payment Payload Validator",
-        description="Validate /payments payloads against OpenAPI specs. This feature is under development.",
-    )
-
 
 @bp.route("/payload-suggested")
 def payload_suggested() -> str:
