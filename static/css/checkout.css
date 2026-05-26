@@ -222,6 +222,10 @@
   flex-direction: column;
   gap: 12px;
   padding-top: 0;
+  position: sticky;
+  top: 40px;
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
 }
 
 .api-sidebar .response-details {

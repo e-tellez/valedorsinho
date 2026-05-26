@@ -1,6 +1,8 @@
 from dataclasses import asdict
 
-from flask import Blueprint, Response, request, render_template, session, redirect, url_for
+import json
+
+from flask import Blueprint, Response, make_response, request, render_template, session, redirect, url_for
 
 from checkout.checkout_helpers import COUNTRY_CURRENCY_MAP, build_checkout_context, require_session
 from checkout.integrations import register_integration, get_integrations, get_integration_categories
@@ -172,12 +174,24 @@ def result() -> str | Response:
     if not raw_result:
         return redirect(url_for("pages.index"))
 
+    # The large Adyen response lives in a separate cookie (avoids the 4 KB
+    # session-cookie limit).  Merge it back into raw_result for the template.
+    adyen_cookie = request.cookies.get("adyen_result")
+    if adyen_cookie:
+        try:
+            raw_result["adyen_response"] = json.loads(adyen_cookie)
+        except (json.JSONDecodeError, ValueError):
+            raw_result["adyen_response"] = None
+
     payment_result = PaymentResult(**raw_result)
     integration_type = session.get("integration_type", "Unknown")
     session.clear()
 
-    return render_template(
+    response = make_response(render_template(
         "pages/result.html",
         payment_result=payment_result,
         integration_type=integration_type,
-    )
+    ))
+    # Clear the adyen_result cookie after reading it
+    response.delete_cookie("adyen_result", path="/result")
+    return response

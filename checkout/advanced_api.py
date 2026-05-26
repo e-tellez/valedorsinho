@@ -5,9 +5,10 @@ The Advanced integration uses separate server calls for /paymentMethods,
 the payment lifecycle.
 """
 
+import json
 import logging
 
-from flask import Blueprint, Response, request, jsonify, session, redirect, url_for
+from flask import Blueprint, Response, make_response, request, jsonify, session, redirect, url_for
 import Adyen
 
 from checkout.config import adyen_client, MERCHANT_ACCOUNT
@@ -32,6 +33,18 @@ def _adyen_error_response(error: Adyen.AdyenError) -> tuple[Response, int]:
     return jsonify({"error": str(error), "type": type(error).__name__}), status_code
 
 
+def _set_adyen_result_cookie(response: Response, adyen_response: dict | None) -> None:
+    """Store the Adyen response in a separate cookie to stay within the 4 KB session limit."""
+    if adyen_response:
+        response.set_cookie(
+            "adyen_result",
+            json.dumps(adyen_response, separators=(",", ":")),
+            httponly=True,
+            samesite="Lax",
+            path="/result",
+        )
+
+
 @bp.route("/result/store", methods=["POST"])
 def result_store() -> Response:
     """Receive the payment outcome from the browser and store it in the session.
@@ -46,13 +59,16 @@ def result_store() -> Response:
     for key in ("payment_data", "adyen_session_id", "adyen_session_data", "order_ref"):
         session.pop(key, None)
 
-    # Save everything the result page needs into the session
+    # Small metadata stays in the session cookie; the large Adyen response
+    # goes into a separate cookie to avoid the 4 KB limit.
     session["payment_result"] = {
         "status": body.get("status", "failure"),
         "result_code": body.get("resultCode", "Unknown"),
-        "adyen_response": body.get("adyenResponse"),
     }
-    return jsonify({"redirect": url_for("pages.result")})
+
+    response = make_response(jsonify({"redirect": url_for("pages.result")}))
+    _set_adyen_result_cookie(response, body.get("adyenResponse"))
+    return response
 
 
 @bp.route("/api/paymentMethods", methods=["GET"])
@@ -192,7 +208,6 @@ def handle_shopper_redirect() -> Response:
         session["payment_result"] = {
             "status": "failure",
             "result_code": "Error",
-            "adyen_response": None,
         }
         return redirect(url_for("pages.result"))
 
@@ -201,12 +216,16 @@ def handle_shopper_redirect() -> Response:
         session.pop(key, None)
 
     result_code = response.message.get("resultCode", "")
-
-    # Store the result in the session so /result can render a clean URL
     status = "success" if result_code in ("Authorised", "Pending", "Received") else "failure"
+
     session["payment_result"] = {
         "status": status,
         "result_code": result_code,
-        "adyen_response": response.message if status == "success" else None,
     }
-    return redirect(url_for("pages.result"))
+
+    redirect_response = redirect(url_for("pages.result"))
+    _set_adyen_result_cookie(
+        redirect_response,
+        response.message if status == "success" else None,
+    )
+    return redirect_response

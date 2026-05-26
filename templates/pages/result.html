@@ -12,37 +12,42 @@
       a) A native 3DS2 flow completes in-browser (JS redirect via handleFinalResult)
       b) The shopper is redirected back from an issuer ACS page (/api/handleShopperRedirect)
   -->
-  <div class="result-card {{ payment_result.status }}">
-    {% if payment_result.status == "success" %}
-      <div class="icon">✅</div>
-      <h1>Payment successful</h1>
-    {% else %}
-      <div class="icon">❌</div>
-      <h1>Payment failed</h1>
-    {% endif %}
-
-    <span class="integration-badge">{{ integration_type }}</span>
-
-    <p class="result-code-row">Raw acquirer response: <strong>{{ payment_result.result_code }}</strong></p>
-
-    {% if payment_result.adyen_response %}
-      {% if payment_result.adyen_response.pspReference %}
-        <!-- PSP reference is the unique Adyen transaction ID – highlighted prominently -->
-        <div class="psp-block">
-          <span class="psp-label">PSP Reference</span>
-          <span class="psp-value">{{ payment_result.adyen_response.pspReference }}</span>
-        </div>
+  <div class="result-page-layout">
+    <div class="result-card {{ payment_result.status }}">
+      {% if payment_result.status == "success" %}
+        <div class="icon">✅</div>
+        <h1>Payment successful</h1>
+      {% else %}
+        <div class="icon">❌</div>
+        <h1>Payment failed</h1>
       {% endif %}
 
-      <!-- Full Adyen response object for inspection / debugging -->
-      <details class="response-details">
+      <span class="integration-badge">{{ integration_type }}</span>
+
+      <p class="result-code-row">Raw acquirer response: <strong>{{ payment_result.result_code }}</strong></p>
+
+      {% if payment_result.adyen_response %}
+        {% if payment_result.adyen_response.pspReference %}
+          <!-- PSP reference is the unique Adyen transaction ID – highlighted prominently -->
+          <div class="psp-block">
+            <span class="psp-label">PSP Reference</span>
+            <span class="psp-value">{{ payment_result.adyen_response.pspReference }}</span>
+          </div>
+        {% endif %}
+      {% endif %}
+
+      <br/>
+      <a href="/">Try again</a>
+    </div>
+
+    {% if payment_result.adyen_response %}
+    <div class="result-sidebar">
+      <details class="response-details" open>
         <summary>Full Adyen response</summary>
         <pre class="response-json">{{ payment_result.adyen_response | tojson(indent=2) }}</pre>
       </details>
+    </div>
     {% endif %}
-
-    <br/>
-    <a href="/">Try again</a>
   </div>
 </body>
 </html>
