@@ -13,40 +13,45 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/checkout.css') }}" />
 </head>
 <body>
-<div class="checkout-container">
+<div class="checkout-page-layout">
+  <div class="checkout-container">
 
-  <!-- Step indicator -->
-  <div class="step-indicator">
-    <span class="step">1</span>
-    <span class="step-line"></span>
-    <span class="step">2</span>
-    <span class="step-line"></span>
-    <span class="step">3</span>
-    <span class="step-line"></span>
-    <span class="step active">4</span>
+    <!-- Step indicator -->
+    <div class="step-indicator">
+      <span class="step">1</span>
+      <span class="step-line"></span>
+      <span class="step">2</span>
+      <span class="step-line"></span>
+      <span class="step">3</span>
+      <span class="step-line"></span>
+      <span class="step active">4</span>
+    </div>
+
+    <h1>Complete your order</h1>
+
+    <!-- Order summary – values locked in at step 1, shown here for confirmation -->
+    <div class="order-summary">
+      <strong>Order total:</strong> {{ currency }} {{ "%.2f"|format(amount) }}<br/>
+      <strong>Shopper:</strong> {{ shopper_reference or 'Guest' }}
+    </div>
+
+    <div id="dropin-container"></div>
+
+    <a href="/implementations" class="btn-back">← Back</a>
+
   </div>
 
-  <h1>Complete your order</h1>
+  <div class="api-sidebar">
+    <details class="response-details" open>
+      <summary>/paymentMethods request body</summary>
+      <pre id="pm-request" class="response-json"></pre>
+    </details>
 
-  <!-- Order summary – values locked in at step 1, shown here for confirmation -->
-  <div class="order-summary">
-    <strong>Order total:</strong> {{ currency }} {{ "%.2f"|format(amount) }}<br/>
-    <strong>Shopper:</strong> {{ shopper_reference or 'Guest' }}
+    <details class="response-details" open>
+      <summary>/paymentMethods response</summary>
+      <pre id="pm-response" class="response-json"></pre>
+    </details>
   </div>
-
-  <div id="dropin-container"></div>
-
-  <a href="/implementations" class="btn-back">← Back</a>
-
-  <details class="response-details" style="margin-top:24px;">
-    <summary>/paymentMethods request body</summary>
-    <pre id="pm-request" class="response-json"></pre>
-  </details>
-
-  <details class="response-details" style="margin-top:8px;">
-    <summary>/paymentMethods response</summary>
-    <pre id="pm-response" class="response-json"></pre>
-  </details>
 </div>
 
 <!--  This must match the CSS version imported in <head>.  -->

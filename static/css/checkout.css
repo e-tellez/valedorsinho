@@ -196,9 +196,32 @@
   text-align: center;
 }
 
-/* Widen the container when it holds columns */
-.checkout-container:has(.integration-columns) {
+/* Step 4 – two-panel layout: white box (left) + API sidebar (right) */
+.checkout-page-layout {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.checkout-page-layout .checkout-container {
+  flex: 0 0 auto;
+  width: 100%;
   max-width: 720px;
+}
+
+.api-sidebar {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 0;
+}
+
+.api-sidebar .response-details {
+  margin: 0;
 }
 
 .integration-list {
@@ -274,7 +297,7 @@ body {
   box-shadow: 0 2px 12px rgba(0,0,0,.1);
   padding: 32px;
   width: 100%;
-  max-width: 480px;
+  max-width: 720px;
 }
 
 h1 {
