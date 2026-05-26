@@ -1,6 +1,6 @@
 import logging
 
-from flask import Blueprint, Response, request, jsonify, session, redirect, url_for
+from flask import Blueprint, Response, render_template, request, jsonify, session, redirect, url_for
 import Adyen
 
 from checkout.config import adyen_client, MERCHANT_ACCOUNT
@@ -11,6 +11,7 @@ from checkout.models import (
     PaymentDetailsRequest,
     PaymentMethodsRequest,
     PaymentRequest,
+    SessionsRequest,
 )
 
 logger = logging.getLogger(__name__)
@@ -150,6 +151,74 @@ def payments_details() -> Response:
     return jsonify(response.message)
 
 
+@bp.route("/api/sessions", methods=["POST"])
+def sessions() -> Response:
+    """Create an Adyen session.
+
+    The /sessions endpoint creates a payment session that the Adyen Web SDK
+    uses to handle the full payment lifecycle on the client side — including
+    payment methods, payments, and 3DS — without further server calls.
+    """
+    is_guest = session.get("is_guest", False)
+    shopper_reference = session.get("shopper_reference", "") or None
+    order_ref = generate_reference()
+    session["order_ref"] = order_ref
+
+    sessions_request = SessionsRequest(
+        merchant_account=MERCHANT_ACCOUNT,
+        reference=order_ref,
+        amount=Amount(
+            value=session.get("amount_minor_units", 1000),
+            currency=session.get("currency", "MXN"),
+        ),
+        country_code=session.get("country_code", "MX"),
+        return_url=request.host_url.rstrip("/") + "/sessions/handleShopperRedirect",
+        shopper_reference=shopper_reference,
+        shopper_email="shopper@example.com",
+        store_payment_method_mode="askForConsent" if not is_guest and shopper_reference else None,
+        recurring_processing_model="CardOnFile" if not is_guest and shopper_reference else None,
+    )
+
+    request_body = sessions_request.model_dump(by_alias=True, exclude_none=True)
+    try:
+        response = adyen_client.checkout.payments_api.sessions(request_body)
+    except Adyen.AdyenError as error:
+        return _adyen_error_response(error)
+
+    response_body = response.message
+    # Store session data in Flask session so the redirect handler can re-create
+    # the AdyenCheckout instance after a 3DS redirect
+    session["adyen_session_id"] = response_body.get("id")
+    session["adyen_session_data"] = response_body.get("sessionData")
+
+    return jsonify({"requestBody": request_body, "response": response_body})
+
+
+@bp.route("/sessions/handleShopperRedirect", methods=["GET"])
+def sessions_handle_shopper_redirect() -> Response:
+    """Handle the redirect back from the issuer for sessions-based flows.
+
+    After a 3DS redirect the shopper returns here with `redirectResult` and
+    `sessionId` query params.  We render a lightweight page that re-creates
+    the AdyenCheckout instance with the stored session, letting the SDK
+    finalise the payment on the client side.
+    """
+    from checkout.config import CLIENT_KEY, ADYEN_ENVIRONMENT
+
+    redirect_result = request.args.get("redirectResult", "")
+    session_id = request.args.get("sessionId", "") or session.get("adyen_session_id", "")
+    session_data = session.get("adyen_session_data", "")
+
+    return render_template(
+        "pages/sessions_redirect.html",
+        client_key=CLIENT_KEY,
+        environment=ADYEN_ENVIRONMENT,
+        session_id=session_id,
+        session_data=session_data,
+        redirect_result=redirect_result,
+    )
+
+
 @bp.route("/dropin/handleShopperRedirect", methods=["GET", "POST"])
 def handle_shopper_redirect() -> Response:
     """Handle the redirect back from the issuer ACS page.
@@ -180,7 +249,6 @@ def handle_shopper_redirect() -> Response:
             "status": "failure",
             "result_code": "Error",
             "adyen_response": None,
-            "integration_type": session.get("integration_type", "Unknown"),
         }
         return redirect(url_for("pages.result"))
     result_code = response.message.get("resultCode", "")
@@ -191,6 +259,5 @@ def handle_shopper_redirect() -> Response:
         "status": status,
         "result_code": result_code,
         "adyen_response": response.message if status == "success" else None,
-        "integration_type": session.get("integration_type", "Unknown"),
     }
     return redirect(url_for("pages.result"))

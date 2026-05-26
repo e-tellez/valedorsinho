@@ -1,8 +1,10 @@
+from dataclasses import asdict
+
 from flask import Blueprint, Response, request, render_template, session, redirect, url_for
 
-from checkout.config import CLIENT_KEY, ADYEN_ENVIRONMENT
-from checkout.helpers import COUNTRY_CURRENCY_MAP, require_session
+from checkout.helpers import COUNTRY_CURRENCY_MAP, build_checkout_context, require_session
 from checkout.integrations import register_integration, get_integrations
+from checkout.models import OrderFormContext, PaymentResult
 
 bp = Blueprint("pages", __name__)
 
@@ -43,16 +45,17 @@ def order() -> str | Response:
             amount_warning = "Amount is 0 \u2014 this will create a zero-value authorisation to tokenize the card."
 
         if errors or amount_warning:
-            return render_template(
-                "pages/order.html",
+            order_form_context = OrderFormContext(
                 form_action="/order",
                 is_guest=is_guest,
                 username=username,
                 amount=amount_raw,
                 country=country,
                 amount_warning=amount_warning,
-                **errors,
+                error=errors.get("error"),
+                amount_error=errors.get("amount_error"),
             )
+            return render_template("pages/order.html", **asdict(order_form_context))
 
         currency = COUNTRY_CURRENCY_MAP.get(country, "MXN")
         country_code = country
@@ -66,16 +69,14 @@ def order() -> str | Response:
 
     amount_stored = session.get("amount_minor_units")
     amount_display = "{:.2f}".format(amount_stored / 100) if amount_stored else "10.00"
-    return render_template(
-        "pages/order.html",
+    order_form_context = OrderFormContext(
         form_action="/order",
         is_guest=is_guest,
         username=session.get("shopper_reference", ""),
         amount=amount_display,
         country=session.get("country_code", "MX"),
-        error=None,
-        amount_error=None,
     )
+    return render_template("pages/order.html", **asdict(order_form_context))
 
 
 @bp.route("/implementations")
@@ -86,14 +87,10 @@ def select_integration() -> str | Response:
     Requires step 1 to have been completed (shopper_reference in session).
     """
 
-    amount_minor_units = session.get("amount_minor_units", 1000)
+    checkout_context = build_checkout_context()
     return render_template(
         "pages/implementation_index.html",
-        shopper_reference=session.get("shopper_reference", ""),
-        is_guest=session.get("is_guest", False),
-        amount=amount_minor_units / 100,
-        country_code=session.get("country_code", "MX"),
-        currency=session.get("currency", "MXN"),
+        **asdict(checkout_context),
         integrations=get_integrations(),
     )
 
@@ -110,18 +107,8 @@ def components_checkout() -> str | Response:
     """Card Component funnel – Step 3: render the Card Component."""
 
     session["integration_type"] = "Card Component"
-    amount_minor_units = session.get("amount_minor_units", 1000)
-    return render_template(
-        "pages/card_component.html",
-        client_key=CLIENT_KEY,
-        environment=ADYEN_ENVIRONMENT,
-        shopper_reference=session.get("shopper_reference", ""),
-        is_guest=session.get("is_guest", False),
-        amount_minor_units=amount_minor_units,
-        amount=amount_minor_units / 100,
-        country_code=session.get("country_code", "MX"),
-        currency=session.get("currency", "MXN"),
-    )
+    checkout_context = build_checkout_context()
+    return render_template("pages/card_component.html", **asdict(checkout_context))
 
 
 @bp.route("/dropin/checkout")
@@ -135,34 +122,54 @@ def dropin_checkout() -> str | Response:
     """Drop-in funnel – Step 3: render the Drop-in payment form."""
 
     session["integration_type"] = "Drop-in"
-    amount_minor_units = session.get("amount_minor_units", 1000)
-    return render_template(
-        "pages/dropin.html",
-        client_key=CLIENT_KEY,
-        environment=ADYEN_ENVIRONMENT,
-        shopper_reference=session.get("shopper_reference", ""),
-        is_guest=session.get("is_guest", False),
-        amount_minor_units=amount_minor_units,
-        amount=amount_minor_units / 100,
-        country_code=session.get("country_code", "MX"),
-        currency=session.get("currency", "MXN"),
-    )
+    checkout_context = build_checkout_context()
+    return render_template("pages/dropin.html", **asdict(checkout_context))
+
+
+@bp.route("/sessions/dropin/checkout")
+@register_integration(
+    name="Drop-in (Sessions)",
+    description="Pre-built UI powered by /sessions \u2014 Adyen handles the full payment flow.",
+    order=3,
+)
+@require_session
+def sessions_dropin_checkout() -> str | Response:
+    """Sessions Drop-in funnel \u2013 Step 3: render the Drop-in using /sessions."""
+
+    session["integration_type"] = "Drop-in (Sessions)"
+    checkout_context = build_checkout_context()
+    return render_template("pages/sessions_dropin.html", **asdict(checkout_context))
+
+
+@bp.route("/sessions/components/checkout")
+@register_integration(
+    name="Components (Sessions)",
+    description="Card fields only, powered by /sessions \u2014 you control the UI, Adyen handles the flow.",
+    note="(Only Card Component implemented for now)",
+    order=4,
+)
+@require_session
+def sessions_components_checkout() -> str | Response:
+    """Sessions Card Component funnel \u2013 Step 3: render the Card Component using /sessions."""
+
+    session["integration_type"] = "Card Component (Sessions)"
+    checkout_context = build_checkout_context()
+    return render_template("pages/sessions_card_component.html", **asdict(checkout_context))
 
 
 @bp.route("/result")
 def result() -> str | Response:
     """Render the payment result page and clear the session."""
-    payment_result = session.pop("payment_result", None)
-    if not payment_result:
+    raw_result = session.pop("payment_result", None)
+    if not raw_result:
         return redirect(url_for("pages.index"))
 
+    payment_result = PaymentResult(**raw_result)
     integration_type = session.get("integration_type", "Unknown")
     session.clear()
 
     return render_template(
         "pages/result.html",
-        result=payment_result["status"],
-        result_code=payment_result["result_code"],
-        adyen_response=payment_result["adyen_response"],
+        payment_result=payment_result,
         integration_type=integration_type,
     )

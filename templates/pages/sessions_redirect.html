@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Processing payment…</title>
+
+  <link
+    rel="stylesheet"
+    href="https://checkoutshopper-test.cdn.adyen.com/checkoutshopper/sdk/5.67.0/adyen.css"
+  />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/checkout.css') }}" />
+</head>
+<body>
+<div class="checkout-container">
+  <h1>Processing your payment…</h1>
+  <p class="step-subtitle">Please wait while we finalise your transaction.</p>
+
+  <!-- Hidden container for the Drop-in to mount into (needed by the SDK) -->
+  <div id="dropin-container" style="min-height:0;"></div>
+</div>
+
+<script src="https://checkoutshopper-test.cdn.adyen.com/checkoutshopper/sdk/5.67.0/adyen.js"></script>
+<script src="{{ url_for('static', filename='js/adyen_api.js') }}"></script>
+
+<script>
+  // Re-create the AdyenCheckout instance with the stored session so the SDK
+  // can finalise the payment after the 3DS redirect.
+  (async () => {
+    try {
+      const checkout = await AdyenCheckout({
+        clientKey: "{{ client_key }}",
+        environment: "{{ environment }}",
+        session: {
+          id: "{{ session_id }}",
+          sessionData: "{{ session_data }}",
+        },
+        locale: "en-US",
+
+        onPaymentCompleted: async (result, component) => {
+          console.info("Payment completed after redirect:", result);
+          await handleFinalResult(result.resultCode, result);
+        },
+
+        onError: (error, component) => {
+          console.error("Post-redirect error:", error.name, error.message);
+          handleFinalResult("Error", {});
+        },
+      });
+
+      // Mount a minimal Drop-in so the SDK processes the redirect result
+      checkout.create("dropin").mount("#dropin-container");
+
+    } catch (err) {
+      console.error("Failed to finalise payment after redirect:", err);
+      document.querySelector("h1").textContent = "Something went wrong";
+      document.querySelector(".step-subtitle").textContent =
+        "We could not complete your payment. Please try again.";
+    }
+  })();
+</script>
+</body>
+</html>

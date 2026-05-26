@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Checkout – Step 4 of 4</title>
+
+  <link
+    rel="stylesheet"
+    href="https://checkoutshopper-test.cdn.adyen.com/checkoutshopper/sdk/5.67.0/adyen.css"
+  />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/checkout.css') }}" />
+</head>
+<body>
+<div class="checkout-container">
+
+  <!-- Step indicator -->
+  <div class="step-indicator">
+    <span class="step">1</span>
+    <span class="step-line"></span>
+    <span class="step">2</span>
+    <span class="step-line"></span>
+    <span class="step">3</span>
+    <span class="step-line"></span>
+    <span class="step active">4</span>
+  </div>
+
+  <h1>Complete your order</h1>
+
+  <!-- Order summary – values locked in at step 1 -->
+  <div class="order-summary">
+    <strong>Order total:</strong> {{ currency }} {{ "%.2f"|format(amount) }}<br/>
+    <strong>Shopper:</strong> {{ shopper_reference or 'Guest' }}
+  </div>
+
+  <!-- Card Component mounts here -->
+  <div id="card-container"></div>
+
+  <!-- Pay button – submitted programmatically by the Card Component -->
+  <button id="pay-button" class="btn-primary" style="margin-top:16px;">Pay {{ currency }} {{ "%.2f"|format(amount) }}</button>
+
+  <a href="/implementations" class="btn-back">← Back</a>
+
+  <details class="response-details" style="margin-top:24px;">
+    <summary>/sessions request body</summary>
+    <pre id="session-request" class="response-json"></pre>
+  </details>
+
+  <details class="response-details" style="margin-top:8px;">
+    <summary>/sessions response</summary>
+    <pre id="session-response" class="response-json"></pre>
+  </details>
+
+</div>
+
+<script src="https://checkoutshopper-test.cdn.adyen.com/checkoutshopper/sdk/5.67.0/adyen.js"></script>
+
+<script>
+  const CHECKOUT_CONFIG = {
+    clientKey: "{{ client_key }}",
+    environment: "{{ environment }}",
+    shopperReference: "{{ shopper_reference }}",
+    amountMinorUnits: "{{ amount_minor_units }}",
+    countryCode: "{{ country_code }}",
+    currency: "{{ currency }}",
+    isGuest: {{ 'true' if is_guest else 'false' }},
+  };
+</script>
+
+<script src="{{ url_for('static', filename='js/adyen_api.js') }}"></script>
+<script src="{{ url_for('static', filename='js/sessions_card_component.js') }}"></script>
+</body>
+</html>

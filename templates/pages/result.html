@@ -12,8 +12,8 @@
       a) A native 3DS2 flow completes in-browser (JS redirect via handleFinalResult)
       b) The shopper is redirected back from an issuer ACS page (/api/handleShopperRedirect)
   -->
-  <div class="result-card {{ result }}">
-    {% if result == "success" %}
+  <div class="result-card {{ payment_result.status }}">
+    {% if payment_result.status == "success" %}
       <div class="icon">✅</div>
       <h1>Payment successful</h1>
     {% else %}
@@ -23,21 +23,21 @@
 
     <span class="integration-badge">{{ integration_type }}</span>
 
-    <p class="result-code-row">Raw acquirer response: <strong>{{ result_code }}</strong></p>
+    <p class="result-code-row">Raw acquirer response: <strong>{{ payment_result.result_code }}</strong></p>
 
-    {% if adyen_response %}
-      {% if adyen_response.pspReference %}
+    {% if payment_result.adyen_response %}
+      {% if payment_result.adyen_response.pspReference %}
         <!-- PSP reference is the unique Adyen transaction ID – highlighted prominently -->
         <div class="psp-block">
           <span class="psp-label">PSP Reference</span>
-          <span class="psp-value">{{ adyen_response.pspReference }}</span>
+          <span class="psp-value">{{ payment_result.adyen_response.pspReference }}</span>
         </div>
       {% endif %}
 
       <!-- Full Adyen response object for inspection / debugging -->
       <details class="response-details">
         <summary>Full Adyen response</summary>
-        <pre class="response-json">{{ adyen_response | tojson(indent=2) }}</pre>
+        <pre class="response-json">{{ payment_result.adyen_response | tojson(indent=2) }}</pre>
       </details>
     {% endif %}
 
