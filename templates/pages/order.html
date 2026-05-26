@@ -20,8 +20,8 @@
     <span class="step">4</span>
   </div>
 
-  <h1>Your order</h1>
-  <p class="step-subtitle">
+  <h1 style="text-align:center">Your order</h1>
+  <p class="step-subtitle" style="text-align:center">
     {% if is_guest %}Confirm your order details.{% else %}Enter your details to continue.{% endif %}
   </p>
 
@@ -46,7 +46,7 @@
     {% endif %}
 
     <div class="field-row">
-      <label>Country</label>
+      <label style="text-align:center">Country</label>
       <div class="country-selector">
         <label class="country-option">
           <input type="radio" name="country" value="MX" {% if country == 'MX' or not country %}checked{% endif %} />
@@ -64,7 +64,7 @@
     </div>
 
     <div class="field-row">
-      <label for="amount">Order total</label>
+      <label for="amount" style="text-align:center">Order total</label>
       <div class="amount-input-wrap">
         <span class="currency-symbol" id="currency-symbol">$</span>
         <input

@@ -40,6 +40,12 @@ def result_store() -> Response:
     final URL stays clean (/result with no query string).
     """
     body = request.get_json()
+
+    # Remove large transient keys that are no longer needed – this keeps the
+    # cookie-based session well under the 4 KB browser limit.
+    for key in ("payment_data", "adyen_session_id", "adyen_session_data", "order_ref"):
+        session.pop(key, None)
+
     # Save everything the result page needs into the session
     session["payment_result"] = {
         "status": body.get("status", "failure"),
@@ -189,6 +195,11 @@ def handle_shopper_redirect() -> Response:
             "adyen_response": None,
         }
         return redirect(url_for("pages.result"))
+
+    # Clean up large transient session keys to stay under the 4 KB cookie limit
+    for key in ("payment_data", "adyen_session_id", "adyen_session_data", "order_ref"):
+        session.pop(key, None)
+
     result_code = response.message.get("resultCode", "")
 
     # Store the result in the session so /result can render a clean URL

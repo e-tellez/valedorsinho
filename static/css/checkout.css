@@ -64,6 +64,7 @@
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  justify-content: center;
 }
 
 .country-option {
@@ -143,6 +144,9 @@
 .btn-primary {
   display: block;
   width: 100%;
+  max-width: 320px;
+  margin-left: auto;
+  margin-right: auto;
   height: 44px;
   background: #0070f3;
   color: #fff;
@@ -338,6 +342,9 @@ h1 {
   border-radius: 6px;
   overflow: hidden;
   background: #fff;
+  max-width: 320px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .amount-input-wrap:focus-within {
@@ -419,6 +426,50 @@ h1 {
   font-size: 0.78rem;
   color: #666;
   line-height: 1.4;
+}
+
+/* Title row – h1 + pills on the same line (step 4) */
+.checkout-title-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.checkout-title-row h1 {
+  margin-bottom: 0;
+}
+
+.checkout-title-row .checkout-pills {
+  margin-bottom: 0;
+}
+
+/* Integration / flow pills shown on step 4 */
+.checkout-pills {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.checkout-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  user-select: none;
+}
+
+.checkout-pill.pill-product {
+  background: #e8f0fe;
+  color: #1a5fcc;
+}
+
+.checkout-pill.pill-flow {
+  background: #f0faf0;
+  color: #1a7a2e;
 }
 
 /* Drop-in mounts here */
