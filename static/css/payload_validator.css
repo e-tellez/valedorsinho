@@ -3,7 +3,7 @@
 /* ------------------------------------------------------------------ */
 .validator-container {
   width: 100%;
-  max-width: 780px;
+  max-width: 900px;
 }
 
 .validator-subtitle {
@@ -32,16 +32,23 @@
 /* ------------------------------------------------------------------ */
 /* Editor                                                               */
 /* ------------------------------------------------------------------ */
+.editor-actions-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
 .editor-wrap {
   background: #1e1e1e;
   border-radius: 8px;
   padding: 4px;
-  margin-bottom: 16px;
+  flex: 1 1 0%;
 }
 
 #payload-input {
   width: 100%;
-  min-height: 220px;
+  min-height: 550px;
   background: #1e1e1e;
   color: #d4d4d4;
   border: none;
@@ -61,10 +68,11 @@
 /* ------------------------------------------------------------------ */
 /* Actions                                                              */
 /* ------------------------------------------------------------------ */
-.actions-row {
+.actions-column {
   display: flex;
-  gap: 12px;
-  margin-bottom: 20px;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 4px;
 }
 
 .btn-primary {

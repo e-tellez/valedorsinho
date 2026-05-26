@@ -15,21 +15,22 @@
   <h1>Payment Payload Validator</h1>
   <p class="validator-subtitle">Paste a <code>/payments</code> JSON payload and validate it against the Adyen OpenAPI spec.</p>
 
-  <!-- Input area -->
-  <div class="editor-wrap">
-    <textarea id="payload-input" spellcheck="false" placeholder='{
+  <!-- Input area + Actions side by side -->
+  <div class="editor-actions-row">
+    <div class="editor-wrap">
+      <textarea id="payload-input" spellcheck="false" placeholder='{
   "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
   "reference": "order-123",
   "amount": { "value": 1000, "currency": "EUR" },
   "paymentMethod": { "type": "scheme", "number": "..." },
   "returnUrl": "https://your-domain.com/redirect"
 }'></textarea>
-  </div>
+    </div>
 
-  <!-- Actions -->
-  <div class="actions-row">
-    <button id="btn-validate" class="btn-primary">Validate</button>
-    <button id="btn-export-csv" class="btn-secondary" disabled>Export CSV</button>
+    <div class="actions-column">
+      <button id="btn-validate" class="btn-primary">Validate</button>
+      <button id="btn-export-csv" class="btn-secondary" disabled>Export CSV</button>
+    </div>
   </div>
 
   <!-- Status banner -->
