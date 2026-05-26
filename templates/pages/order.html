@@ -29,16 +29,18 @@
     <input type="hidden" name="is_guest" value="{{ 'true' if is_guest else 'false' }}" />
     {% if not is_guest %}
     <div class="field-row">
-      <label for="username">Username</label>
-      <input
-        id="username"
-        name="username"
-        type="text"
-        placeholder="e.g. john_doe"
-        value="{{ username or '' }}"
-        autocomplete="username"
-        required
-      />
+      <label for="username" style="text-align:center">Username</label>
+      <div class="amount-input-wrap">
+        <input
+          id="username"
+          name="username"
+          type="text"
+          placeholder="e.g. john_doe"
+          value="{{ username or '' }}"
+          autocomplete="username"
+          required
+        />
+      </div>
       {% if error %}
         <span class="field-error">{{ error }}</span>
       {% endif %}
@@ -102,7 +104,7 @@
     <button type="submit" class="btn-primary">Continue</button>
   </form>
 
-  <a href="/" class="btn-back">← Back</a>
+  <a href="{{ url_for('pages.index') }}" class="btn-back">← Back</a>
 
 </div>
 </body>

@@ -362,7 +362,8 @@ h1 {
   user-select: none;
 }
 
-.amount-input-wrap input {
+.amount-input-wrap input,
+.amount-input-wrap input[type="text"] {
   border: none;
   outline: none;
   padding: 0 12px;
@@ -370,6 +371,11 @@ h1 {
   font-size: 1rem;
   width: 100%;
   background: transparent;
+}
+
+.amount-input-wrap input[type="text"]:focus {
+  border: none;
+  box-shadow: none;
 }
 
 /* Remove browser spinner arrows from number input */

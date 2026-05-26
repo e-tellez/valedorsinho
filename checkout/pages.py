@@ -22,7 +22,12 @@ def order() -> str | Response:
     GET  renders the order form.
     POST validates input, stores values in session, redirects to step 3.
     """
-    is_guest = request.args.get("flow") == "guest" or session.get("is_guest", False)
+    flow_param = request.args.get("flow")
+    if flow_param is not None:
+        is_guest = flow_param == "guest"
+        session["is_guest"] = is_guest
+    else:
+        is_guest = session.get("is_guest", False)
 
     if request.method == "POST":
         username = request.form.get("username", "").strip()
