@@ -6,7 +6,7 @@ from flask import Flask, render_template
 # before the Adyen client (initialised inside config) makes any requests.
 from checkout.config import FLASK_SECRET_KEY
 from checkout.pages import bp as pages_bp
-from checkout.api import bp as api_bp
+from checkout.advanced_api import bp as api_bp
 from checkout.sessions_api import bp as sessions_api_bp
 from homepage.pages import bp as homepage_bp
 from setup.pages import bp as setup_bp

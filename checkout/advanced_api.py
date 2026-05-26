@@ -1,11 +1,18 @@
+"""Advanced-flow API endpoints.
+
+The Advanced integration uses separate server calls for /paymentMethods,
+/payments, and /payments/details — giving full control over each step of
+the payment lifecycle.
+"""
+
 import logging
 
 from flask import Blueprint, Response, request, jsonify, session, redirect, url_for
 import Adyen
 
 from checkout.config import adyen_client, MERCHANT_ACCOUNT
-from checkout.helpers import generate_reference
-from checkout.models import (
+from checkout.checkout_helpers import generate_reference
+from checkout.adyen_models import (
     Amount,
     BillingAddress,
     PaymentDetailsRequest,

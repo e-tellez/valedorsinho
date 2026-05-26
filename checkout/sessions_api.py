@@ -11,8 +11,8 @@ from flask import Blueprint, Response, render_template, request, jsonify, sessio
 import Adyen
 
 from checkout.config import adyen_client, MERCHANT_ACCOUNT
-from checkout.helpers import generate_reference
-from checkout.models import Amount, SessionsRequest
+from checkout.checkout_helpers import generate_reference
+from checkout.adyen_models import Amount, SessionsRequest
 
 logger = logging.getLogger(__name__)
 
