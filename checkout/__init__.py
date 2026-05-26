@@ -7,6 +7,7 @@ from flask import Flask, render_template
 from checkout.config import FLASK_SECRET_KEY
 from checkout.pages import bp as pages_bp
 from checkout.api import bp as api_bp
+from checkout.sessions_api import bp as sessions_api_bp
 from homepage.pages import bp as homepage_bp
 from setup.pages import bp as setup_bp
 from payload_validator.pages import bp as validator_pages_bp
@@ -44,6 +45,7 @@ def create_app() -> Flask:
     app.register_blueprint(nfc_bp)
     app.register_blueprint(pages_bp)
     app.register_blueprint(api_bp)
+    app.register_blueprint(sessions_api_bp)
 
     @app.errorhandler(404)
     def page_not_found(e) -> tuple[str, int]:

@@ -33,7 +33,7 @@ def build_checkout_context():
     (Drop-in, Card Component, and their Sessions variants) needs.
     """
     from checkout.config import CLIENT_KEY, ADYEN_ENVIRONMENT
-    from checkout.models import CheckoutContext
+    from checkout.contexts import CheckoutContext
 
     amount_minor_units = session.get("amount_minor_units", 1000)
     return CheckoutContext(

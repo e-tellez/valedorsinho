@@ -4,7 +4,7 @@ from flask import Blueprint, Response, request, render_template, session, redire
 
 from checkout.helpers import COUNTRY_CURRENCY_MAP, build_checkout_context, require_session
 from checkout.integrations import register_integration, get_integrations
-from checkout.models import OrderFormContext, PaymentResult
+from checkout.contexts import OrderFormContext, PaymentResult
 
 bp = Blueprint("pages", __name__)
 
