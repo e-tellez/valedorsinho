@@ -8,7 +8,7 @@ the payment lifecycle.
 import json
 import logging
 
-from flask import Blueprint, Response, make_response, request, jsonify, session, redirect, url_for
+from flask import Blueprint, Response, request, jsonify, session, redirect, url_for, render_template
 import Adyen
 
 from checkout.config import adyen_client, MERCHANT_ACCOUNT
@@ -33,24 +33,15 @@ def _adyen_error_response(error: Adyen.AdyenError) -> tuple[Response, int]:
     return jsonify({"error": str(error), "type": type(error).__name__}), status_code
 
 
-def _set_adyen_result_cookie(response: Response, adyen_response: dict | None) -> None:
-    """Store the Adyen response in a separate cookie to stay within the 4 KB session limit."""
-    if adyen_response:
-        response.set_cookie(
-            "adyen_result",
-            json.dumps(adyen_response, separators=(",", ":")),
-            httponly=True,
-            samesite="Lax",
-            path="/result",
-        )
-
-
 @bp.route("/result/store", methods=["POST"])
 def result_store() -> Response:
     """Receive the payment outcome from the browser and store it in the session.
 
     The JS calls this endpoint instead of redirecting with query params, so the
     final URL stays clean (/result with no query string).
+
+    Only small metadata is stored here.  The full Adyen response is kept in
+    the browser's sessionStorage by the JS caller (no 4 KB cookie limit).
     """
     body = request.get_json()
 
@@ -59,16 +50,13 @@ def result_store() -> Response:
     for key in ("payment_data", "adyen_session_id", "adyen_session_data", "order_ref"):
         session.pop(key, None)
 
-    # Small metadata stays in the session cookie; the large Adyen response
-    # goes into a separate cookie to avoid the 4 KB limit.
     session["payment_result"] = {
         "status": body.get("status", "failure"),
         "result_code": body.get("resultCode", "Unknown"),
+        "psp_reference": body.get("pspReference"),
     }
 
-    response = make_response(jsonify({"redirect": url_for("pages.result")}))
-    _set_adyen_result_cookie(response, body.get("adyenResponse"))
-    return response
+    return jsonify({"redirect": url_for("pages.result")})
 
 
 @bp.route("/api/paymentMethods", methods=["GET"])
@@ -221,11 +209,14 @@ def handle_shopper_redirect() -> Response:
     session["payment_result"] = {
         "status": status,
         "result_code": result_code,
+        "psp_reference": response.message.get("pspReference"),
     }
 
-    redirect_response = redirect(url_for("pages.result"))
-    _set_adyen_result_cookie(
-        redirect_response,
-        response.message if status == "success" else None,
+    # Render a tiny intermediate page that stores the full Adyen response in
+    # sessionStorage (same mechanism the JS flow uses) and then navigates to
+    # the result page.
+    return render_template(
+        "pages/redirect_result.html",
+        adyen_response_json=json.dumps(response.message),
+        redirect_url=url_for("pages.result"),
     )
-    return redirect_response

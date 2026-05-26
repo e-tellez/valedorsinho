@@ -83,7 +83,16 @@ async function handleFinalResult(resultCode, response) {
     ? "success"
     : "failure";
 
-  // POST the outcome to the server so it can be stored in the session.
+  // Store the full Adyen response client-side.  sessionStorage is per-tab,
+  // survives same-origin navigations, and has ~5 MB of space – unlike
+  // cookies which are limited to ~4 KB.
+  try {
+    sessionStorage.setItem("adyen_result", JSON.stringify(response));
+  } catch (e) {
+    console.warn("Could not store Adyen response in sessionStorage:", e);
+  }
+
+  // POST only the small metadata to the server (fits in the session cookie).
   // The server returns a redirect URL, keeping the browser URL clean (/result).
   const res = await fetch("/result/store", {
     method: "POST",
@@ -91,7 +100,7 @@ async function handleFinalResult(resultCode, response) {
     body: JSON.stringify({
       status,
       resultCode,
-      adyenResponse: status === "success" ? response : null,
+      pspReference: response?.pspReference || null,
     }),
   });
   const { redirect } = await res.json();

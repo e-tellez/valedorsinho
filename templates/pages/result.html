@@ -22,32 +22,49 @@
         <h1>Payment failed</h1>
       {% endif %}
 
-      <span class="integration-badge">{{ integration_type }}</span>
+      <div class="integration-badges">
+        <span class="integration-badge">{{ integration_type.split(' (')[0] }}</span>
+        <span class="integration-badge badge-flow">{{ 'Sessions' if 'Sessions' in integration_type else 'Advanced' }}</span>
+      </div>
 
-      <p class="result-code-row">Raw acquirer response: <strong>{{ payment_result.result_code }}</strong></p>
+      <p class="result-code-row">Raw acquirer response: <strong class="result-code-value {{ 'code-success' if payment_result.result_code in ('Authorised', 'Pending', 'Received') else 'code-failure' }}">{{ payment_result.result_code }}</strong></p>
 
-      {% if payment_result.adyen_response %}
-        {% if payment_result.adyen_response.pspReference %}
-          <!-- PSP reference is the unique Adyen transaction ID – highlighted prominently -->
-          <div class="psp-block">
-            <span class="psp-label">PSP Reference</span>
-            <span class="psp-value">{{ payment_result.adyen_response.pspReference }}</span>
-          </div>
-        {% endif %}
+      {% if payment_result.psp_reference %}
+        <!-- PSP reference is the unique Adyen transaction ID – highlighted prominently -->
+        <div class="psp-block">
+          <span class="psp-label">PSP Reference</span>
+          <span class="psp-value">{{ payment_result.psp_reference }}</span>
+        </div>
       {% endif %}
 
       <br/>
-      <a href="/">Try again</a>
+      <div class="result-actions">
+        <a href="/checkout" class="btn-result">Try again</a>
+        <a href="/" class="btn-result btn-secondary">Homepage</a>
+      </div>
     </div>
 
-    {% if payment_result.adyen_response %}
-    <div class="result-sidebar">
+    <!-- Sidebar populated client-side from sessionStorage (avoids 4 KB cookie limit) -->
+    <div class="result-sidebar" id="response-sidebar" style="display:none">
       <details class="response-details" open>
         <summary>Full Adyen response</summary>
-        <pre class="response-json">{{ payment_result.adyen_response | tojson(indent=2) }}</pre>
+        <pre class="response-json" id="response-json"></pre>
       </details>
     </div>
-    {% endif %}
   </div>
+
+  <script>
+    (function () {
+      var raw = sessionStorage.getItem("adyen_result");
+      if (!raw) return;
+      try {
+        var parsed = JSON.parse(raw);
+        document.getElementById("response-json").textContent =
+          JSON.stringify(parsed, null, 2);
+        document.getElementById("response-sidebar").style.display = "";
+      } catch (e) {}
+      sessionStorage.removeItem("adyen_result");
+    })();
+  </script>
 </body>
 </html>

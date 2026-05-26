@@ -55,6 +55,13 @@ h1 { font-size: 1.5rem; margin-bottom: 8px; }
   margin-bottom: 8px;
 }
 
+.integration-badges {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
 .integration-badge {
   display: inline-block;
   background: #e8f0fe;
@@ -65,20 +72,42 @@ h1 { font-size: 1.5rem; margin-bottom: 8px; }
   font-size: 0.78rem;
   font-weight: 600;
   letter-spacing: .02em;
-  margin-bottom: 20px;
 }
 
-a {
+.badge-flow {
+  background: #f0faf4;
+  color: #1a7f37;
+  border-color: #a8e6c1;
+}
+
+.result-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.btn-result {
   display: inline-block;
-  background: #0070f3;
-  color: #fff;
   text-decoration: none;
   padding: 10px 24px;
   border-radius: 6px;
   font-size: 0.95rem;
+  font-weight: 600;
+  background: #0070f3;
+  color: #fff;
 }
 
-a:hover { background: #005fd4; }
+.btn-result:hover { background: #005fd4; }
+
+.btn-result.btn-secondary {
+  background: #fff;
+  color: #333;
+  border: 1px solid #d0d0d0;
+}
+
+.btn-result.btn-secondary:hover {
+  background: #f5f5f5;
+}
 
 .success h1 { color: #1a7f37; }
 .failure h1 { color: #cf222e; }
@@ -88,6 +117,9 @@ a:hover { background: #005fd4; }
   color: #555;
   margin: 8px 0 0;
 }
+
+.result-code-value.code-success { color: #1a7f37; }
+.result-code-value.code-failure { color: #cf222e; }
 
 /* PSP Reference – highlighted block */
 .psp-block {

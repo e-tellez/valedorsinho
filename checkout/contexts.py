@@ -45,4 +45,5 @@ class PaymentResult:
 
     status: str
     result_code: str
+    psp_reference: str | None = None
     adyen_response: dict[str, Any] | None = None
