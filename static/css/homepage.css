@@ -78,13 +78,14 @@ body {
 }
 
 .column-heading {
-  font-size: 0.85rem;
+  font-size: 1.05rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: #888;
   padding-bottom: 4px;
   border-bottom: 2px solid #e5e5e5;
+  text-align: center;
 }
 
 /* ------------------------------------------------------------------ */

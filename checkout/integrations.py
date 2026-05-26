@@ -17,6 +17,7 @@ def register_integration(
     description: str,
     note: str | None = None,
     order: int = 100,
+    category: str = "Advanced",
 ) -> Callable[[F], F]:
     """Decorator that registers a Flask view function as a selectable integration.
 
@@ -30,6 +31,8 @@ def register_integration(
         Extra note rendered above the description (e.g. a WIP warning).
     order : int
         Controls display order — lower numbers appear first.
+    category : str
+        Column heading on the integration-selection page (e.g. "Advanced", "Sessions").
     """
     def decorator(func: F) -> F:
         _REGISTRY.append({
@@ -38,6 +41,7 @@ def register_integration(
             "note": note,
             "endpoint": func.__name__,
             "order": order,
+            "category": category,
         })
         return func
     return decorator
@@ -46,3 +50,12 @@ def register_integration(
 def get_integrations() -> list[dict[str, Any]]:
     """Return registered integrations sorted by ``order``."""
     return sorted(_REGISTRY, key=lambda i: i["order"])
+
+
+def get_integration_categories() -> list[dict[str, Any]]:
+    """Return integrations grouped by category, preserving order within each group."""
+    from collections import OrderedDict
+    groups: OrderedDict[str, list[dict[str, Any]]] = OrderedDict()
+    for integration in get_integrations():
+        groups.setdefault(integration["category"], []).append(integration)
+    return [{"name": cat, "integrations": items} for cat, items in groups.items()]

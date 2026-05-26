@@ -20,8 +20,8 @@
     <span class="step">4</span>
   </div>
 
-  <h1>Integration type</h1>
-  <p class="step-subtitle">Choose how you'd like to pay.</p>
+  <h1 style="text-align:center">Integration type</h1>
+  <p class="step-subtitle" style="text-align:center">Choose how you'd like to pay.</p>
 
   <!-- Order summary from step 1 -->
   <div class="order-summary">
@@ -30,22 +30,29 @@
     <strong>Country:</strong> {{ country_code }}
   </div>
 
-  <ul class="integration-list">
-    {% for integration in integrations %}
-    <li class="integration-card">
-      <a href="{{ url_for('pages.' + integration.endpoint) }}" class="integration-link">
-        <div class="integration-info">
-          <span class="integration-name">{{ integration.name }}</span>
-          <span class="integration-desc">
-            {% if integration.note %}<p>{{ integration.note }}</p>{% endif %}
-            {{ integration.description }}
-          </span>
-        </div>
-        <span class="integration-arrow">›</span>
-      </a>
-    </li>
+  <div class="integration-columns">
+    {% for category in categories %}
+    <div class="integration-column">
+      <h2 class="integration-column-title">{{ category.name }}</h2>
+      <ul class="integration-list">
+        {% for integration in category.integrations %}
+        <li class="integration-card">
+          <a href="{{ url_for('pages.' + integration.endpoint) }}" class="integration-link">
+            <div class="integration-info">
+              <span class="integration-name">{{ integration.name }}</span>
+              <span class="integration-desc">
+                {% if integration.note %}<p>{{ integration.note }}</p>{% endif %}
+                {{ integration.description }}
+              </span>
+            </div>
+            <span class="integration-arrow">›</span>
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
     {% endfor %}
-  </ul>
+  </div>
 
   <a href="/order" class="btn-back">← Back</a>
 

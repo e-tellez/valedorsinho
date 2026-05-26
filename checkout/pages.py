@@ -3,7 +3,7 @@ from dataclasses import asdict
 from flask import Blueprint, Response, request, render_template, session, redirect, url_for
 
 from checkout.checkout_helpers import COUNTRY_CURRENCY_MAP, build_checkout_context, require_session
-from checkout.integrations import register_integration, get_integrations
+from checkout.integrations import register_integration, get_integrations, get_integration_categories
 from checkout.contexts import OrderFormContext, PaymentResult
 
 bp = Blueprint("pages", __name__)
@@ -92,6 +92,7 @@ def select_integration() -> str | Response:
         "pages/implementation_index.html",
         **asdict(checkout_context),
         integrations=get_integrations(),
+        categories=get_integration_categories(),
     )
 
 
@@ -128,9 +129,10 @@ def dropin_checkout() -> str | Response:
 
 @bp.route("/sessions/dropin/checkout")
 @register_integration(
-    name="Drop-in (Sessions)",
+    name="Drop-in",
     description="Pre-built UI powered by /sessions \u2014 Adyen handles the full payment flow.",
     order=3,
+    category="Sessions",
 )
 @require_session
 def sessions_dropin_checkout() -> str | Response:
@@ -143,10 +145,11 @@ def sessions_dropin_checkout() -> str | Response:
 
 @bp.route("/sessions/components/checkout")
 @register_integration(
-    name="Components (Sessions)",
+    name="Components",
     description="Card fields only, powered by /sessions \u2014 you control the UI, Adyen handles the flow.",
     note="(Only Card Component implemented for now)",
     order=4,
+    category="Sessions",
 )
 @require_session
 def sessions_components_checkout() -> str | Response:
