@@ -14,19 +14,69 @@
   </header>
 
   <section class="card-row">
-    <div class="dash-card card-full card-disabled">
+
+    <a href="{{ url_for('terminal_payments.make_payment') }}" class="dash-card">
       <div class="card-icon icon-green">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-          <line x1="8" y1="21" x2="16" y2="21"/>
-          <line x1="12" y1="17" x2="12" y2="21"/>
+          <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+          <line x1="1" y1="10" x2="23" y2="10"/>
         </svg>
       </div>
       <div class="card-body">
-        <span class="card-title">Under Construction</span>
-        <span class="card-desc">Terminal payment functionality is coming soon.</span>
+        <span class="card-title">Make a Payment</span>
+        <span class="card-desc">Send a payment request to a terminal.</span>
+        <span class="card-badge badge-soon">Placeholder</span>
       </div>
-    </div>
+      <span class="card-arrow">&rsaquo;</span>
+    </a>
+
+    <a href="{{ url_for('terminal_payments.nfc_flow') }}" class="dash-card">
+      <div class="card-icon icon-green">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 18.7V21a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-2.3"/>
+          <path d="M12 12a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+          <path d="M12 15c-4 0-6-2-6-5V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7c0 3-2 5-6 5z"/>
+        </svg>
+      </div>
+      <div class="card-body">
+        <span class="card-title">NFC Flow</span>
+        <span class="card-desc">Identify, read, and write NFC tags on terminal.</span>
+        <span class="card-badge badge-soon">Placeholder</span>
+      </div>
+      <span class="card-arrow">&rsaquo;</span>
+    </a>
+
+    <a href="{{ url_for('terminal_payments.card_acquisition') }}" class="dash-card">
+      <div class="card-icon icon-green">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="5" width="20" height="14" rx="2"/>
+          <path d="M12 9v6"/>
+          <path d="M9 12h6"/>
+        </svg>
+      </div>
+      <div class="card-body">
+        <span class="card-title">Card Acquisition</span>
+        <span class="card-desc">Acquire card details without charging.</span>
+        <span class="card-badge badge-soon">Placeholder</span>
+      </div>
+      <span class="card-arrow">&rsaquo;</span>
+    </a>
+
+    <a href="{{ url_for('terminal_payments.auth_capt') }}" class="dash-card">
+      <div class="card-icon icon-green">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <path d="M9 12l2 2 4-4"/>
+        </svg>
+      </div>
+      <div class="card-body">
+        <span class="card-title">Auth – Capt</span>
+        <span class="card-desc">Pre-authorize then capture in separate steps.</span>
+        <span class="card-badge badge-soon">Placeholder</span>
+      </div>
+      <span class="card-arrow">&rsaquo;</span>
+    </a>
+
   </section>
 
   <a href="{{ url_for('homepage.dashboard') }}" style="display:inline-block;margin-top:16px;color:#0070f3;text-decoration:none;font-size:0.9rem;">&larr; Back to Dashboard</a>

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Make a Payment – Terminal Payments – Valedorsinho</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/homepage.css') }}" />
+</head>
+<body>
+<div class="dashboard">
+  <header class="dash-header">
+    <h1>Make a Payment</h1>
+    <p class="dash-subtitle">Send a payment request to a terminal.</p>
+  </header>
+
+  <section class="card-row">
+    <div class="dash-card card-full card-disabled">
+      <div class="card-icon icon-green">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+          <line x1="1" y1="10" x2="23" y2="10"/>
+        </svg>
+      </div>
+      <div class="card-body">
+        <span class="card-title">Under Construction</span>
+        <span class="card-desc">The Make a Payment flow will be implemented here.</span>
+      </div>
+    </div>
+  </section>
+
+  <a href="{{ url_for('terminal_payments.index') }}" style="display:inline-block;margin-top:16px;color:#0070f3;text-decoration:none;font-size:0.9rem;">&larr; Back to Terminal Payments</a>
+</div>
+</body>
+</html>
