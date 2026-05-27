@@ -74,7 +74,7 @@ body {
 }
 
 .column-group .dash-card {
-  flex: 1;
+  flex: none;
 }
 
 .column-heading {
