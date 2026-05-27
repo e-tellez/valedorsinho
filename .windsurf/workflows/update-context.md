@@ -30,6 +30,7 @@ Run this workflow after making a commit or when the project structure has change
    - `payload_suggested/pages.py` — suggested payload routes
    - `nfc_formatter/pages.py` — NFC formatter routes
    - `terminal_fleet/pages.py` and `terminal_fleet/api.py` — terminal fleet routes
+   - `terminal_payments/pages.py` and `terminal_payments/api.py` — terminal payments routes & Management API proxies
    - `requirements.txt` — dependencies
    - Any **new** Python modules or blueprint files
 
