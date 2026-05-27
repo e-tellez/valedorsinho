@@ -17,6 +17,7 @@ from nfc_formatter.pages import bp as nfc_bp
 from terminal_fleet.pages import bp as terminal_fleet_bp
 from terminal_fleet.api import bp as terminal_fleet_api_bp
 from terminal_payments.pages import bp as terminal_payments_bp
+from terminal_payments.api import bp as terminal_payments_api_bp
 
 
 def create_app() -> Flask:
@@ -47,6 +48,7 @@ def create_app() -> Flask:
     app.register_blueprint(suggested_bp)
     app.register_blueprint(nfc_bp)
     app.register_blueprint(terminal_payments_bp)
+    app.register_blueprint(terminal_payments_api_bp)
     app.register_blueprint(terminal_fleet_bp)
     app.register_blueprint(terminal_fleet_api_bp)
     app.register_blueprint(pages_bp)

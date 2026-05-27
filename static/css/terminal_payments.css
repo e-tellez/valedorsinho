@@ -1,0 +1,150 @@
+/* ------------------------------------------------------------------ */
+/* Terminal Payments – selector panel & flow gating                      */
+/* ------------------------------------------------------------------ */
+
+/* Status banner */
+.tp-status {
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  margin-bottom: 16px;
+}
+
+.tp-status.hidden { display: none; }
+
+.tp-status-error {
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  color: #b91c1c;
+}
+
+.tp-status-info {
+  background: #eff6ff;
+  border: 1px solid #93c5fd;
+  color: #1d4ed8;
+}
+
+/* ------------------------------------------------------------------ */
+/* Selector panel                                                        */
+/* ------------------------------------------------------------------ */
+.terminal-selector {
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.selector-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.selector-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.selector-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.selector-field label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.selector-field select {
+  padding: 10px 12px;
+  border: 1px solid #d5d5d5;
+  border-radius: 6px;
+  font-size: 0.88rem;
+  font-family: inherit;
+  background: #fff;
+  color: #1a1a1a;
+  cursor: pointer;
+  appearance: auto;
+}
+
+.selector-field select:focus {
+  outline: none;
+  border-color: #0070f3;
+  box-shadow: 0 0 0 3px rgba(0, 112, 243, .1);
+}
+
+.selector-field select:disabled {
+  background: #f8f8f8;
+  color: #999;
+  cursor: default;
+}
+
+.field-static {
+  padding: 10px 12px;
+  background: #f8f8f8;
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  font-size: 0.88rem;
+  color: #1a1a1a;
+}
+
+/* ------------------------------------------------------------------ */
+/* Selected terminal confirmation                                        */
+/* ------------------------------------------------------------------ */
+.selected-info {
+  margin-top: 16px;
+  padding: 10px 16px;
+  background: #e6f7ed;
+  border: 1px solid #b8e6c8;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: #1a8a4a;
+  font-weight: 600;
+}
+
+.selected-info.hidden { display: none; }
+
+/* ------------------------------------------------------------------ */
+/* Flows section – gated by terminal selection                           */
+/* ------------------------------------------------------------------ */
+.flows-section {
+  margin-bottom: 8px;
+}
+
+.flows-disabled .dash-card {
+  opacity: 0.4;
+  pointer-events: none;
+  cursor: default;
+}
+
+.flows-disabled .dash-card:hover {
+  border-color: #e5e5e5;
+  box-shadow: none;
+  background: #fff;
+}
+
+.flows-hint {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #999;
+  margin-bottom: 12px;
+  font-style: italic;
+}
+
+.flows-hint.hidden { display: none; }
+
+/* ------------------------------------------------------------------ */
+/* Responsive                                                            */
+/* ------------------------------------------------------------------ */
+@media (max-width: 640px) {
+  .selector-grid { grid-template-columns: 1fr; }
+}
