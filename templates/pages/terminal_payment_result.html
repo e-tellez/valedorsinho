@@ -25,6 +25,19 @@
     </div>
   </div>
 
+  <!-- Decoded Additional Response -->
+  {% if decoded_additional_response %}
+  <div class="mp-preview-card" style="margin-top:20px;">
+    <div class="mp-preview-header">
+      <span class="mp-preview-title">Decoded Additional Response</span>
+      <span style="font-size:0.68rem;color:#888;font-style:italic;">Base64-decoded per nexo EPAS standard</span>
+    </div>
+    <div class="mp-preview-body">
+      <pre>{{ decoded_additional_response | tojson(indent=2) | safe }}</pre>
+    </div>
+  </div>
+  {% endif %}
+
   <!-- Response JSON -->
   <div class="mp-preview-card" style="margin-top:20px;">
     <div class="mp-preview-header">

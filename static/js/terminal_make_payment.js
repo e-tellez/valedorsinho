@@ -318,8 +318,8 @@
         var stores = data.data || data.stores || [];
         stores.forEach(function (store) {
           var option = document.createElement("option");
-          option.value = store.id || "";
-          option.textContent = (store.id || "") + (store.description ? " – " + store.description : "");
+          option.value = store.reference || "";
+          option.textContent = (store.reference || "") + (store.description ? " – " + store.description : "");
           storeInput.appendChild(option);
         });
       })
