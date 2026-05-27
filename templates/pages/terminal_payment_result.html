@@ -14,6 +14,11 @@
     <p class="dash-subtitle">Terminal API response for your payment request.</p>
   </header>
 
+  <div style="display:flex;gap:12px;margin-bottom:20px;">
+    <a href="{{ back_url }}" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;font-size:0.82rem;font-weight:600;color:#fff;background:#0070f3;border-radius:8px;text-decoration:none;transition:background .15s;">&larr; Make Another Payment</a>
+    <a href="{{ url_for('terminal_payments.index') }}" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;font-size:0.82rem;font-weight:600;color:#333;background:#f0f0f0;border:1px solid #d5d5d5;border-radius:8px;text-decoration:none;transition:background .15s;">&larr; Back to Terminal Payments</a>
+  </div>
+
   <!-- Status banner + summary (centered, single card) -->
   <div style="max-width:700px;margin:0 auto;border:1px solid {{ '#b8e6c8' if success else '#fca5a5' }};border-radius:10px;overflow:hidden;">
     <div class="mp-result-banner {{ 'mp-result-success' if success else 'mp-result-failure' }}" style="justify-content:center;text-align:center;border-radius:0;">
@@ -64,11 +69,6 @@
       </div>
     </div>
     {% endif %}
-  </div>
-
-  <div style="display:flex;gap:16px;margin-top:20px;">
-    <a href="{{ back_url }}" style="color:#0070f3;text-decoration:none;font-size:0.9rem;">&larr; Make Another Payment</a>
-    <a href="{{ url_for('terminal_payments.index') }}" style="color:#0070f3;text-decoration:none;font-size:0.9rem;">&larr; Back to Terminal Payments</a>
   </div>
 </div>
 
