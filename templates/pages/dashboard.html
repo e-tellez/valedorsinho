@@ -93,8 +93,8 @@
     <div class="column-group">
       <h2 class="column-heading">Unified Commerce</h2>
 
-      <div class="dash-card card-disabled">
-        <div class="card-icon icon-gray">
+      <a href="{{ url_for('terminal_fleet.index') }}" class="dash-card">
+        <div class="card-icon icon-green">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
             <path d="M16 3h-8l-2 4h12l-2-4z"/>
@@ -105,7 +105,8 @@
           <span class="card-desc">Manage and monitor your terminal fleet.</span>
           <span class="card-badge badge-soon">Coming soon</span>
         </div>
-      </div>
+        <span class="card-arrow">&rsaquo;</span>
+      </a>
 
       <a href="{{ url_for('nfc_formatter.index') }}" class="dash-card">
         <div class="card-icon icon-green">
