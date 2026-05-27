@@ -1,4 +1,4 @@
-from dataclasses import asdict
+from dataclasses import asdict, replace
 
 from flask import Blueprint, Response, request, render_template, session, redirect, url_for
 
@@ -163,6 +163,26 @@ def sessions_components_checkout() -> str | Response:
     session["integration_type"] = "Card Component (Sessions)"
     checkout_context = build_checkout_context()
     return render_template("pages/sessions_card_component.html", **asdict(checkout_context))
+
+
+@bp.route("/manage-payments")
+@require_session
+def manage_payments() -> str | Response:
+    """Manage stored payment methods – view, delete, or add new cards.
+
+    Uses the Drop-in in zero-auth mode so adding a new card tokenises it
+    without charging the shopper.  This page is standalone and does not
+    appear under the Advanced or Sessions integration columns.
+    """
+    if session.get("is_guest", False):
+        return redirect(url_for("pages.select_integration"))
+
+    checkout_context = replace(
+        build_checkout_context(),
+        amount_minor_units=0,
+        amount=0.0,
+    )
+    return render_template("pages/manage_payments.html", **asdict(checkout_context))
 
 
 @bp.route("/result")

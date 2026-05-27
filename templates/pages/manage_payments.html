@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manage Payment Methods</title>
+
+  <link
+    rel="stylesheet"
+    href="https://checkoutshopper-test.cdn.adyen.com/checkoutshopper/sdk/5.67.0/adyen.css"
+  />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/checkout.css') }}" />
+</head>
+<body>
+<div class="checkout-page-layout manage-payments-page">
+  <div class="checkout-container">
+
+    <!-- Step indicator -->
+    <div class="step-indicator">
+      <span class="step">1</span>
+      <span class="step-line"></span>
+      <span class="step">2</span>
+      <span class="step-line"></span>
+      <span class="step active">3</span>
+      <span class="step-line"></span>
+      <span class="step">4</span>
+    </div>
+
+    <div class="checkout-title-row">
+      <h1>Manage payment methods</h1>
+    </div>
+
+    <p class="step-subtitle" style="text-align:center">
+      Remove stored cards or add a new one. Adding a card will perform a zero-auth verification.
+    </p>
+
+    <!-- Status banner for feedback messages -->
+    <div id="manage-status" class="manage-status" style="display:none"></div>
+
+    <!-- Stored cards – Drop-in with only stored payment methods visible -->
+    <h2 class="manage-section-title">Your saved cards</h2>
+    <div id="dropin-container"></div>
+    <p id="no-stored-cards" class="manage-empty" style="display:none">No saved cards yet.</p>
+
+    <!-- Add new card – Card Component (zero-auth), styled like a Drop-in panel -->
+    <div class="manage-card-wrapper" style="margin-top:24px">
+      <div class="manage-card-header" id="add-card-toggle">
+        <div class="manage-card-header-left">
+          <svg class="manage-card-header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+            <line x1="1" y1="10" x2="23" y2="10"/>
+          </svg>
+          <span>New card</span>
+        </div>
+      </div>
+      <div class="manage-card-body" id="add-card-body" style="display:none">
+        <div id="card-container"></div>
+        <button id="save-card-button" class="btn-primary" style="margin-top:16px;">Save card</button>
+      </div>
+    </div>
+
+    <a href="/implementations" class="btn-back">← Back</a>
+
+  </div>
+
+  <div class="api-sidebar">
+    <details class="response-details" open>
+      <summary>/paymentMethods request body</summary>
+      <pre id="pm-request" class="response-json"></pre>
+    </details>
+
+    <details class="response-details" open>
+      <summary>/paymentMethods response</summary>
+      <pre id="pm-response" class="response-json"></pre>
+    </details>
+  </div>
+</div>
+
+<script src="https://checkoutshopper-test.cdn.adyen.com/checkoutshopper/sdk/5.67.0/adyen.js"></script>
+
+<script>
+  const CHECKOUT_CONFIG = {
+    clientKey: "{{ client_key }}",
+    environment: "{{ environment }}",
+    shopperReference: "{{ shopper_reference }}",
+    amountMinorUnits: 0,
+    countryCode: "{{ country_code }}",
+    currency: "{{ currency }}",
+    isGuest: false,
+  };
+</script>
+
+<script src="{{ url_for('static', filename='js/adyen_api.js') }}"></script>
+<script src="{{ url_for('static', filename='js/manage_payments.js') }}"></script>
+<script>
+  document.getElementById("add-card-toggle").addEventListener("click", function () {
+    var body = document.getElementById("add-card-body");
+    body.style.display = body.style.display === "none" ? "block" : "none";
+  });
+</script>
+</body>
+</html>

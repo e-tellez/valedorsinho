@@ -111,7 +111,8 @@ def payments() -> Response:
         merchant_account=MERCHANT_ACCOUNT,
         reference=order_ref,
         amount=Amount(
-            value=session.get("amount_minor_units") or body.get("amountMinorUnits", 1000),
+            value=body.get("amountMinorUnits") if body.get("amountMinorUnits") is not None
+            else session.get("amount_minor_units", 1000),
             currency=session.get("currency", "MXN"),
         ),
         country_code=session.get("country_code", "MX"),
@@ -164,6 +165,35 @@ def payments_details() -> Response:
         )
     except Adyen.AdyenError as error:
         return _adyen_error_response(error)
+    return jsonify(response.message)
+
+
+@bp.route("/api/disable", methods=["POST"])
+def disable_stored_payment_method() -> Response:
+    """Remove a stored (tokenised) payment method.
+
+    The Drop-in calls this endpoint when the shopper clicks the remove button
+    on a stored card.  We forward the request to Adyen's Recurring API which
+    marks the token as disabled so it no longer appears in /paymentMethods.
+    """
+    body = request.get_json()
+    shopper_reference = session.get("shopper_reference", "")
+    stored_payment_method_id = body.get("storedPaymentMethodId")
+
+    if not shopper_reference or not stored_payment_method_id:
+        return jsonify({"error": "Missing shopperReference or storedPaymentMethodId"}), 400
+
+    disable_request = {
+        "merchantAccount": MERCHANT_ACCOUNT,
+        "shopperReference": shopper_reference,
+        "recurringDetailReference": stored_payment_method_id,
+    }
+
+    try:
+        response = adyen_client.recurring.disable(disable_request)
+    except Adyen.AdyenError as error:
+        return _adyen_error_response(error)
+
     return jsonify(response.message)
 
 
