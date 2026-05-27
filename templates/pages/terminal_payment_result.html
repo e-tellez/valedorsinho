@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/terminal_make_payment.css') }}" />
 </head>
 <body>
-<div class="dashboard" style="max-width:900px;">
+<div class="dashboard" style="max-width:{{ '1400px' if decoded_additional_response else '900px' }};">
   <header class="dash-header">
     <h1>Payment Result</h1>
     <p class="dash-subtitle">Terminal API response for your payment request.</p>
@@ -25,28 +25,33 @@
     </div>
   </div>
 
-  <!-- Decoded Additional Response -->
-  {% if decoded_additional_response %}
-  <div class="mp-preview-card" style="margin-top:20px;">
-    <div class="mp-preview-header">
-      <span class="mp-preview-title">Decoded Additional Response</span>
-      <span style="font-size:0.68rem;color:#888;font-style:italic;">Base64-decoded per nexo EPAS standard</span>
+  <!-- Two-column layout: Full Response (left) | Decoded Additional Response (right) -->
+  <div class="mp-layout" style="margin-top:20px;{{ '' if decoded_additional_response else 'grid-template-columns:1fr;' }}">
+    <!-- Full Response -->
+    <div class="mp-preview-card">
+      <div class="mp-preview-header">
+        <span class="mp-preview-title">Full Response</span>
+        <button type="button" id="mp-copy-btn" class="mp-copy-btn">Copy JSON</button>
+      </div>
+      <div class="mp-preview-body">
+        <pre id="mp-response-json">{{ response_json }}</pre>
+      </div>
     </div>
-    <div class="mp-preview-body">
-      <pre>{{ decoded_additional_response | tojson(indent=2) | safe }}</pre>
-    </div>
-  </div>
-  {% endif %}
 
-  <!-- Response JSON -->
-  <div class="mp-preview-card" style="margin-top:20px;">
-    <div class="mp-preview-header">
-      <span class="mp-preview-title">Full Response</span>
-      <button type="button" id="mp-copy-btn" class="mp-copy-btn">Copy JSON</button>
+    <!-- Decoded Additional Response -->
+    {% if decoded_additional_response %}
+    <div class="mp-preview-card">
+      <div class="mp-preview-header">
+        <span class="mp-preview-title">Decoded Additional Response</span>
+      </div>
+      <div class="mp-preview-sub" style="padding:0 16px 4px;">
+        <span class="mp-preview-sub-title">Base64-decoded per nexo EPAS standard</span>
+      </div>
+      <div class="mp-preview-body">
+        <pre>{{ decoded_additional_response | tojson(indent=2) | safe }}</pre>
+      </div>
     </div>
-    <div class="mp-preview-body">
-      <pre id="mp-response-json">{{ response_json }}</pre>
-    </div>
+    {% endif %}
   </div>
 
   <div style="display:flex;gap:16px;margin-top:20px;">
