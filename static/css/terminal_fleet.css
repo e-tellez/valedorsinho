@@ -103,7 +103,7 @@
 }
 
 .fleet-table th {
-  text-align: left;
+  text-align: center;
   padding: 12px 14px;
   font-weight: 700;
   color: #555;
@@ -133,11 +133,6 @@
   font-family: "SF Mono", "Fira Code", Menlo, monospace;
   font-size: 0.82rem;
   word-break: break-all;
-}
-
-.col-serial {
-  font-family: "SF Mono", "Fira Code", Menlo, monospace;
-  font-size: 0.82rem;
 }
 
 .col-date {

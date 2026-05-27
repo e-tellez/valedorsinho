@@ -118,12 +118,12 @@
   }
 
   function patchStoreNames() {
-    var cells = document.querySelectorAll("[data-store-id]");
+    var cells = document.querySelectorAll(".col-description[data-store-id]");
     cells.forEach(function (cell) {
       var storeId = cell.getAttribute("data-store-id");
       var store = storeCache[storeId];
       if (store) {
-        var name = store.shopperStatement || store.description || store.reference || storeId;
+        var name = store.description || store.shopperStatement || store.reference || storeId;
         cell.textContent = name;
         cell.title = storeId;
       }
@@ -162,10 +162,10 @@
         "</td>" +
         "<td class='col-id'>" + (terminalId || "—") + "</td>" +
         "<td>" + (terminal.model || "—") + "</td>" +
-        "<td class='col-serial'>" + (terminal.serialNumber || "—") + "</td>" +
         "<td>" + statusBadgeHTML(assignment.status) + "</td>" +
-        "<td data-store-id='" + (assignment.storeId || "") + "'>" +
-          (assignment.storeId || "—") +
+        "<td>" + (assignment.storeId || "—") + "</td>" +
+        "<td class='col-description' data-store-id='" + (assignment.storeId || "") + "'>" +
+          (assignment.storeId ? "…" : "—") +
         "</td>" +
         "<td>" + (assignment.merchantId || "—") + "</td>" +
         "<td class='col-date'>" + formatDate(terminal.lastActivityAt) + "</td>";
