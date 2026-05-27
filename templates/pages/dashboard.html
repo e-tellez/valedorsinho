@@ -15,7 +15,7 @@
     <p class="dash-subtitle">Adyen Unified Commerce Toolbox</p>
   </header>
 
-  <!-- Top row: Setup + Payload Validator -->
+  <!-- Top row: Setup -->
   <section class="card-row top-row">
 
     <a href="{{ url_for('setup.credentials') }}" class="dash-card card-setup">
@@ -28,20 +28,6 @@
       <div class="card-body">
         <span class="card-title">Set Up</span>
         <span class="card-desc">Configure Adyen credentials, merchant account and webhook settings.</span>
-      </div>
-      <span class="card-arrow">&rsaquo;</span>
-    </a>
-
-    <a href="{{ url_for('payload_validator.index') }}" class="dash-card card-validator">
-      <div class="card-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9 11l3 3L22 4"/>
-          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-        </svg>
-      </div>
-      <div class="card-body">
-        <span class="card-title">Payment Payload Validator</span>
-        <span class="card-desc">Validate /payments payloads against OpenAPI specs. Export errors as CSV.</span>
       </div>
       <span class="card-arrow">&rsaquo;</span>
     </a>
@@ -83,6 +69,21 @@
         <div class="card-body">
           <span class="card-title">Payload Suggested</span>
           <span class="card-desc">Recommended payloads per vertical.</span>
+          <span class="card-badge badge-wip">WIP</span>
+        </div>
+        <span class="card-arrow">&rsaquo;</span>
+      </a>
+
+      <a href="{{ url_for('payload_validator.index') }}" class="dash-card">
+        <div class="card-icon icon-blue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 11l3 3L22 4"/>
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+          </svg>
+        </div>
+        <div class="card-body">
+          <span class="card-title">Payload Validator</span>
+          <span class="card-desc">Validate payloads against Adyen OpenAPI specs.</span>
           <span class="card-badge badge-wip">WIP</span>
         </div>
         <span class="card-arrow">&rsaquo;</span>
