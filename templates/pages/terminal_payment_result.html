@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Payment Result – Terminal Payments – Valedorsinho</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/homepage.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/terminal_make_payment.css') }}" />
+</head>
+<body>
+<div class="dashboard" style="max-width:900px;">
+  <header class="dash-header">
+    <h1>Payment Result</h1>
+    <p class="dash-subtitle">Terminal API response for your payment request.</p>
+  </header>
+
+  <!-- Status banner -->
+  <div class="mp-result-banner {{ 'mp-result-success' if success else 'mp-result-failure' }}">
+    <span class="mp-result-icon">{{ '✓' if success else '✗' }}</span>
+    <div>
+      <div class="mp-result-status">{{ result_title }}</div>
+      {% if result_message %}
+      <div class="mp-result-message">{{ result_message }}</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Response JSON -->
+  <div class="mp-preview-card" style="margin-top:20px;">
+    <div class="mp-preview-header">
+      <span class="mp-preview-title">Full Response</span>
+      <button type="button" id="mp-copy-btn" class="mp-copy-btn">Copy JSON</button>
+    </div>
+    <div class="mp-preview-body">
+      <pre id="mp-response-json">{{ response_json }}</pre>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:16px;margin-top:20px;">
+    <a href="{{ back_url }}" style="color:#0070f3;text-decoration:none;font-size:0.9rem;">&larr; Make Another Payment</a>
+    <a href="{{ url_for('terminal_payments.index') }}" style="color:#0070f3;text-decoration:none;font-size:0.9rem;">&larr; Back to Terminal Payments</a>
+  </div>
+</div>
+
+<script>
+  document.getElementById("mp-copy-btn").addEventListener("click", function () {
+    var text = document.getElementById("mp-response-json").textContent;
+    navigator.clipboard.writeText(text).then(function () {
+      var btn = document.getElementById("mp-copy-btn");
+      var orig = btn.textContent;
+      btn.textContent = "Copied!";
+      setTimeout(function () { btn.textContent = orig; }, 1500);
+    });
+  });
+</script>
+</body>
+</html>

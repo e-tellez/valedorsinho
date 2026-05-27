@@ -5,30 +5,198 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Make a Payment – Terminal Payments – Valedorsinho</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/homepage.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/terminal_make_payment.css') }}" />
 </head>
 <body>
-<div class="dashboard">
+<div class="dashboard" style="max-width:1100px;">
   <header class="dash-header">
     <h1>Make a Payment</h1>
-    <p class="dash-subtitle">Send a payment request to a terminal.</p>
+    <p class="dash-subtitle">Configure and send a payment request to a terminal.</p>
   </header>
 
-  <section class="card-row">
-    <div class="dash-card card-full card-disabled">
-      <div class="card-icon icon-green">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
-          <line x1="1" y1="10" x2="23" y2="10"/>
-        </svg>
+  <!-- Terminal info bar -->
+  <div class="mp-terminal-bar">
+    <span class="bar-label">Terminal:</span>
+    <span class="bar-value" id="mp-terminal-id">—</span>
+    <span class="bar-label" style="margin-left:auto;">Merchant:</span>
+    <span class="bar-value" id="mp-merchant-id">—</span>
+  </div>
+
+  <div class="mp-layout">
+    <!-- ============================================================ -->
+    <!-- LEFT – Configuration form                                     -->
+    <!-- ============================================================ -->
+    <div class="mp-form-col">
+
+      <!-- Payment details -->
+      <div class="mp-section">
+        <h3 class="mp-section-title">Payment Details</h3>
+        <div class="mp-row">
+          <div class="mp-field">
+            <label for="mp-amount">Amount <span class="mp-required">*</span></label>
+            <input type="number" id="mp-amount" min="0" step="0.01" placeholder="0.00" value="10.00" />
+          </div>
+          <div class="mp-field">
+            <label for="mp-currency">Currency <span class="mp-required">*</span></label>
+            <select id="mp-currency">
+              <option value="EUR">EUR – Euro</option>
+              <option value="USD">USD – US Dollar</option>
+              <option value="GBP">GBP – British Pound</option>
+              <option value="MXN" selected>MXN – Mexican Peso</option>
+              <option value="BRL">BRL – Brazilian Real</option>
+              <option value="AUD">AUD – Australian Dollar</option>
+              <option value="CAD">CAD – Canadian Dollar</option>
+              <option value="CHF">CHF – Swiss Franc</option>
+              <option value="SEK">SEK – Swedish Krona</option>
+              <option value="NOK">NOK – Norwegian Krone</option>
+              <option value="DKK">DKK – Danish Krone</option>
+              <option value="PLN">PLN – Polish Zloty</option>
+              <option value="CZK">CZK – Czech Koruna</option>
+              <option value="HUF">HUF – Hungarian Forint</option>
+              <option value="SGD">SGD – Singapore Dollar</option>
+              <option value="HKD">HKD – Hong Kong Dollar</option>
+              <option value="NZD">NZD – New Zealand Dollar</option>
+              <option value="JPY">JPY – Japanese Yen</option>
+              <option value="ZAR">ZAR – South African Rand</option>
+              <option value="AED">AED – UAE Dirham</option>
+              <option value="SAR">SAR – Saudi Riyal</option>
+            </select>
+          </div>
+        </div>
       </div>
-      <div class="card-body">
-        <span class="card-title">Under Construction</span>
-        <span class="card-desc">The Make a Payment flow will be implemented here.</span>
+
+      <!-- Tender options -->
+      <div class="mp-section">
+        <h3 class="mp-section-title">Tender Options</h3>
+        <div class="mp-toggle-row">
+          <div>
+            <div class="mp-toggle-label">Ask Gratuity</div>
+            <div class="mp-toggle-hint">Prompt the shopper to add a tip on the terminal</div>
+          </div>
+          <label class="mp-switch">
+            <input type="checkbox" id="mp-ask-gratuity" />
+            <span class="mp-switch-slider"></span>
+          </label>
+        </div>
+        <div class="mp-toggle-row">
+          <div>
+            <div class="mp-toggle-label">Receipt Handler</div>
+            <div class="mp-toggle-hint">Terminal handles receipt printing instead of the POS</div>
+          </div>
+          <label class="mp-switch">
+            <input type="checkbox" id="mp-receipt-handler" />
+            <span class="mp-switch-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Force entry mode -->
+      <div class="mp-section">
+        <h3 class="mp-section-title">Force Entry Mode</h3>
+        <div class="mp-pill-group">
+          <label class="mp-pill">
+            <input type="radio" name="forceEntryMode" value="" checked />
+            <span>None</span>
+          </label>
+          <label class="mp-pill">
+            <input type="radio" name="forceEntryMode" value="Contactless" />
+            <span>Contactless</span>
+          </label>
+          <label class="mp-pill">
+            <input type="radio" name="forceEntryMode" value="ICC" />
+            <span>ICC</span>
+          </label>
+          <label class="mp-pill">
+            <input type="radio" name="forceEntryMode" value="MagStripe" />
+            <span>MagStripe</span>
+          </label>
+          <label class="mp-pill">
+            <input type="radio" name="forceEntryMode" value="Manual" />
+            <span>Manual</span>
+          </label>
+          <label class="mp-pill">
+            <input type="radio" name="forceEntryMode" value="RFID" />
+            <span>RFID</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- SaleToAcquirerData -->
+      <div class="mp-section">
+        <h3 class="mp-section-title">SaleToAcquirerData</h3>
+
+        <div class="mp-field">
+          <label for="mp-shopper-reference">Shopper Reference</label>
+          <input type="text" id="mp-shopper-reference" placeholder="e.g. shopper_123" />
+        </div>
+
+        <div class="mp-row">
+          <div class="mp-field">
+            <label for="mp-recurring-contract">Recurring Contract</label>
+            <select id="mp-recurring-contract">
+              <option value="">— None —</option>
+              <option value="ONECLICK">ONECLICK</option>
+              <option value="RECURRING">RECURRING</option>
+              <option value="PAYOUT">PAYOUT</option>
+            </select>
+          </div>
+          <div class="mp-field">
+            <label for="mp-authorisation-type">Authorisation Type</label>
+            <select id="mp-authorisation-type">
+              <option value="">— None —</option>
+              <option value="PreAuth">PreAuth</option>
+              <option value="FinalAuth">FinalAuth</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mp-field">
+          <label for="mp-shopper-email">Shopper Email</label>
+          <input type="email" id="mp-shopper-email" placeholder="e.g. shopper@example.com" />
+        </div>
+
+        <div class="mp-field">
+          <label for="mp-store">Store</label>
+          <select id="mp-store">
+            <option value="">— None —</option>
+          </select>
+        </div>
+
+        <!-- Metadata key-value pairs -->
+        <div class="mp-field">
+          <label>Metadata</label>
+          <div id="mp-metadata-list" class="mp-kv-list"></div>
+          <button type="button" id="mp-add-metadata" class="mp-kv-add">+ Add entry</button>
+        </div>
+      </div>
+
+      <!-- Send button -->
+      <button type="button" id="mp-send-btn" class="mp-send-btn" disabled>Send Payment Request</button>
+
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- RIGHT – Live payload preview                                  -->
+    <!-- ============================================================ -->
+    <div class="mp-preview-col">
+      <div class="mp-preview-card">
+        <div class="mp-preview-header">
+          <span class="mp-preview-title">Payload Preview</span>
+          <button type="button" id="mp-copy-btn" class="mp-copy-btn">Copy JSON</button>
+        </div>
+        <div class="mp-preview-body">
+          <pre id="mp-payload-json"></pre>
+          <div class="mp-preview-sub">
+            <div class="mp-preview-sub-title">Decoded SaleToAcquirerData</div>
+            <pre id="mp-acquirer-json"></pre>
+          </div>
+        </div>
       </div>
     </div>
-  </section>
+  </div>
 
-  <a href="{{ url_for('terminal_payments.index') }}" style="display:inline-block;margin-top:16px;color:#0070f3;text-decoration:none;font-size:0.9rem;">&larr; Back to Terminal Payments</a>
+  <a href="{{ url_for('terminal_payments.index') }}" style="display:inline-block;margin-top:20px;color:#0070f3;text-decoration:none;font-size:0.9rem;">&larr; Back to Terminal Payments</a>
 </div>
+<script src="{{ url_for('static', filename='js/terminal_make_payment.js') }}"></script>
 </body>
 </html>

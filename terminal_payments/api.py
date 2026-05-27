@@ -4,9 +4,12 @@ Proxies requests to the Adyen Management API for cascading terminal selection:
 Company Account → Merchant Account → Store → Terminal.
 """
 
+import json
 import logging
+import os
 
-from flask import Blueprint, Response, jsonify, request
+import requests as http_requests
+from flask import Blueprint, Response, jsonify, request, session
 import Adyen
 
 from checkout.config import adyen_client
@@ -103,3 +106,62 @@ def list_terminals() -> tuple[Response, int] | Response:
         return _adyen_error_response(error)
 
     return jsonify(response.message)
+
+
+TERMINAL_API_URLS = {
+    "test": "https://terminal-api-test.adyen.com/sync",
+    "live": "https://terminal-api-live.adyen.com/sync",
+}
+
+
+@bp.route("/api/make-payment", methods=["POST"])
+def make_payment() -> tuple[Response, int] | Response:
+    """Send a payment request to a terminal via the Adyen Terminal API (Cloud).
+
+    Expects the full SaleToPOIRequest JSON in the request body.
+    """
+    payment_request = request.get_json(silent=True)
+    if not payment_request:
+        return jsonify({"error": "Request body is required"}), 400
+
+    api_key = os.getenv("ADYEN_API_KEY", "")
+    environment = os.getenv("ADYEN_ENVIRONMENT", "test")
+    terminal_api_url = TERMINAL_API_URLS.get(environment, TERMINAL_API_URLS["test"])
+
+    try:
+        terminal_response = http_requests.post(
+            terminal_api_url,
+            json=payment_request,
+            headers={
+                "x-API-key": api_key,
+                "Content-Type": "application/json",
+            },
+            timeout=120,
+        )
+    except http_requests.RequestException as error:
+        logger.error("Terminal API request failed: %s", error)
+        return jsonify({"error": str(error), "type": "RequestException"}), 502
+
+    try:
+        response_body = terminal_response.json()
+    except ValueError:
+        return jsonify({
+            "error": "Invalid JSON in terminal response",
+            "raw": terminal_response.text[:500],
+        }), 502
+
+    if terminal_response.status_code >= 400:
+        return jsonify(response_body), terminal_response.status_code
+
+    return jsonify(response_body)
+
+
+@bp.route("/api/store-result", methods=["POST"])
+def store_result() -> tuple[Response, int] | Response:
+    """Store the terminal payment response in the session for the result page."""
+    result_data = request.get_json(silent=True)
+    if not result_data:
+        return jsonify({"error": "Request body is required"}), 400
+
+    session["terminal_payment_response"] = result_data
+    return jsonify({"ok": True})
