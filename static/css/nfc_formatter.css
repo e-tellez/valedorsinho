@@ -3,14 +3,13 @@
 /* ------------------------------------------------------------------ */
 .nfc-container {
   width: 100%;
-  max-width: 900px;
+  max-width: 960px;
 }
 
 .nfc-layout {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 24px;
-  align-items: start;
 }
 
 @media (max-width: 700px) {
@@ -137,6 +136,7 @@
   display: flex;
   gap: 12px;
   margin-bottom: 16px;
+  justify-content: center;
 }
 
 .btn-primary {
