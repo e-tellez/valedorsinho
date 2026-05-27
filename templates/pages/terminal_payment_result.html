@@ -14,15 +14,27 @@
     <p class="dash-subtitle">Terminal API response for your payment request.</p>
   </header>
 
-  <!-- Status banner -->
-  <div class="mp-result-banner {{ 'mp-result-success' if success else 'mp-result-failure' }}">
-    <span class="mp-result-icon">{{ '✓' if success else '✗' }}</span>
-    <div>
+  <!-- Status banner + summary (centered, single card) -->
+  <div style="max-width:700px;margin:0 auto;border:1px solid {{ '#b8e6c8' if success else '#fca5a5' }};border-radius:10px;overflow:hidden;">
+    <div class="mp-result-banner {{ 'mp-result-success' if success else 'mp-result-failure' }}" style="justify-content:center;text-align:center;border-radius:0;">
+      <span class="mp-result-icon">{{ '✓' if success else '✗' }}</span>
       <div class="mp-result-status">{{ result_title }}</div>
-      {% if result_message %}
-      <div class="mp-result-message">{{ result_message }}</div>
-      {% endif %}
     </div>
+
+    {% if result_message %}
+    <div style="text-align:center;font-size:0.82rem;color:#666;padding:8px 20px 0;">{{ result_message }}</div>
+    {% endif %}
+
+    {% if payment_summary %}
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px 20px;padding:16px 20px;">
+      {% for label, value in payment_summary %}
+      <div>
+        <div style="font-size:0.68rem;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.04em;">{{ label }}</div>
+        <div style="font-size:0.88rem;font-weight:600;color:#1a1a1a;margin-top:2px;">{{ value }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
   </div>
 
   <!-- Two-column layout: Full Response (left) | Decoded Additional Response (right) -->
