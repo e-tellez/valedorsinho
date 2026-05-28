@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Make a Payment – Terminal Payments – Valedorsinho</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/homepage.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/preview-card.css') }}" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/terminal_make_payment.css') }}" />
 </head>
 <body>
@@ -181,15 +182,15 @@
     <!-- RIGHT – Live payload preview                                  -->
     <!-- ============================================================ -->
     <div class="mp-preview-col">
-      <div class="mp-preview-card">
-        <div class="mp-preview-header">
-          <span class="mp-preview-title">Payload Preview</span>
-          <button type="button" id="mp-copy-btn" class="mp-copy-btn">Copy JSON</button>
+      <div class="preview-card">
+        <div class="preview-header">
+          <span class="preview-title">Payload Preview</span>
+          <button type="button" id="mp-copy-btn" class="preview-copy-btn">Copy JSON</button>
         </div>
-        <div class="mp-preview-body">
+        <div class="preview-body">
           <pre id="mp-payload-json"></pre>
-          <div class="mp-preview-sub">
-            <div class="mp-preview-sub-title">Decoded SaleToAcquirerData</div>
+          <div class="preview-sub">
+            <div class="preview-sub-title">Decoded SaleToAcquirerData</div>
             <pre id="mp-acquirer-json"></pre>
           </div>
         </div>

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Payment Result – Terminal Payments – Valedorsinho</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/homepage.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/preview-card.css') }}" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/terminal_make_payment.css') }}" />
 </head>
 <body>
@@ -45,26 +46,26 @@
   <!-- Two-column layout: Full Response (left) | Decoded Additional Response (right) -->
   <div class="mp-layout" style="margin-top:20px;{{ '' if decoded_additional_response else 'grid-template-columns:1fr;' }}">
     <!-- Full Response -->
-    <div class="mp-preview-card">
-      <div class="mp-preview-header">
-        <span class="mp-preview-title">Full Response</span>
-        <button type="button" id="mp-copy-btn" class="mp-copy-btn">Copy JSON</button>
+    <div class="preview-card">
+      <div class="preview-header">
+        <span class="preview-title">Full Response</span>
+        <button type="button" id="mp-copy-btn" class="preview-copy-btn">Copy JSON</button>
       </div>
-      <div class="mp-preview-body">
+      <div class="preview-body">
         <pre id="mp-response-json">{{ response_json }}</pre>
       </div>
     </div>
 
     <!-- Decoded Additional Response -->
     {% if decoded_additional_response %}
-    <div class="mp-preview-card">
-      <div class="mp-preview-header">
-        <span class="mp-preview-title">Decoded Additional Response</span>
+    <div class="preview-card">
+      <div class="preview-header">
+        <span class="preview-title">Decoded Additional Response</span>
       </div>
-      <div class="mp-preview-sub" style="padding:0 16px 4px;">
-        <span class="mp-preview-sub-title">Base64-decoded per nexo EPAS standard</span>
+      <div class="preview-sub" style="padding:0 16px 4px;">
+        <span class="preview-sub-title">Base64-decoded per nexo EPAS standard</span>
       </div>
-      <div class="mp-preview-body">
+      <div class="preview-body">
         <pre>{{ decoded_additional_response | tojson(indent=2) | safe }}</pre>
       </div>
     </div>
