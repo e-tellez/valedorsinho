@@ -18,6 +18,7 @@ from terminal_fleet.pages import bp as terminal_fleet_bp
 from terminal_fleet.api import bp as terminal_fleet_api_bp
 from terminal_payments.pages import bp as terminal_payments_bp
 from terminal_payments.api import bp as terminal_payments_api_bp
+from management_api.pages import bp as management_api_bp
 
 
 def create_app() -> Flask:
@@ -51,6 +52,7 @@ def create_app() -> Flask:
     app.register_blueprint(terminal_payments_api_bp)
     app.register_blueprint(terminal_fleet_bp)
     app.register_blueprint(terminal_fleet_api_bp)
+    app.register_blueprint(management_api_bp)
     app.register_blueprint(pages_bp)
     app.register_blueprint(api_bp)
     app.register_blueprint(sessions_api_bp)
