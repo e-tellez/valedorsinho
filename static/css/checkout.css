@@ -235,10 +235,6 @@
   overflow-y: auto;
 }
 
-.api-sidebar .response-details {
-  margin: 0;
-}
-
 .integration-list {
   list-style: none;
   display: flex;
