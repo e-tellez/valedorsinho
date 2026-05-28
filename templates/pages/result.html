@@ -46,24 +46,65 @@
 
     <!-- Sidebar populated client-side from sessionStorage (avoids 4 KB cookie limit) -->
     <div class="result-sidebar" id="response-sidebar" style="display:none">
-      <details class="response-details" open>
-        <summary>Full Adyen response</summary>
-        <pre class="response-json" id="response-json"></pre>
-      </details>
+      <div class="preview-card">
+        <div class="preview-header">
+          <span class="preview-title">Full Adyen response</span>
+          <button type="button" class="preview-copy-btn" data-target="response-json">Copy JSON</button>
+        </div>
+        <div class="preview-body">
+          <pre id="response-json"></pre>
+        </div>
+      </div>
     </div>
   </div>
 
   <script>
     (function () {
+      function syntaxHighlight(json) {
+        var str = JSON.stringify(json, null, 2);
+        str = str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        return str.replace(
+          /("(\\u[\da-fA-F]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?|\bnull\b)/g,
+          function (match) {
+            var cls = "json-number";
+            if (/^"/.test(match)) {
+              if (/:$/.test(match)) {
+                cls = "json-key";
+                match = match.replace(/:$/, "") + ":";
+              } else {
+                cls = "json-string";
+              }
+            } else if (/true|false/.test(match)) {
+              cls = "json-bool";
+            } else if (/null/.test(match)) {
+              cls = "json-null";
+            }
+            return '<span class="' + cls + '">' + match + "</span>";
+          }
+        );
+      }
+
       var raw = sessionStorage.getItem("adyen_result");
       if (!raw) return;
       try {
         var parsed = JSON.parse(raw);
-        document.getElementById("response-json").textContent =
-          JSON.stringify(parsed, null, 2);
+        document.getElementById("response-json").innerHTML = syntaxHighlight(parsed);
         document.getElementById("response-sidebar").style.display = "";
       } catch (e) {}
       sessionStorage.removeItem("adyen_result");
+
+      document.querySelectorAll(".preview-copy-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var targetId = btn.getAttribute("data-target");
+          var pre = document.getElementById(targetId);
+          if (!pre) return;
+          navigator.clipboard.writeText(pre.textContent).then(function () {
+            var orig = btn.textContent;
+            btn.textContent = "Copied!";
+            setTimeout(function () { btn.textContent = orig; }, 1500);
+          });
+        });
+      });
     })();
   </script>
 </body>

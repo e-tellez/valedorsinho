@@ -7,6 +7,51 @@
 // Flask template before this file is loaded.
 
 // -------------------------------------------------------------------------
+// JSON syntax highlighting (matches terminal_make_payment.js palette)
+// -------------------------------------------------------------------------
+function syntaxHighlight(json) {
+  var str = JSON.stringify(json, null, 2);
+  str = str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return str.replace(
+    /("(\\u[\da-fA-F]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?|\bnull\b)/g,
+    function (match) {
+      var cls = "json-number";
+      if (/^"/.test(match)) {
+        if (/:$/.test(match)) {
+          cls = "json-key";
+          match = match.replace(/:$/, "") + ":";
+        } else {
+          cls = "json-string";
+        }
+      } else if (/true|false/.test(match)) {
+        cls = "json-bool";
+      } else if (/null/.test(match)) {
+        cls = "json-null";
+      }
+      return '<span class="' + cls + '">' + match + "</span>";
+    }
+  );
+}
+
+// -------------------------------------------------------------------------
+// Generic copy-button handler for .preview-copy-btn elements
+// -------------------------------------------------------------------------
+function initPreviewCopyButtons() {
+  document.querySelectorAll(".preview-copy-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var targetId = btn.getAttribute("data-target");
+      var pre = document.getElementById(targetId);
+      if (!pre) return;
+      navigator.clipboard.writeText(pre.textContent).then(function () {
+        var orig = btn.textContent;
+        btn.textContent = "Copied!";
+        setTimeout(function () { btn.textContent = orig; }, 1500);
+      });
+    });
+  });
+}
+
+// -------------------------------------------------------------------------
 // Amount helper
 // -------------------------------------------------------------------------
 function getAmountMinorUnits() {

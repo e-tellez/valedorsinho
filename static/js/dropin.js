@@ -81,10 +81,11 @@
       })
       .mount("#dropin-container");
 
-    document.getElementById("pm-request").textContent =
-      JSON.stringify(pmRequestBody, null, 2);
-    document.getElementById("pm-response").textContent =
-      JSON.stringify(paymentMethodsResponse, null, 2);
+    document.getElementById("pm-request").innerHTML =
+      syntaxHighlight(pmRequestBody);
+    document.getElementById("pm-response").innerHTML =
+      syntaxHighlight(paymentMethodsResponse);
+    initPreviewCopyButtons();
 
   } catch (err) {
     console.error("Checkout initialisation failed:", err);

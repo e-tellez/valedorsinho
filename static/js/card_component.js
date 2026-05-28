@@ -74,10 +74,11 @@
       })
       .mount("#card-container");
 
-    document.getElementById("pm-request").textContent =
-      JSON.stringify(pmRequestBody, null, 2);
-    document.getElementById("pm-response").textContent =
-      JSON.stringify(paymentMethodsResponse, null, 2);
+    document.getElementById("pm-request").innerHTML =
+      syntaxHighlight(pmRequestBody);
+    document.getElementById("pm-response").innerHTML =
+      syntaxHighlight(paymentMethodsResponse);
+    initPreviewCopyButtons();
 
     // Wire the external pay button to submit the Card Component
     document.getElementById("pay-button").addEventListener("click", () => {

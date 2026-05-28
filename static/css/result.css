@@ -150,32 +150,68 @@ h1 { font-size: 1.5rem; margin-bottom: 8px; }
   word-break: break-all;
 }
 
-/* Full response collapsible */
-.response-details {
-  margin: 12px 0 16px;
-  text-align: left;
-  width: 100%;
+/* ------------------------------------------------------------------ */
+/* Dark preview card (mirrors terminal_make_payment.css)               */
+/* ------------------------------------------------------------------ */
+.preview-card {
+  background: #1e1e2e;
+  border-radius: 10px;
+  overflow: hidden;
 }
 
-.response-details summary {
-  cursor: pointer;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #0070f3;
-  user-select: none;
-  margin-bottom: 8px;
+.preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #282840;
 }
 
-.response-details summary:hover { text-decoration: underline; }
-
-.response-json {
-  background: #1e1e1e;
-  color: #d4d4d4;
-  border-radius: 6px;
-  padding: 14px;
+.preview-title {
   font-size: 0.78rem;
-  line-height: 1.5;
-  overflow-x: auto;
-  white-space: pre;
-  text-align: left;
+  font-weight: 700;
+  color: #ccc;
+  letter-spacing: 0.05em;
 }
+
+.preview-copy-btn {
+  padding: 4px 12px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.08);
+  color: #aaa;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all .15s;
+}
+
+.preview-copy-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+}
+
+.preview-body {
+  padding: 16px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.preview-body pre {
+  margin: 0;
+  font-family: "SF Mono", "Fira Code", "Cascadia Code", Menlo, Consolas, monospace;
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: #c9d1d9;
+  white-space: pre;
+  tab-size: 2;
+  word-break: break-all;
+  overflow-wrap: break-word;
+}
+
+/* JSON syntax colours */
+.json-key    { color: #7ec8e3; }
+.json-string { color: #a5d6a7; }
+.json-number { color: #ffcc80; }
+.json-bool   { color: #ce93d8; }
+.json-null   { color: #999; }

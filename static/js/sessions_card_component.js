@@ -51,10 +51,11 @@
       })
       .mount("#card-container");
 
-    document.getElementById("session-request").textContent =
-      JSON.stringify(requestBody, null, 2);
-    document.getElementById("session-response").textContent =
-      JSON.stringify(sessionResponse, null, 2);
+    document.getElementById("session-request").innerHTML =
+      syntaxHighlight(requestBody);
+    document.getElementById("session-response").innerHTML =
+      syntaxHighlight(sessionResponse);
+    initPreviewCopyButtons();
 
     // Wire the external pay button to submit the Card Component
     document.getElementById("pay-button").addEventListener("click", () => {
