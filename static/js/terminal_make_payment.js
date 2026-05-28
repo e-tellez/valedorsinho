@@ -279,17 +279,20 @@
         });
       })
       .then(function (res) {
-        /* Store response in session, then redirect to result page */
-        return fetch("/terminal-payments/api/store-result", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(res.body)
-        }).then(function () {
-          var resultUrl = "/terminal-payments/payment-result"
-            + "?terminalId=" + encodeURIComponent(terminalId)
-            + "&merchantAccount=" + encodeURIComponent(merchantAccount);
-          window.location.href = resultUrl;
-        });
+        /* POST response directly to the result page via hidden form */
+        var resultUrl = "/terminal-payments/payment-result"
+          + "?terminalId=" + encodeURIComponent(terminalId)
+          + "&merchantAccount=" + encodeURIComponent(merchantAccount);
+        var form = document.createElement("form");
+        form.method = "POST";
+        form.action = resultUrl;
+        var input = document.createElement("input");
+        input.type = "hidden";
+        input.name = "response_data";
+        input.value = JSON.stringify(res.body);
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
       })
       .catch(function (err) {
         sendBtn.disabled = false;

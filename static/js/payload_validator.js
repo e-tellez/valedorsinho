@@ -1,12 +1,45 @@
 (() => {
   const input       = document.getElementById("payload-input");
   const btnValidate = document.getElementById("btn-validate");
+  const btnClear    = document.getElementById("btn-clear");
   const btnExport   = document.getElementById("btn-export-csv");
   const banner      = document.getElementById("status-banner");
   const errorsSection = document.getElementById("errors-section");
   const errorsBody  = document.getElementById("errors-body");
 
+  const lineNumbers = document.getElementById("line-numbers");
+
   let lastErrors = [];
+
+  // -- Line numbers --------------------------------------------------- //
+
+  function updateLineNumbers() {
+    const lines = input.value.split("\n").length || 1;
+    const nums = [];
+    for (let i = 1; i <= lines; i++) nums.push(i);
+    lineNumbers.textContent = nums.join("\n");
+  }
+
+  input.addEventListener("input", updateLineNumbers);
+  input.addEventListener("keyup", updateLineNumbers);
+
+  input.addEventListener("scroll", () => {
+    lineNumbers.scrollTop = input.scrollTop;
+  });
+
+  updateLineNumbers();
+
+  // -- Clear ---------------------------------------------------------- //
+
+  btnClear.addEventListener("click", () => {
+    input.value = "";
+    banner.className = "status-banner hidden";
+    hideErrors();
+    btnExport.disabled = true;
+    lastErrors = [];
+    updateLineNumbers();
+    input.focus();
+  });
 
   // -- Validate --------------------------------------------------------- //
 

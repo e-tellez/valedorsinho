@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Payment Payload Validator – Valedorsinho</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/homepage.css') }}" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/payload_validator.css') }}" />
 </head>
 <body>
@@ -15,40 +14,43 @@
   <h1>Payment Payload Validator</h1>
   <p class="validator-subtitle">Paste a <code>/payments</code> JSON payload and validate it against the Adyen OpenAPI spec.</p>
 
-  <!-- Input area + Actions side by side -->
-  <div class="editor-actions-row">
-    <div class="editor-wrap">
-      <textarea id="payload-input" spellcheck="false" placeholder='{
+  <div class="validator-grid">
+    <!-- Left column: editor + actions -->
+    <div class="validator-left">
+      <div class="editor-wrap">
+        <div class="line-numbers" id="line-numbers">1</div>
+        <textarea id="payload-input" spellcheck="false" placeholder='{
   "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
   "reference": "order-123",
   "amount": { "value": 1000, "currency": "EUR" },
   "paymentMethod": { "type": "scheme", "number": "..." },
   "returnUrl": "https://your-domain.com/redirect"
 }'></textarea>
+      </div>
     </div>
 
-    <div class="actions-column">
-      <button id="btn-validate" class="btn-primary">Validate</button>
-      <button id="btn-export-csv" class="btn-secondary" disabled>Export CSV</button>
+    <!-- Right column: actions + status + validation results -->
+    <div class="validator-right">
+      <div class="actions-row">
+        <button id="btn-validate" class="btn-primary">Validate</button>
+        <button id="btn-clear" class="btn-secondary">Clear</button>
+        <button id="btn-export-csv" class="btn-secondary" disabled>Export CSV</button>
+      </div>
+      <div id="status-banner" class="status-banner hidden"></div>
+      <div id="errors-section" class="errors-section hidden">
+        <h2>Validation Errors</h2>
+        <table class="errors-table">
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Error</th>
+              <th>Rule</th>
+            </tr>
+          </thead>
+          <tbody id="errors-body"></tbody>
+        </table>
+      </div>
     </div>
-  </div>
-
-  <!-- Status banner -->
-  <div id="status-banner" class="status-banner hidden"></div>
-
-  <!-- Error table -->
-  <div id="errors-section" class="errors-section hidden">
-    <h2>Validation Errors</h2>
-    <table class="errors-table">
-      <thead>
-        <tr>
-          <th>Field</th>
-          <th>Error</th>
-          <th>Rule</th>
-        </tr>
-      </thead>
-      <tbody id="errors-body"></tbody>
-    </table>
   </div>
 
 </div>

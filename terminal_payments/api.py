@@ -4,12 +4,11 @@ Proxies requests to the Adyen Management API for cascading terminal selection:
 Company Account → Merchant Account → Store → Terminal.
 """
 
-import json
 import logging
 import os
 
 import requests as http_requests
-from flask import Blueprint, Response, jsonify, request, session
+from flask import Blueprint, Response, jsonify, request
 import Adyen
 
 from checkout.config import adyen_client
@@ -154,14 +153,3 @@ def make_payment() -> tuple[Response, int] | Response:
         return jsonify(response_body), terminal_response.status_code
 
     return jsonify(response_body)
-
-
-@bp.route("/api/store-result", methods=["POST"])
-def store_result() -> tuple[Response, int] | Response:
-    """Store the terminal payment response in the session for the result page."""
-    result_data = request.get_json(silent=True)
-    if not result_data:
-        return jsonify({"error": "Request body is required"}), 400
-
-    session["terminal_payment_response"] = result_data
-    return jsonify({"ok": True})

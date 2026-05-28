@@ -2,7 +2,7 @@ import base64
 import json
 from urllib.parse import parse_qs
 
-from flask import Blueprint, render_template, request, session, url_for
+from flask import Blueprint, render_template, request, url_for
 
 bp = Blueprint("terminal_payments", __name__, url_prefix="/terminal-payments")
 
@@ -162,15 +162,22 @@ def _extract_payment_summary(
     return summary
 
 
-@bp.route("/payment-result")
+@bp.route("/payment-result", methods=["GET", "POST"])
 def payment_result() -> str:
     """Render the terminal payment result page."""
     terminal_id = request.args.get("terminalId", "")
     merchant_account = request.args.get("merchantAccount", "")
 
-    response_data = session.pop("terminal_payment_response", None)
+    response_data = None
+    if request.method == "POST":
+        raw = request.form.get("response_data", "")
+        if raw:
+            try:
+                response_data = json.loads(raw)
+            except (json.JSONDecodeError, ValueError):
+                response_data = None
     if not response_data:
-        response_data = {"error": "No payment response found in session."}
+        response_data = {"error": "No payment response found."}
 
     # Determine success from the response
     success = False
