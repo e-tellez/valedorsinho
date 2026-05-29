@@ -135,7 +135,7 @@ def make_payment() -> tuple[Response, int] | Response:
                 "x-API-key": api_key,
                 "Content-Type": "application/json",
             },
-            timeout=120,
+            timeout=300,
         )
     except http_requests.RequestException as error:
         logger.error("Terminal API request failed: %s", error)
@@ -144,10 +144,23 @@ def make_payment() -> tuple[Response, int] | Response:
     try:
         response_body = terminal_response.json()
     except ValueError:
+        logger.error(
+            "Invalid JSON in terminal response (HTTP %s): %s",
+            terminal_response.status_code, terminal_response.text[:500],
+        )
         return jsonify({
             "error": "Invalid JSON in terminal response",
             "raw": terminal_response.text[:500],
         }), 502
+
+    # Log the response structure for debugging (keys only to avoid leaking data)
+    sal_resp = response_body.get("SaleToPOIResponse", {}) if isinstance(response_body, dict) else {}
+    logger.info(
+        "Terminal API response – HTTP %s, SaleToPOIResponse keys: %s, Result: %s",
+        terminal_response.status_code,
+        list(sal_resp.keys()) if sal_resp else "N/A",
+        sal_resp.get("PaymentResponse", {}).get("Response", {}).get("Result", "N/A"),
+    )
 
     if terminal_response.status_code >= 400:
         return jsonify(response_body), terminal_response.status_code

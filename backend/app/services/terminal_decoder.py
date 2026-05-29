@@ -1,46 +1,13 @@
+"""Terminal API AdditionalResponse decoder and payment summary extractor."""
+
+from __future__ import annotations
+
 import base64
 import json
-import logging
 from urllib.parse import parse_qs
 
-from flask import Blueprint, render_template, request, url_for
 
-logger = logging.getLogger(__name__)
-
-bp = Blueprint("terminal_payments", __name__, url_prefix="/terminal-payments")
-
-
-@bp.route("/")
-def index() -> str:
-    """Render the Terminal Payments page."""
-    return render_template("pages/terminal_payments.html")
-
-
-@bp.route("/make-payment")
-def make_payment() -> str:
-    """Render the Make a Payment placeholder."""
-    return render_template("pages/terminal_make_payment.html")
-
-
-@bp.route("/nfc")
-def nfc_flow() -> str:
-    """Render the NFC flow placeholder."""
-    return render_template("pages/terminal_nfc.html")
-
-
-@bp.route("/card-acquisition")
-def card_acquisition() -> str:
-    """Render the Card Acquisition flow placeholder."""
-    return render_template("pages/terminal_card_acquisition.html")
-
-
-@bp.route("/auth-capt")
-def auth_capt() -> str:
-    """Render the Auth-Capt flow placeholder."""
-    return render_template("pages/terminal_auth_capt.html")
-
-
-def _decode_additional_response(encoded_value: str) -> dict | str | None:
+def decode_additional_response(encoded_value: str) -> dict | str | None:
     """Decode an AdditionalResponse from the Terminal API.
 
     The value may be:
@@ -94,7 +61,7 @@ _SUMMARY_FIELDS = [
 ]
 
 
-def _extract_payment_summary(
+def extract_payment_summary(
     decoded: dict | str | None,
     poi_response: dict | None = None,
 ) -> list[tuple[str, str]]:
@@ -163,78 +130,3 @@ def _extract_payment_summary(
         if value:
             summary.append((label, value))
     return summary
-
-
-@bp.route("/payment-result", methods=["GET", "POST"])
-def payment_result() -> str:
-    """Render the terminal payment result page."""
-    terminal_id = request.args.get("terminalId", "")
-    merchant_account = request.args.get("merchantAccount", "")
-
-    response_data = None
-    if request.method == "POST":
-        raw = request.form.get("response_data", "")
-        if raw:
-            try:
-                response_data = json.loads(raw)
-            except (json.JSONDecodeError, ValueError):
-                response_data = None
-    if not response_data:
-        response_data = {"error": "No payment response found."}
-
-    # Determine success from the response
-    success = False
-    result_title = "Payment Failed"
-    result_message = ""
-    decoded_additional_response = None
-    payment_summary = []
-
-    logger.info(
-        "Payment result response keys: %s",
-        list(response_data.keys()) if isinstance(response_data, dict) else type(response_data).__name__,
-    )
-
-    sal_response = response_data.get("SaleToPOIResponse", {}) if isinstance(response_data, dict) else {}
-    poi_response = sal_response.get("PaymentResponse", {})
-
-    if poi_response:
-        response_block = poi_response.get("Response", {})
-        result_text = response_block.get("Result", "")
-        error_condition = response_block.get("ErrorCondition", "")
-        success = result_text == "Success"
-        result_title = "Payment Approved" if success else "Payment Declined"
-
-        if not success and error_condition:
-            result_message = f"ErrorCondition: {error_condition}"
-
-        logger.info(
-            "Payment Result=%s, ErrorCondition=%s, Success=%s",
-            result_text, error_condition, success,
-        )
-
-        additional = response_block.get("AdditionalResponse", "")
-
-        # Decode the Base64-encoded AdditionalResponse (nexo EPAS standard)
-        decoded_additional_response = _decode_additional_response(additional)
-        payment_summary = _extract_payment_summary(decoded_additional_response, poi_response)
-    elif "error" in response_data:
-        result_title = "Error"
-        result_message = response_data.get("error", "")
-        logger.warning("Payment error response: %s", result_message)
-
-    back_url = url_for(
-        "terminal_payments.make_payment",
-        terminalId=terminal_id,
-        merchantAccount=merchant_account,
-    )
-
-    return render_template(
-        "pages/terminal_payment_result.html",
-        success=success,
-        result_title=result_title,
-        result_message=result_message,
-        response_json=json.dumps(response_data, indent=2),
-        decoded_additional_response=decoded_additional_response,
-        payment_summary=payment_summary,
-        back_url=back_url,
-    )
