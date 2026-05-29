@@ -1,19 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Page Not Found</title>
+{% extends "base.html" %}
+
+{% block title %}Page Not Found{% endblock %}
+
+{% block head_css %}
   <link rel="stylesheet" href="{{ url_for('static', filename='css/checkout.css') }}" />
-</head>
-<body>
+{% endblock %}
+
+{% block body %}
 <div class="checkout-container" style="text-align:center; padding-top:48px;">
 
   <p style="font-size:3rem; margin-bottom:16px;">🔍</p>
   <h1 style="margin-bottom:8px;">Page not found</h1>
   <p class="step-subtitle">We'll redirect you to the home page in <strong id="countdown">3</strong> seconds.</p>
 
-  <a href="/" class="btn-primary" style="display:inline-block; width:auto; margin-top:24px; padding:0 24px; line-height:44px; text-decoration:none;">
+  <a href="{{ url_for('homepage.dashboard') }}" class="btn-primary" style="display:inline-block; width:auto; margin-top:24px; padding:0 24px; line-height:44px; text-decoration:none;">
     Go now
   </a>
 
@@ -24,8 +24,7 @@
   const t = setInterval(() => {
     n -= 1;
     el.textContent = n;
-    if (n <= 0) { clearInterval(t); window.location.href = "/"; }
+    if (n <= 0) { clearInterval(t); window.location.href = "{{ url_for('homepage.dashboard') }}"; }
   }, 1000);
 </script>
-</body>
-</html>
+{% endblock %}

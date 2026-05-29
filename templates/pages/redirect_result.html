@@ -1,7 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head><meta charset="UTF-8" /><title>Redirecting…</title></head>
-<body>
+{% extends "base.html" %}
+
+{% block title %}Redirecting…{% endblock %}
+
+{% block body %}
 <!--
   Tiny intermediate page rendered by handle_shopper_redirect.
   Stores the full Adyen response in sessionStorage (same mechanism the JS
@@ -13,5 +14,4 @@
   } catch (e) {}
   window.location.href = {{ redirect_url | tojson }};
 </script>
-</body>
-</html>
+{% endblock %}

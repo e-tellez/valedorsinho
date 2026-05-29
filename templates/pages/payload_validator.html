@@ -1,12 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Payment Payload Validator – Valedorsinho</title>
+{% extends "base.html" %}
+
+{% block title %}Payment Payload Validator – Valedorsinho{% endblock %}
+
+{% block head_css %}
   <link rel="stylesheet" href="{{ url_for('static', filename='css/payload_validator.css') }}" />
-</head>
-<body>
+{% endblock %}
+
+{% block body %}
 <div class="validator-container">
 
   <a href="{{ url_for('homepage.dashboard') }}" class="btn-back">&larr; Back to Dashboard</a>
@@ -56,5 +56,4 @@
 </div>
 
 <script src="{{ url_for('static', filename='js/payload_validator.js') }}"></script>
-</body>
-</html>
+{% endblock %}

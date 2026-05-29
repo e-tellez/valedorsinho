@@ -1,14 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Payment Result – Terminal Payments – Valedorsinho</title>
+{% extends "base.html" %}
+
+{% block title %}Payment Result – Terminal Payments – Valedorsinho{% endblock %}
+
+{% block head_css %}
   <link rel="stylesheet" href="{{ url_for('static', filename='css/homepage.css') }}" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/preview-card.css') }}" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/terminal_make_payment.css') }}" />
-</head>
-<body>
+{% endblock %}
+
+{% block body %}
 <div class="dashboard" style="max-width:{{ '1400px' if decoded_additional_response else '900px' }};">
   <header class="dash-header">
     <h1>Payment Result</h1>
@@ -16,8 +16,8 @@
   </header>
 
   <div style="display:flex;gap:12px;margin-bottom:20px;">
-    <a href="{{ back_url }}" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;font-size:0.82rem;font-weight:600;color:#fff;background:#0070f3;border-radius:8px;text-decoration:none;transition:background .15s;">&larr; Make Another Payment</a>
-    <a href="{{ url_for('terminal_payments.index') }}" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;font-size:0.82rem;font-weight:600;color:#333;background:#f0f0f0;border:1px solid #d5d5d5;border-radius:8px;text-decoration:none;transition:background .15s;">&larr; Back to Terminal Payments</a>
+    <a href="{{ back_url }}" class="btn-back" style="color:#fff;background:#0070f3;border-color:#0070f3;">&larr; Make Another Payment</a>
+    <a href="{{ url_for('terminal_payments.index') }}" class="btn-back">&larr; Back to Terminal Payments</a>
   </div>
 
   <!-- Status banner + summary (centered, single card) -->
@@ -84,5 +84,4 @@
     });
   });
 </script>
-</body>
-</html>
+{% endblock %}

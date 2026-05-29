@@ -1,13 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Set Up – Valedorsinho</title>
+{% extends "base.html" %}
+
+{% block title %}Set Up – Valedorsinho{% endblock %}
+
+{% block head_css %}
   <link rel="stylesheet" href="{{ url_for('static', filename='css/homepage.css') }}" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/setup.css') }}" />
-</head>
-<body>
+{% endblock %}
+
+{% block body %}
 <div class="setup-container">
 
   <a href="{{ url_for('homepage.dashboard') }}" class="btn-back">&larr; Back to Dashboard</a>
@@ -77,5 +77,4 @@
   </form>
 
 </div>
-</body>
-</html>
+{% endblock %}

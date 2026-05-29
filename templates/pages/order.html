@@ -1,24 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Checkout – Step 2 of 4</title>
+{% extends "base.html" %}
+{% from "macros.html" import step_indicator %}
+
+{% block title %}Checkout – Step 2 of 4{% endblock %}
+
+{% block head_css %}
   <link rel="stylesheet" href="{{ url_for('static', filename='css/checkout.css') }}" />
-</head>
-<body>
+{% endblock %}
+
+{% block body %}
 <div class="checkout-container">
 
   <!-- Step indicator -->
-  <div class="step-indicator">
-    <span class="step">1</span>
-    <span class="step-line"></span>
-    <span class="step active">2</span>
-    <span class="step-line"></span>
-    <span class="step">3</span>
-    <span class="step-line"></span>
-    <span class="step">4</span>
-  </div>
+  {{ step_indicator(2) }}
 
   <h1 style="text-align:center">Your order</h1>
   <p class="step-subtitle" style="text-align:center">
@@ -107,5 +100,4 @@
   <a href="{{ url_for('pages.index') }}" class="btn-back">← Back</a>
 
 </div>
-</body>
-</html>
+{% endblock %}

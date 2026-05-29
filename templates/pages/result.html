@@ -1,13 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Payment Result</title>
+{% extends "base.html" %}
+
+{% block title %}Payment Result{% endblock %}
+
+{% block head_css %}
   <link rel="stylesheet" href="{{ url_for('static', filename='css/preview-card.css') }}" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/result.css') }}" />
-</head>
-<body>
+{% endblock %}
+
+{% block body %}
   <!--
     This page is rendered by Flask after:
       a) A native 3DS2 flow completes in-browser (JS redirect via handleFinalResult)
@@ -40,8 +40,8 @@
 
       <br/>
       <div class="result-actions">
-        <a href="/checkout" class="btn-result">Try again</a>
-        <a href="/" class="btn-result btn-secondary">Homepage</a>
+        <a href="{{ url_for('pages.choose_flow') }}" class="btn-result">Try again</a>
+        <a href="{{ url_for('homepage.dashboard') }}" class="btn-result btn-secondary">Homepage</a>
       </div>
     </div>
 
@@ -108,5 +108,4 @@
       });
     })();
   </script>
-</body>
-</html>
+{% endblock %}

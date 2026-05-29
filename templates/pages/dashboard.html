@@ -1,12 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Valedorsinho – Dashboard</title>
+{% extends "base.html" %}
+
+{% block title %}Valedorsinho – Dashboard{% endblock %}
+
+{% block head_css %}
   <link rel="stylesheet" href="{{ url_for('static', filename='css/homepage.css') }}" />
-</head>
-<body>
+{% endblock %}
+
+{% block body %}
 <div class="dashboard">
 
   <!-- Header -->
@@ -179,5 +179,4 @@
   </section>
 
 </div>
-</body>
-</html>
+{% endblock %}

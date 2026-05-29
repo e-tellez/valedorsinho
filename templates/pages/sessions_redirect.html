@@ -1,17 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Processing payment…</title>
+{% extends "base.html" %}
+{% from "macros.html" import adyen_sdk_css, adyen_sdk_js %}
 
-  <link
-    rel="stylesheet"
-    href="https://checkoutshopper-test.cdn.adyen.com/checkoutshopper/sdk/5.67.0/adyen.css"
-  />
+{% block title %}Processing payment…{% endblock %}
+
+{% block head_css %}
+  {{ adyen_sdk_css() }}
   <link rel="stylesheet" href="{{ url_for('static', filename='css/checkout.css') }}" />
-</head>
-<body>
+{% endblock %}
+
+{% block body %}
 <div class="checkout-container">
   <h1>Processing your payment…</h1>
   <p class="step-subtitle">Please wait while we finalise your transaction.</p>
@@ -20,7 +17,7 @@
   <div id="dropin-container" style="min-height:0;"></div>
 </div>
 
-<script src="https://checkoutshopper-test.cdn.adyen.com/checkoutshopper/sdk/5.67.0/adyen.js"></script>
+{{ adyen_sdk_js() }}
 <script src="{{ url_for('static', filename='js/adyen_api.js') }}"></script>
 
 <script>
@@ -59,5 +56,4 @@
     }
   })();
 </script>
-</body>
-</html>
+{% endblock %}

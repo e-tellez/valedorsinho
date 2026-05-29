@@ -1,32 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Checkout – Step 4 of 4</title>
+{% extends "base.html" %}
+{% from "macros.html" import step_indicator, adyen_sdk_css, adyen_sdk_js, checkout_config, preview_card %}
 
-  <link
-    rel="stylesheet"
-    href="https://checkoutshopper-test.cdn.adyen.com/checkoutshopper/sdk/5.67.0/adyen.css"
-  />
+{% block title %}Checkout – Step 4 of 4{% endblock %}
 
+{% block head_css %}
+  {{ adyen_sdk_css() }}
   <link rel="stylesheet" href="{{ url_for('static', filename='css/preview-card.css') }}" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/checkout.css') }}" />
-</head>
-<body>
+{% endblock %}
+
+{% block body %}
 <div class="checkout-page-layout">
   <div class="checkout-container">
 
     <!-- Step indicator -->
-    <div class="step-indicator">
-      <span class="step">1</span>
-      <span class="step-line"></span>
-      <span class="step">2</span>
-      <span class="step-line"></span>
-      <span class="step">3</span>
-      <span class="step-line"></span>
-      <span class="step active">4</span>
-    </div>
+    {{ step_indicator(4) }}
 
     <div class="checkout-title-row">
       <h1>Complete your order</h1>
@@ -44,49 +32,19 @@
 
     <div id="dropin-container"></div>
 
-    <a href="/implementations" class="btn-back">← Back</a>
+    <a href="{{ url_for('pages.implementations') }}" class="btn-back">← Back</a>
 
   </div>
 
   <div class="api-sidebar">
-    <div class="preview-card">
-      <div class="preview-header">
-        <span class="preview-title">/sessions request body</span>
-        <button type="button" class="preview-copy-btn" data-target="session-request">Copy JSON</button>
-      </div>
-      <div class="preview-body">
-        <pre id="session-request"></pre>
-      </div>
-    </div>
-
-    <div class="preview-card">
-      <div class="preview-header">
-        <span class="preview-title">/sessions response</span>
-        <button type="button" class="preview-copy-btn" data-target="session-response">Copy JSON</button>
-      </div>
-      <div class="preview-body">
-        <pre id="session-response"></pre>
-      </div>
-    </div>
+    {{ preview_card("/sessions request body", "session-request") }}
+    {{ preview_card("/sessions response", "session-response") }}
   </div>
 </div>
 
-<!--  This must match the CSS version imported in <head>.  -->
-<script src="https://checkoutshopper-test.cdn.adyen.com/checkoutshopper/sdk/5.67.0/adyen.js"></script>
-
-<script>
-  const CHECKOUT_CONFIG = {
-    clientKey: "{{ client_key }}",
-    environment: "{{ environment }}",
-    shopperReference: "{{ shopper_reference }}",
-    amountMinorUnits: "{{ amount_minor_units }}",
-    countryCode: "{{ country_code }}",
-    currency: "{{ currency }}",
-    isGuest: {{ 'true' if is_guest else 'false' }},
-  };
-</script>
+{{ adyen_sdk_js() }}
+{{ checkout_config(client_key, environment, shopper_reference, amount_minor_units, country_code, currency, is_guest) }}
 
 <script src="{{ url_for('static', filename='js/adyen_api.js') }}"></script>
 <script src="{{ url_for('static', filename='js/sessions_dropin.js') }}"></script>
-</body>
-</html>
+{% endblock %}

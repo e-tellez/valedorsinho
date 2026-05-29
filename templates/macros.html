@@ -1,0 +1,60 @@
+{# ------------------------------------------------------------------ #}
+{# Adyen Web SDK version – single source of truth                       #}
+{# ------------------------------------------------------------------ #}
+{% set ADYEN_SDK_VERSION = "5.67.0" %}
+{% set ADYEN_SDK_BASE = "https://checkoutshopper-test.cdn.adyen.com/checkoutshopper/sdk/" ~ ADYEN_SDK_VERSION %}
+
+{% macro adyen_sdk_css() %}
+<link rel="stylesheet" href="{{ ADYEN_SDK_BASE }}/adyen.css" />
+{% endmacro %}
+
+{% macro adyen_sdk_js() %}
+<script src="{{ ADYEN_SDK_BASE }}/adyen.js"></script>
+{% endmacro %}
+
+{# ------------------------------------------------------------------ #}
+{# Checkout step indicator (1–4)                                        #}
+{# ------------------------------------------------------------------ #}
+{% macro step_indicator(active_step) %}
+<div class="step-indicator">
+  <span class="step{{ ' active' if active_step == 1 }}">1</span>
+  <span class="step-line"></span>
+  <span class="step{{ ' active' if active_step == 2 }}">2</span>
+  <span class="step-line"></span>
+  <span class="step{{ ' active' if active_step == 3 }}">3</span>
+  <span class="step-line"></span>
+  <span class="step{{ ' active' if active_step == 4 }}">4</span>
+</div>
+{% endmacro %}
+
+{# ------------------------------------------------------------------ #}
+{# Dark preview card with copy button                                   #}
+{# ------------------------------------------------------------------ #}
+{% macro preview_card(title, target_id, copy_label="Copy JSON") %}
+<div class="preview-card">
+  <div class="preview-header">
+    <span class="preview-title">{{ title }}</span>
+    <button type="button" class="preview-copy-btn" data-target="{{ target_id }}">{{ copy_label }}</button>
+  </div>
+  <div class="preview-body">
+    <pre id="{{ target_id }}"></pre>
+  </div>
+</div>
+{% endmacro %}
+
+{# ------------------------------------------------------------------ #}
+{# CHECKOUT_CONFIG JS object (shared by all checkout step-4 pages)      #}
+{# ------------------------------------------------------------------ #}
+{% macro checkout_config(client_key, environment, shopper_reference, amount_minor_units, country_code, currency, is_guest) %}
+<script>
+  const CHECKOUT_CONFIG = {
+    clientKey: "{{ client_key }}",
+    environment: "{{ environment }}",
+    shopperReference: "{{ shopper_reference }}",
+    amountMinorUnits: "{{ amount_minor_units }}",
+    countryCode: "{{ country_code }}",
+    currency: "{{ currency }}",
+    isGuest: {{ 'true' if is_guest else 'false' }},
+  };
+</script>
+{% endmacro %}

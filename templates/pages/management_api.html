@@ -1,13 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Management API – Valedorsinho</title>
+{% extends "base.html" %}
+
+{% block title %}Management API – Valedorsinho{% endblock %}
+
+{% block head_css %}
   <link rel="stylesheet" href="{{ url_for('static', filename='css/homepage.css') }}" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/management_api.css') }}" />
-</head>
-<body>
+{% endblock %}
+
+{% block body %}
 <div class="mgmt-container">
 
   <a href="{{ url_for('homepage.dashboard') }}" class="btn-back">&larr; Back to Dashboard</a>
@@ -110,5 +110,4 @@
   </div>
 
 </div>
-</body>
-</html>
+{% endblock %}

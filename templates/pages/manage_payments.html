@@ -1,30 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Manage Payment Methods</title>
+{% extends "base.html" %}
+{% from "macros.html" import step_indicator, adyen_sdk_css, adyen_sdk_js %}
 
-  <link
-    rel="stylesheet"
-    href="https://checkoutshopper-test.cdn.adyen.com/checkoutshopper/sdk/5.67.0/adyen.css"
-  />
+{% block title %}Manage Payment Methods{% endblock %}
+
+{% block head_css %}
+  {{ adyen_sdk_css() }}
   <link rel="stylesheet" href="{{ url_for('static', filename='css/checkout.css') }}" />
-</head>
-<body>
+{% endblock %}
+
+{% block body %}
 <div class="checkout-page-layout manage-payments-page">
   <div class="checkout-container">
 
     <!-- Step indicator -->
-    <div class="step-indicator">
-      <span class="step">1</span>
-      <span class="step-line"></span>
-      <span class="step">2</span>
-      <span class="step-line"></span>
-      <span class="step active">3</span>
-      <span class="step-line"></span>
-      <span class="step">4</span>
-    </div>
+    {{ step_indicator(3) }}
 
     <div class="checkout-title-row">
       <h1>Manage payment methods</h1>
@@ -59,7 +48,7 @@
       </div>
     </div>
 
-    <a href="/implementations" class="btn-back">← Back</a>
+    <a href="{{ url_for('pages.implementations') }}" class="btn-back">← Back</a>
 
   </div>
 
@@ -76,8 +65,7 @@
   </div>
 </div>
 
-<script src="https://checkoutshopper-test.cdn.adyen.com/checkoutshopper/sdk/5.67.0/adyen.js"></script>
-
+{{ adyen_sdk_js() }}
 <script>
   const CHECKOUT_CONFIG = {
     clientKey: "{{ client_key }}",
@@ -98,5 +86,4 @@
     body.style.display = body.style.display === "none" ? "block" : "none";
   });
 </script>
-</body>
-</html>
+{% endblock %}
