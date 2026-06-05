@@ -9,12 +9,12 @@ import requests as http_requests
 from fastapi import HTTPException
 
 from app.domain.models.terminal import TERMINAL_API_URLS
-from app.domain.ports.terminal_port import TerminalGateway
+from app.ports.terminal_port import TerminalGateway
 
 logger = logging.getLogger(__name__)
 
 
-class AdyenTerminalAdapter(TerminalGateway):
+class TerminalAdapter(TerminalGateway):
     """Concrete adapter that calls the Adyen Terminal API (Cloud)."""
 
     def __init__(self, api_key: str, environment: str) -> None:
