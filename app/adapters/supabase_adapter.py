@@ -33,6 +33,10 @@ class SupabaseAdapter(AuthGateway):
             "Authorization": f"Bearer {service_role_key}",
             "Content-Type": "application/json",
         }
+        self._jwks_client = jwt.PyJWKClient(
+            f"{self._base_url}/auth/v1/.well-known/jwks.json",
+            cache_keys=True,
+        )
 
     # ------------------------------------------------------------------
     # AuthGateway
@@ -41,12 +45,29 @@ class SupabaseAdapter(AuthGateway):
     def verify_token(self, token: str) -> UserProfile:
         """Decode the Supabase JWT, then enrich the profile with the custom role."""
         try:
-            payload: dict[str, Any] = jwt.decode(
-                token,
-                self._jwt_secret,
-                algorithms=["HS256"],
-                audience="authenticated",
-            )
+            header = jwt.get_unverified_header(token)
+        except jwt.DecodeError as error:
+            raise ValueError(f"Malformed token: {error}")
+
+        algorithm: str = header.get("alg", "HS256")
+        logger.debug("JWT algorithm from header: %s", algorithm)
+
+        try:
+            if algorithm == "HS256":
+                payload: dict[str, Any] = jwt.decode(
+                    token,
+                    self._jwt_secret,
+                    algorithms=["HS256"],
+                    audience="authenticated",
+                )
+            else:
+                signing_key = self._jwks_client.get_signing_key_from_jwt(token)
+                payload = jwt.decode(
+                    token,
+                    signing_key.key,
+                    algorithms=[algorithm],
+                    audience="authenticated",
+                )
         except jwt.ExpiredSignatureError:
             raise ValueError("Token has expired")
         except jwt.InvalidTokenError as error:
