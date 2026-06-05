@@ -54,6 +54,15 @@ def create_app() -> FastAPI:
         """Simple health check endpoint."""
         return {"status": "ok"}
 
+    @application.get("/goodmorning")
+    async def goodmorning() -> dict[str, str]:
+        """Wake-up endpoint.
+
+        Called by the frontend when a user on an Adyen domain loads the app,
+        ensuring the server is active after a period of inactivity.
+        """
+        return {"status": "awake"}
+
     return application
 
 
