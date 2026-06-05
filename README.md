@@ -62,29 +62,29 @@ app/
 │   ├── models/
 │   │   ├── checkout.py                  # Amount, PaymentRequest, SessionsRequest, etc.
 │   │   └── terminal.py                  # DecodedTerminalResponse, PaymentSummaryField
-│   └── ports/                           # Abstract interfaces (driven side)
-│       ├── checkout_port.py             # CheckoutGateway ABC
-│       ├── terminal_port.py             # TerminalGateway ABC
-│       ├── management_port.py           # ManagementGateway ABC
-│       └── validator_port.py            # PayloadValidator ABC
+│   └── verticals.py                     # Merchant vertical definitions
 │
-├── application/                         # USE CASES — orchestration
+├── ports/                               # Abstract interfaces (driven side)
+│   ├── checkout_port.py                 # CheckoutGateway ABC
+│   ├── terminal_port.py                 # TerminalGateway ABC
+│   ├── management_port.py               # ManagementGateway ABC
+│   └── validator_port.py                # PayloadValidator ABC
+│
+├── use_cases/                           # USE CASES — orchestration
 │   ├── checkout_service.py
 │   ├── terminal_payment_service.py
 │   ├── terminal_fleet_service.py
 │   └── tools_service.py
 │
-├── infrastructure/                      # ADAPTERS — driven side (external)
-│   ├── config.py                        # Env vars, Adyen client singleton
-│   ├── adyen_checkout_adapter.py        # CheckoutGateway implementation
-│   ├── adyen_terminal_adapter.py        # TerminalGateway implementation
-│   ├── adyen_management_adapter.py      # ManagementGateway implementation
-│   ├── adyen_validator_adapter.py       # PayloadValidator implementation
-│   ├── terminal_decoder.py              # AdditionalResponse decoder
-│   └── data/
-│       └── verticals.py                 # Merchant vertical definitions
+├── adapters/                            # ADAPTERS — driven side (external)
+│   ├── checkout_adapter.py              # CheckoutGateway implementation
+│   ├── management_adapter.py            # ManagementGateway implementation
+│   ├── terminal_adapter.py              # TerminalGateway implementation
+│   ├── validator_adapter.py             # PayloadValidator implementation
+│   └── terminal_decoder.py             # AdditionalResponse decoder
 │
 └── api/                                 # DRIVING ADAPTERS — HTTP layer
+    ├── config.py                        # Env vars, Adyen client singleton
     ├── dependencies.py                  # FastAPI DI wiring
     ├── routers/
     │   ├── checkout.py                  # /api/checkout/*
