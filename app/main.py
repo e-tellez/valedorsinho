@@ -15,7 +15,7 @@ from fastapi.middleware.cors import CORSMiddleware
 # the SSL fix before the Adyen client (initialised inside config) makes
 # any requests.
 from app.api.config import CORS_ORIGINS
-from app.api.routers import checkout, terminal_payments, terminal_fleet, tools, config
+from app.api.routers import checkout, terminal_payments, terminal_fleet, tools, config, auth
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -48,6 +48,7 @@ def create_app() -> FastAPI:
     application.include_router(terminal_fleet.router)
     application.include_router(tools.router)
     application.include_router(config.router)
+    application.include_router(auth.router)
 
     @application.get("/health")
     async def health_check() -> dict[str, str]:

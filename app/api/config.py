@@ -75,3 +75,11 @@ CLIENT_KEY: str = os.getenv("ADYEN_CLIENT_KEY", "")
 ADYEN_ENVIRONMENT: str = os.getenv("ADYEN_ENVIRONMENT", "test")
 ADYEN_API_KEY: str = os.getenv("ADYEN_API_KEY", "")
 CORS_ORIGINS: list[str] = os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
+
+# ---------------------------------------------------------------------------
+# Supabase configuration
+# ---------------------------------------------------------------------------
+
+SUPABASE_URL: str = os.getenv("SUPABASE_URL", "")
+SUPABASE_SERVICE_ROLE_KEY: str = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+SUPABASE_JWT_SECRET: str = os.getenv("SUPABASE_JWT_SECRET", "")
