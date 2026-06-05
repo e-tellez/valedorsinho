@@ -31,7 +31,7 @@ def decode_additional_response(encoded_value: str) -> dict | str | None:
             pass
         try:
             parsed = parse_qs(text, keep_blank_values=True)
-            if parsed:
+            if parsed and all(len(k) < 100 for k in parsed):
                 return {k: v[0] if len(v) == 1 else v for k, v in parsed.items()}
         except Exception:
             pass
