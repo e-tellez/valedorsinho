@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends
 
 from app.api.dependencies import get_tools_service
 from app.api.schemas.tools import ValidatePayloadBody
-from app.application.tools_service import ToolsService
+from app.use_cases.tools_service import ToolsService
 
 logger = logging.getLogger(__name__)
 

@@ -10,7 +10,7 @@ import Adyen
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 
 from app.api.dependencies import get_terminal_payment_service
-from app.application.terminal_payment_service import TerminalPaymentService
+from app.use_cases.terminal_payment_service import TerminalPaymentService
 
 logger = logging.getLogger(__name__)
 

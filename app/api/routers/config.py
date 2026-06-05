@@ -5,7 +5,7 @@ Serves Adyen client-side configuration to the frontend.
 
 from fastapi import APIRouter
 
-from app.infrastructure.config import CLIENT_KEY, ADYEN_ENVIRONMENT, MERCHANT_ACCOUNT
+from app.api.config import CLIENT_KEY, ADYEN_ENVIRONMENT, MERCHANT_ACCOUNT
 
 router = APIRouter(prefix="/api/config", tags=["config"])
 

@@ -7,12 +7,12 @@ from typing import Any
 
 import Adyen
 
-from app.domain.ports.checkout_port import CheckoutGateway
+from app.ports.checkout_port import CheckoutGateway
 
 logger = logging.getLogger(__name__)
 
 
-class AdyenCheckoutAdapter(CheckoutGateway):
+class CheckoutAdapter(CheckoutGateway):
     """Concrete adapter that calls the Adyen Python SDK for checkout operations."""
 
     def __init__(self, client: Adyen.Adyen) -> None:

@@ -1,27 +1,26 @@
 """FastAPI dependency injection wiring.
 
-Composes infrastructure adapters into application services and exposes
-them as FastAPI ``Depends`` callables.
+Composes adapters into use cases and exposes them as FastAPI ``Depends`` callables.
 """
 
 from functools import lru_cache
 
-from app.application.checkout_service import CheckoutService
-from app.application.terminal_fleet_service import TerminalFleetService
-from app.application.terminal_payment_service import TerminalPaymentService
-from app.application.tools_service import ToolsService
-from app.infrastructure.adyen_checkout_adapter import AdyenCheckoutAdapter
-from app.infrastructure.adyen_management_adapter import AdyenManagementAdapter
-from app.infrastructure.adyen_terminal_adapter import AdyenTerminalAdapter
-from app.infrastructure.adyen_validator_adapter import AdyenValidatorAdapter
-from app.infrastructure.config import (
+from app.use_cases.checkout_service import CheckoutService
+from app.use_cases.terminal_fleet_service import TerminalFleetService
+from app.use_cases.terminal_payment_service import TerminalPaymentService
+from app.use_cases.tools_service import ToolsService
+from app.adapters.checkout_adapter import CheckoutAdapter
+from app.adapters.management_adapter import ManagementAdapter
+from app.adapters.terminal_adapter import TerminalAdapter
+from app.adapters.validator_adapter import ValidatorAdapter
+from app.api.config import (
     ADYEN_API_KEY,
     ADYEN_ENVIRONMENT,
     MERCHANT_ACCOUNT,
     adyen_client,
 )
-from app.infrastructure.data.verticals import VERTICALS
-from app.infrastructure.terminal_decoder import (
+from app.domain.verticals import VERTICALS
+from app.adapters.terminal_decoder import (
     decode_additional_response,
     extract_payment_summary,
 )
@@ -32,23 +31,23 @@ from app.infrastructure.terminal_decoder import (
 # ---------------------------------------------------------------------------
 
 @lru_cache
-def _checkout_adapter() -> AdyenCheckoutAdapter:
-    return AdyenCheckoutAdapter(adyen_client)
+def _checkout_adapter() -> CheckoutAdapter:
+    return CheckoutAdapter(adyen_client)
 
 
 @lru_cache
-def _management_adapter() -> AdyenManagementAdapter:
-    return AdyenManagementAdapter(adyen_client)
+def _management_adapter() -> ManagementAdapter:
+    return ManagementAdapter(adyen_client)
 
 
 @lru_cache
-def _terminal_adapter() -> AdyenTerminalAdapter:
-    return AdyenTerminalAdapter(api_key=ADYEN_API_KEY, environment=ADYEN_ENVIRONMENT)
+def _terminal_adapter() -> TerminalAdapter:
+    return TerminalAdapter(api_key=ADYEN_API_KEY, environment=ADYEN_ENVIRONMENT)
 
 
 @lru_cache
-def _validator_adapter() -> AdyenValidatorAdapter:
-    return AdyenValidatorAdapter()
+def _validator_adapter() -> ValidatorAdapter:
+    return ValidatorAdapter()
 
 
 # ---------------------------------------------------------------------------

@@ -14,7 +14,7 @@ from app.domain.models.checkout import (
     PaymentRequest,
     SessionsRequest,
 )
-from app.domain.ports.checkout_port import CheckoutGateway
+from app.ports.checkout_port import CheckoutGateway
 
 logger = logging.getLogger(__name__)
 
