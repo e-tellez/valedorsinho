@@ -3,58 +3,18 @@
 <br>
 <br>
 
-# <center> Adyen Checkout – Python / Flask</center>
+# Adyen Integration Backend — FastAPI
 
-A Flask application that implements Adyen's **Drop-in** and **Card Component** integrations and covers **native 3DS2** authentication and **tokenisation**.
+Backend-only API for Adyen integration demos. Built with **FastAPI** and **hexagonal architecture**. The frontend lives in a separate repository.
 
 ## Features
 
-- **Drop-in** – pre-built UI with all available payment methods configured in your account
-- **Card Component** – card-only fields with full UI control
-- **Native 3DS2** – in-browser fingerprint and challenge flows
-- **Tokenisation** – save cards for returning shoppers (with shopper consent)
-- **Guest checkout** – pay without creating an account (no tokenisation, no stored cards)
-
-## Flow overview
-
-The checkout has **4 steps**:
-
-| Step | Route | Description |
-|------|-------|-------------|
-| 1 | `GET /` | Choose between **Guest** and **Account** checkout |
-| 2 | `GET /order` → `POST /order` | Enter order details (+ username for account flow) |
-| 3 | `GET /implementations` | Choose integration type (Drop-in / Components) |
-| 4 | `GET /dropin/checkout` or `GET /components/checkout` | Pay |
-
-### Guest vs Account
-
-- **Guest** – no `shopperReference` is sent to Adyen; tokenisation fields (`storePaymentMethod`, `recurringProcessingModel`, `shopperInteraction`) are omitted; the "Save for my next payment" checkbox is hidden.
-- **Account** – a username is collected and used as `shopperReference`; tokenisation is enabled with `recurringProcessingModel: CardOnFile`.
-
-### Sequence diagram
-
-```
-Browser                        Flask server                 Adyen API
-───────                        ────────────                 ─────────
-1. GET /                  →    render flow choice
-2. GET /order?flow=…      →    render order form
-3. POST /order            →    validate & store in session
-4. GET /implementations   →    render integration selector
-5. GET /dropin/checkout   →    render Drop-in page
-6. GET /api/paymentMethods →   POST /paymentMethods     →   payment method list
-                                                              (incl. stored cards for account)
-7. [shopper fills card / picks stored card]
-   onSubmit               →    POST /api/payments        →   POST /payments
-                                ← action{type:threeDS2}  ←──
-8. Drop-in renders 3DS2
-   fingerprint/challenge
-   onAdditionalDetails    →    POST /api/payments/details → POST /payments/details
-                                ← resultCode:Authorised   ←─
-9. POST /result/store     →    store result in session
-10. GET /result           →    render result page & clear session
-```
-
-If the issuer does not support native 3DS2, Adyen falls back to a redirect. After authentication the shopper returns to `/dropin/handleShopperRedirect`.
+- **Online Checkout** — Advanced flow (`/payments`, `/payments/details`) and Sessions flow (`/sessions`)
+- **Terminal Payments** — Cloud Terminal API with cascading terminal selector
+- **Terminal Fleet Management** — List, search, and reassign terminals
+- **Payload Validator** — Validate `/payments` payloads against the Adyen OpenAPI spec
+- **Vertical Suggestions** — Pre-built payloads for retail, hospitality, digital goods, etc.
+- **Tokenisation** — Save cards for returning shoppers (`CardOnFile`)
 
 ## Setup
 
@@ -74,67 +34,66 @@ cp .env.example .env
 ```
 
 You need:
-- **ADYEN_API_KEY** – from Customer Area → Developers → API credentials
-- **ADYEN_MERCHANT_ACCOUNT** – your merchant account name
-- **ADYEN_CLIENT_KEY** – from the same API credentials page (Client Keys tab)
-- **ADYEN_ENVIRONMENT** – `test` for testing, `live` for production
+- **ADYEN_API_KEY** — from Customer Area → Developers → API credentials
+- **ADYEN_MERCHANT_ACCOUNT** — your merchant account name
+- **ADYEN_CLIENT_KEY** — served to the frontend via `/api/config/client`
+- **ADYEN_ENVIRONMENT** — `test` or `live`
+- **CORS_ORIGINS** — comma-separated frontend origins (default `http://localhost:3000`)
 
 ### 3. Run
 
 ```bash
-python app.py
+uvicorn app.main:app --reload --port 8000
 ```
 
-Open http://localhost:3000 in your browser or configure app.py to use a different port.
+API docs at http://localhost:8000/docs
 
-## Test cards
+## API Contract
 
-Use Adyen's test card numbers to trigger different 3DS2 scenarios:
-https://docs.adyen.com/development-resources/testing/test-card-numbers
+See [API_CONTRACT.md](API_CONTRACT.md) for the full endpoint reference to sync with the frontend repo.
 
-## Tokenisation (Account flow only)
-
-Tokenisation uses `recurringProcessingModel: CardOnFile` with shopper consent:
-
-1. Choose **Account** on step 1
-2. Enter a username (used as `shopperReference`)
-3. Pay with a new card — a "Save for my next payment" checkbox appears
-4. If the shopper consents, we ask Adyen to tokenise the card
-5. On the next visit with the same username, stored cards appear in the Drop-in or Card Component
-
-New cards are sent with `shopperInteraction: Ecommerce`; stored cards with `ContAuth`.
-
-Guest payments skip all of this — no reference, no checkbox, no stored cards.
-
-## Project structure
+## Architecture — Hexagonal
 
 ```
-.
-├── app.py                          # Entry point
-├── requirements.txt
-├── .env.example
-├── checkout/
-│   ├── __init__.py                 # App factory – registers blueprints
-│   ├── config.py                   # Adyen client, env vars, SSL fix
-│   ├── helpers.py                  # Shared constants & utilities
-│   ├── integrations.py             # @register_integration decorator & registry
-│   ├── models.py                   # Pydantic models for Adyen API requests
-│   ├── pages.py                    # Blueprint: HTML-serving routes
-│   └── api.py                      # Blueprint: JSON API + redirect handlers
-├── templates/
-│   ├── pages/
-│   │   ├── choose_flow.html        # Step 1 – guest vs account
-│   │   ├── order.html              # Step 2 – shopper & amount form
-│   │   ├── implementation_index.html # Step 3 – integration selector
-│   │   ├── dropin.html             # Step 4 – Drop-in checkout
-│   │   ├── card_component.html     # Step 4 – Card Component checkout
-│   │   └── result.html             # Payment result page
-│   └── errors/
-│       └── 404.html
-└── static/
-    ├── css/
-    └── js/
-        ├── adyen_api.js            # Shared API helpers (fetch, payments, result)
-        ├── dropin.js               # Drop-in initialisation & 3DS2 handling
-        └── card_component.js       # Card Component initialisation
+app/
+├── main.py                              # FastAPI app factory
+│
+├── domain/                              # CORE — no framework dependencies
+│   ├── models/
+│   │   ├── checkout.py                  # Amount, PaymentRequest, SessionsRequest, etc.
+│   │   └── terminal.py                  # DecodedTerminalResponse, PaymentSummaryField
+│   └── ports/                           # Abstract interfaces (driven side)
+│       ├── checkout_port.py             # CheckoutGateway ABC
+│       ├── terminal_port.py             # TerminalGateway ABC
+│       ├── management_port.py           # ManagementGateway ABC
+│       └── validator_port.py            # PayloadValidator ABC
+│
+├── application/                         # USE CASES — orchestration
+│   ├── checkout_service.py
+│   ├── terminal_payment_service.py
+│   ├── terminal_fleet_service.py
+│   └── tools_service.py
+│
+├── infrastructure/                      # ADAPTERS — driven side (external)
+│   ├── config.py                        # Env vars, Adyen client singleton
+│   ├── adyen_checkout_adapter.py        # CheckoutGateway implementation
+│   ├── adyen_terminal_adapter.py        # TerminalGateway implementation
+│   ├── adyen_management_adapter.py      # ManagementGateway implementation
+│   ├── adyen_validator_adapter.py       # PayloadValidator implementation
+│   ├── terminal_decoder.py              # AdditionalResponse decoder
+│   └── data/
+│       └── verticals.py                 # Merchant vertical definitions
+│
+└── api/                                 # DRIVING ADAPTERS — HTTP layer
+    ├── dependencies.py                  # FastAPI DI wiring
+    ├── routers/
+    │   ├── checkout.py                  # /api/checkout/*
+    │   ├── terminal_payments.py         # /api/terminal/*
+    │   ├── terminal_fleet.py            # /api/fleet/*
+    │   ├── tools.py                     # /api/tools/*
+    │   └── config.py                    # /api/config/*
+    └── schemas/                         # Request/Response DTOs
+        ├── checkout.py
+        ├── terminal.py
+        └── tools.py
 ```

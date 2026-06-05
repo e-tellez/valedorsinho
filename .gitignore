@@ -17,9 +17,6 @@ eggs/
 /lib/
 lib64/
 
-# Node / Next.js
-node_modules/
-.next/
 parts/
 sdist/
 var/
@@ -64,10 +61,6 @@ cover/
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
-
-# Flask stuff:
-instance/
-.webassets-cache
 
 # Scrapy stuff:
 .scrapy
