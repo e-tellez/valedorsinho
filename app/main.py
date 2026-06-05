@@ -2,8 +2,8 @@
 
 Creates the FastAPI app, configures CORS middleware, and registers
 all API routers.  Follows hexagonal architecture: routers live in
-app.api.routers (driving adapters), business logic in app.application,
-and external integrations in app.infrastructure (driven adapters).
+app.api.routers (driving adapters), use cases in app.use_cases,
+port interfaces in app.ports, and driven adapters in app.adapters.
 """
 
 import logging
@@ -11,10 +11,10 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-# infrastructure.config must be imported first – it loads .env and applies
+# api.config must be imported first – it loads .env and applies
 # the SSL fix before the Adyen client (initialised inside config) makes
 # any requests.
-from app.infrastructure.config import CORS_ORIGINS
+from app.api.config import CORS_ORIGINS
 from app.api.routers import checkout, terminal_payments, terminal_fleet, tools, config
 
 logging.basicConfig(level=logging.INFO)

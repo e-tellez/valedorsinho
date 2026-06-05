@@ -18,7 +18,7 @@ from app.api.schemas.checkout import (
     PaymentDetailsBody,
     RedirectBody,
 )
-from app.application.checkout_service import CheckoutService
+from app.use_cases.checkout_service import CheckoutService
 
 logger = logging.getLogger(__name__)
 

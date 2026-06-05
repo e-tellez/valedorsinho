@@ -8,7 +8,7 @@ from typing import Any
 import requests
 from jsonschema import Draft4Validator, ValidationError
 
-from app.domain.ports.validator_port import PayloadValidator
+from app.ports.validator_port import PayloadValidator
 
 # ---------------------------------------------------------------------------
 # OpenAPI spec fetching
@@ -143,7 +143,7 @@ def _humanize_rule(error: ValidationError) -> str:
 # Concrete adapter
 # ---------------------------------------------------------------------------
 
-class AdyenValidatorAdapter(PayloadValidator):
+class ValidatorAdapter(PayloadValidator):
     """Validates /payments payloads against the Adyen OpenAPI spec."""
 
     def validate(self, payload: dict[str, Any]) -> list[dict[str, str]]:

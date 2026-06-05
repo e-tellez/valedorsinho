@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from app.domain.ports.management_port import ManagementGateway
+from app.ports.management_port import ManagementGateway
 
 logger = logging.getLogger(__name__)
 

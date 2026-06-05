@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.api.dependencies import get_terminal_fleet_service
 from app.api.schemas.terminal import ReassignTerminalsBody
-from app.application.terminal_fleet_service import TerminalFleetService
+from app.use_cases.terminal_fleet_service import TerminalFleetService
 
 logger = logging.getLogger(__name__)
 

@@ -6,8 +6,8 @@ import logging
 from typing import Any
 
 from app.domain.models.terminal import DecodedTerminalResponse, PaymentSummaryField
-from app.domain.ports.management_port import ManagementGateway
-from app.domain.ports.terminal_port import TerminalGateway
+from app.ports.management_port import ManagementGateway
+from app.ports.terminal_port import TerminalGateway
 
 logger = logging.getLogger(__name__)
 

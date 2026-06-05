@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from app.domain.ports.validator_port import PayloadValidator
+from app.ports.validator_port import PayloadValidator
 
 
 class ToolsService:

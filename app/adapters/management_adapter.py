@@ -7,12 +7,12 @@ from typing import Any
 
 import Adyen
 
-from app.domain.ports.management_port import ManagementGateway
+from app.ports.management_port import ManagementGateway
 
 logger = logging.getLogger(__name__)
 
 
-class AdyenManagementAdapter(ManagementGateway):
+class ManagementAdapter(ManagementGateway):
     """Concrete adapter that calls the Adyen Management API via the SDK."""
 
     def __init__(self, client: Adyen.Adyen) -> None:

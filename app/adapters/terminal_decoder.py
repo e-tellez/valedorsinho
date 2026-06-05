@@ -1,7 +1,7 @@
 """Terminal API AdditionalResponse decoder and payment summary extractor.
 
-Pure infrastructure utility — no framework dependencies. Injected into
-the TerminalPaymentService as function references.
+Pure utility — no framework dependencies. Injected into
+TerminalPaymentService as function references.
 """
 
 from __future__ import annotations
