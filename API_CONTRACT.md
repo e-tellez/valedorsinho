@@ -451,7 +451,148 @@ Validate a `/payments` JSON payload against the Adyen OpenAPI spec.
 
 ---
 
-## 6. E-Commerce (Planned)
+## 6. Auth
+
+### GET /api/auth/config
+
+Return the active Adyen credentials for the authenticated user.
+
+**Response `200`:**
+
+```json
+{
+  "role": "admin | im | user",
+  "api_key": "string",
+  "client_key": "string",
+  "merchant_account": "string",
+  "environment": "test | live",
+  "is_custom": true,
+  "locked": false
+}
+```
+
+---
+
+### PUT /api/auth/config
+
+Save personal Adyen credentials. Allowed for `admin` and `im` roles only.
+
+**Request Body:**
+
+```json
+{
+  "api_key": "string",
+  "client_key": "string",
+  "merchant_account": "string"
+}
+```
+
+**Response `200`:** Same shape as `GET /api/auth/config`.
+
+> Returns `403` if the role is `user` or if the existing config row has `locked = true`.
+
+---
+
+## 7. Webhooks
+
+### POST /api/webhooks/adyen/{user_id}
+
+Adyen notification listener. Receives standard Adyen webhook notifications and persists each item under the given user.
+
+**Auth:** None — Adyen calls this endpoint directly.
+
+**Path Parameters:**
+
+| Param   | Type   | Description                                                   |
+|---------|--------|---------------------------------------------------------------|
+| user_id | string | Supabase profile `id` of the user who owns this webhook URL. Configure this URL in the Adyen Customer Area so each user has their own endpoint. |
+
+**Request Body:** Standard Adyen notification JSON:
+
+```json
+{
+  "live": "false",
+  "notificationItems": [
+    {
+      "NotificationRequestItem": {
+        "eventCode": "AUTHORISATION",
+        "merchantAccountCode": "string",
+        "pspReference": "string",
+        "merchantReference": "string",
+        "amount": { "currency": "EUR", "value": 1000 },
+        "success": "true",
+        "eventDate": "2025-01-01T00:00:00+00:00"
+      }
+    }
+  ]
+}
+```
+
+**Response `200`:**
+
+```json
+{ "notificationResponse": "[accepted]" }
+```
+
+> Always responds `[accepted]` regardless of validation outcome — per Adyen specification.
+
+---
+
+### GET /api/webhooks
+
+Return the authenticated user's non-expired webhooks, ordered by `received_at` descending.
+
+**Query Parameters:**
+
+| Param  | Type   | Required | Description                      |
+|--------|--------|----------|----------------------------------|
+| limit  | number | No       | Max results 1–100 (default: 50)  |
+| offset | number | No       | Pagination offset (default: 0)   |
+
+**Response `200`:**
+
+```json
+{
+  "items": [
+    {
+      "id": "uuid",
+      "user_id": "uuid",
+      "merchant_account": "string",
+      "event_code": "AUTHORISATION",
+      "psp_reference": "string",
+      "merchant_reference": "string",
+      "amount_value": 1000,
+      "amount_currency": "EUR",
+      "success": true,
+      "live": false,
+      "received_at": "2025-01-01T00:00:00Z",
+      "expires_at": "2025-01-04T00:00:00Z"
+    }
+  ]
+}
+```
+
+> Retention: `admin` — 5 days; `im` / `user` — 3 days.
+
+---
+
+### GET /api/webhooks/{id}
+
+Return a single webhook event including its full raw payload.
+
+**Response `200`:** Same as a single item from `GET /api/webhooks`, plus:
+
+```json
+{
+  "payload": {}
+}
+```
+
+> Returns `404` if the webhook is not found, has expired, or belongs to a different user.
+
+---
+
+## 8. E-Commerce (Planned)
 
 > Not yet consumed by the frontend. Implement once the e-commerce layer is active.
 
@@ -493,13 +634,15 @@ FastAPI default error shape — the frontend `api.ts` reads `detail` first, then
 | Variable                  | Description                                              |
 |---------------------------|----------------------------------------------------------|
 | `ADYEN_API_KEY`           | Adyen API key (from Adyen Customer Area)                 |
-| `ADYEN_MERCHANT_ACCOUNT`  | Adyen merchant account name                              |
-| `ADYEN_CLIENT_KEY`        | Returned to frontend via `GET /api/config/client`        |
-| `ADYEN_ENVIRONMENT`       | `test` or `live` — returned via `GET /api/config/client` |
-| `ADYEN_HMAC_KEY`          | HMAC key for webhook signature validation                |
-| `ADYEN_TERMINAL_API_URL`  | Adyen Terminal API base URL (cloud or local)             |
-| `ALLOWED_ORIGIN`          | Frontend origin for CORS (`https://etellez.com`)         |
-| `JWT_SECRET`              | Secret for validating JWTs issued by the auth service    |
+| `ADYEN_MERCHANT_ACCOUNT`  | Default Adyen merchant account (env-var fallback)        |
+| `ADYEN_CLIENT_KEY`        | Default Adyen client key                                 |
+| `ADYEN_ENVIRONMENT`       | `test` or `live`                                         |
+| `ADYEN_HMAC_KEY`          | HMAC key for webhook signature validation (future use)   |
+| `CORS_ORIGINS`            | Comma-separated allowed origins (e.g. `https://etellez.com`) |
+| `SUPABASE_URL`            | Supabase project URL                                     |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key (bypasses RLS)               |
+| `SUPABASE_JWT_SECRET`     | Secret for verifying Supabase JWTs (HS256)               |
+| `SUPABASE_DATABASE_URL`   | Direct Postgres connection string (Transaction mode pooler, port 6543) — used by the migration runner on startup |
 
 ### Frontend (Next.js — set in Vercel)
 
@@ -516,4 +659,6 @@ FastAPI default error shape — the frontend `api.ts` reads `detail` first, then
 - **Amount units:** Online checkout uses **minor units** (`amountValue: 1000` = 10.00). Terminal payments use **major units** (`RequestedAmount: 10.00`).
 - **Proxy:** `next.config.mjs` rewrites `/api/*` → `http://localhost:8000/api/*` in dev. In production, update the rewrite destination to `VALEDORSINHO_API_URL`.
 - **CORS:** Backend must allow `http://localhost:3000` (dev) and `https://etellez.com` (prod).
-- **Adyen webhook:** The backend should handle `POST /api/webhooks/adyen` for payment status updates. The frontend does not call this directly.
+- **Adyen webhook:** `POST /api/webhooks/adyen/{user_id}` receives Adyen notifications. Each user configures their own URL in the Adyen Customer Area under Developers → Webhooks using their Supabase profile `id`. The frontend does not call this directly.
+- **Webhook routing:** The `user_id` is embedded in the URL path, so routing is always stable even when a user rotates their Adyen credentials or merchant account.
+- **Webhook retention:** Admin users retain webhooks for 5 days; `im` and `user` roles retain for 3 days. Expired rows are filtered from all read queries. Automated cleanup runs daily via pg_cron (see `migrations/001_create_webhooks_table.sql`). Migrations are applied automatically on app startup.
