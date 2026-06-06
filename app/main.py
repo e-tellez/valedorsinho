@@ -7,6 +7,8 @@ port interfaces in app.ports, and driven adapters in app.adapters.
 """
 
 import logging
+from contextlib import asynccontextmanager
+from typing import AsyncGenerator
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -14,11 +16,22 @@ from fastapi.middleware.cors import CORSMiddleware
 # api.config must be imported first – it loads .env and applies
 # the SSL fix before the Adyen client (initialised inside config) makes
 # any requests.
-from app.api.config import CORS_ORIGINS
-from app.api.routers import checkout, terminal_payments, terminal_fleet, tools, config, auth
+from app.api.config import CORS_ORIGINS, SUPABASE_DATABASE_URL
+from app.api.routers import checkout, terminal_payments, terminal_fleet, tools, config, auth, webhooks
+from app.db.migrations import run_pending_migrations
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(application: FastAPI) -> AsyncGenerator[None, None]:
+    """Run startup tasks before the server begins accepting requests."""
+    if SUPABASE_DATABASE_URL:
+        run_pending_migrations(SUPABASE_DATABASE_URL)
+    else:
+        logger.warning("SUPABASE_DATABASE_URL not set — skipping migrations")
+    yield
 
 
 def create_app() -> FastAPI:
@@ -31,6 +44,7 @@ def create_app() -> FastAPI:
         title="Valedorsinho API",
         description="Backend API for Adyen integration demos",
         version="1.0.0",
+        lifespan=lifespan,
     )
 
     # CORS – allow the Next.js frontend to call the API
@@ -49,6 +63,7 @@ def create_app() -> FastAPI:
     application.include_router(tools.router)
     application.include_router(config.router)
     application.include_router(auth.router)
+    application.include_router(webhooks.router)
 
     @application.get("/health")
     async def health_check() -> dict[str, str]:

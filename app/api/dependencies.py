@@ -14,6 +14,7 @@ from app.adapters.supabase_adapter import SupabaseAdapter
 from app.adapters.terminal_adapter import TerminalAdapter
 from app.adapters.terminal_decoder import decode_additional_response, extract_payment_summary
 from app.adapters.validator_adapter import ValidatorAdapter
+from app.adapters.webhook_adapter import WebhookAdapter
 from app.api.config import (
     ADYEN_API_KEY,
     ADYEN_ENVIRONMENT,
@@ -30,6 +31,7 @@ from app.use_cases.checkout_service import CheckoutService
 from app.use_cases.terminal_fleet_service import TerminalFleetService
 from app.use_cases.terminal_payment_service import TerminalPaymentService
 from app.use_cases.tools_service import ToolsService
+from app.use_cases.webhook_service import WebhookService
 
 
 # ---------------------------------------------------------------------------
@@ -144,3 +146,15 @@ def get_tools_service() -> ToolsService:
         validator=_validator_adapter(),
         verticals=VERTICALS,
     )
+
+
+@lru_cache
+def _webhook_adapter() -> WebhookAdapter:
+    return WebhookAdapter(
+        supabase_url=SUPABASE_URL,
+        service_role_key=SUPABASE_SERVICE_ROLE_KEY,
+    )
+
+
+def get_webhook_service() -> WebhookService:
+    return WebhookService(gateway=_webhook_adapter())
