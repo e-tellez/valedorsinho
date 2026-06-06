@@ -83,3 +83,15 @@ CORS_ORIGINS: list[str] = os.getenv("CORS_ORIGINS", "http://localhost:3000").spl
 SUPABASE_URL: str = os.getenv("SUPABASE_URL", "")
 SUPABASE_SERVICE_ROLE_KEY: str = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
 SUPABASE_JWT_SECRET: str = os.getenv("SUPABASE_JWT_SECRET", "")
+
+# ---------------------------------------------------------------------------
+# Webhook configuration
+# ---------------------------------------------------------------------------
+
+ADYEN_HMAC_KEY: str = os.getenv("ADYEN_HMAC_KEY", "")
+
+# ---------------------------------------------------------------------------
+# Direct database connection (used by the migration runner only)
+# ---------------------------------------------------------------------------
+
+SUPABASE_DATABASE_URL: str = os.getenv("SUPABASE_DATABASE_URL", "")
