@@ -495,7 +495,7 @@ Save personal Adyen credentials. Allowed for `admin` and `im` roles only.
 
 ## 7. Webhooks
 
-### POST /api/webhooks/adyen/{user_id}
+### POST /api/webhooks/{user_id}
 
 Adyen notification listener. Receives standard Adyen webhook notifications and persists each item under the given user.
 
@@ -659,6 +659,6 @@ FastAPI default error shape — the frontend `api.ts` reads `detail` first, then
 - **Amount units:** Online checkout uses **minor units** (`amountValue: 1000` = 10.00). Terminal payments use **major units** (`RequestedAmount: 10.00`).
 - **Proxy:** `next.config.mjs` rewrites `/api/*` → `http://localhost:8000/api/*` in dev. In production, update the rewrite destination to `VALEDORSINHO_API_URL`.
 - **CORS:** Backend must allow `http://localhost:3000` (dev) and `https://etellez.com` (prod).
-- **Adyen webhook:** `POST /api/webhooks/adyen/{user_id}` receives Adyen notifications. Each user configures their own URL in the Adyen Customer Area under Developers → Webhooks using their Supabase profile `id`. The frontend does not call this directly.
+- **Adyen webhook:** `POST /api/webhooks/{user_id}` receives Adyen notifications. Each user configures their own URL in the Adyen Customer Area under Developers → Webhooks using their Supabase profile `id`. The frontend does not call this directly.
 - **Webhook routing:** The `user_id` is embedded in the URL path, so routing is always stable even when a user rotates their Adyen credentials or merchant account.
 - **Webhook retention:** Admin users retain webhooks for 5 days; `im` and `user` roles retain for 3 days. Expired rows are filtered from all read queries. Automated cleanup runs daily via pg_cron (see `migrations/001_create_webhooks_table.sql`). Migrations are applied automatically on app startup.

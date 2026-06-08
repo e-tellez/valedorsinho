@@ -30,7 +30,7 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for branching, commit, and PR standards
 |---------|-----------|--------|
 | **Config** | `GET /api/config/client`, `GET /api/config/environment` | ✅ |
 | **Auth** | `GET /api/auth/config`, `POST /api/auth/config` | ✅ |
-| **Webhooks** | `POST /api/webhooks/adyen/{user_id}`, `GET /api/webhooks`, `GET /api/webhooks/{id}` | ✅ |
+| **Webhooks** | `POST /api/webhooks/{user_id}`, `GET /api/webhooks`, `GET /api/webhooks/{id}` | ✅ |
 
 ---
 
@@ -100,7 +100,7 @@ app/
 ## 🔐 Authentication
 
 - **Provider:** Supabase (JWT verification via `SUPABASE_JWT_SECRET`)
-- **Coverage:** All endpoints except `POST /api/webhooks/adyen/{user_id}` require `Authorization: Bearer <supabase_jwt>`
+- **Coverage:** All endpoints except `POST /api/webhooks/{user_id}` require `Authorization: Bearer <supabase_jwt>`
 - **Config storage:** Adyen credentials stored per-user in `adyen_configs` Supabase table
 
 ### Roles
@@ -117,7 +117,7 @@ Roles are stored in the `profiles` Supabase table and retrieved at runtime.
 
 ## 🗄️ Webhooks
 
-- **Ingest:** `POST /api/webhooks/adyen/{user_id}` — no auth required, receives Adyen standard notifications
+- **Ingest:** `POST /api/webhooks/{user_id}` — no auth required, receives Adyen standard notifications
 - **Routing:** `user_id` comes from the URL path parameter — no Adyen payload lookup needed
 - **Retention:** Computed at insert time via `expires_at` (admin: 5 days, im/user: 3 days)
 - **Cleanup:** `expires_at` filter on all reads + pg_cron daily `DELETE` at 03:00 UTC
