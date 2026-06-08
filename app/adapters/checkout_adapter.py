@@ -35,5 +35,5 @@ class CheckoutAdapter(CheckoutGateway):
         return response.message
 
     def disable_stored_method(self, request_body: dict[str, Any]) -> dict[str, Any]:
-        response = self._client.recurring.disable(request_body)
+        response = self._client.recurring.recurring_api.disable(request_body)
         return response.message
