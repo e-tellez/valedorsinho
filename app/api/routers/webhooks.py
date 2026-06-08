@@ -43,7 +43,7 @@ def _event_to_detail(event: WebhookEvent) -> WebhookDetail:
     )
 
 
-@router.post("/adyen/{user_id}")
+@router.post("/{user_id}")
 def receive_adyen_notification(
     user_id: str,
     payload: dict[str, Any],
@@ -52,8 +52,8 @@ def receive_adyen_notification(
     """Adyen notification listener. Always responds ``[accepted]`` per Adyen spec.
 
     *user_id* must match the Supabase profile id of the user who configured this
-    webhook in Adyen. Using the user_id in the URL avoids a merchant account lookup
-    and keeps routing stable even when credentials are rotated.
+    webhook in Adyen. Each user configures ``/api/webhooks/{user_id}`` as their
+    webhook URL in the Adyen Customer Area.
     """
     try:
         webhook_service.ingest_notification(payload, user_id=user_id)
