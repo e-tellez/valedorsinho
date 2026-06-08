@@ -171,10 +171,10 @@ API docs at http://localhost:8000/docs
 | Epic branch                          | Features                                                          |
 |--------------------------------------|-------------------------------------------------------------------|
 | `valedorsinho/epic/online-checkout`  | Checkout flows (Advanced, Sessions, Tokenisation)                 |
-| `valedorsinho/epic/terminal-payments`| Terminal payments                                                 |
-| `valedorsinho/epic/fleet-management` | Terminal fleet management                                         |
+| `valedorsinho/epic/terminal-payments`| Cloud Terminal API payments, merchants, stores, terminals         |
+| `valedorsinho/epic/fleet-management` | Terminal fleet management, reassign                               |
 | `valedorsinho/epic/tools-and-setup`  | Config, auth, webhooks, payload validator, payload suggested      |
-| `valedorsinho/epic/webhooks`         | Webhook ingest, listing, and retention                            |
+| `valedorsinho/epic/webhooks`         | Webhook ingestion, viewer, HMAC signature validation              |
 
 Feature branches follow the same project prefix:
 `valedorsinho/feature/<description>` — branched from its parent epic.
