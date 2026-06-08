@@ -16,8 +16,9 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for branching, commit, and PR standards
 | **Checkout — Advanced Flow** | `POST /api/checkout/payments`, `POST /api/checkout/payments/details` | ✅ |
 | **Checkout — Sessions Flow** | `POST /api/checkout/sessions` | ✅ |
 | **Tokenisation** | `CardOnFile` via Advanced flow | ✅ |
-| **Payload Validator** | `POST /api/tools/validate` | ✅ |
-| **Vertical Suggestions** | `GET /api/tools/suggested/{vertical}` | ✅ |
+| **Payload Validator** | `POST /api/tools/validate-payload` | ✅ |
+| **Vertical Catalog** | `GET /api/tools/verticals` | ✅ |
+| **Payload Suggested** | `POST /api/tools/payload-suggested` | ✅ |
 
 ### 2. Unified Commerce
 | Feature | Endpoints | Status |
@@ -167,13 +168,13 @@ API docs at http://localhost:8000/docs
 
 ## 🗂️ Epic Mapping
 
-| Epic branch                             | Features                                                        |
-|-----------------------------------------|-----------------------------------------------------------------|
-| `valedorsinho/epic/online-checkout`     | Checkout flows, payload validator, vertical suggestions         |
-| `valedorsinho/epic/terminal-payments`   | Cloud Terminal API payments, merchants, stores, terminals       |
-| `valedorsinho/epic/fleet-management`    | Terminal fleet management, reassign                             |
-| `valedorsinho/epic/webhooks`            | Webhook ingestion, viewer, HMAC signature validation            |
-| `valedorsinho/epic/tools-and-setup`     | Config, auth, environment setup                                 |
+| Epic branch                          | Features                                                          |
+|--------------------------------------|-------------------------------------------------------------------|
+| `valedorsinho/epic/online-checkout`  | Checkout flows (Advanced, Sessions, Tokenisation)                 |
+| `valedorsinho/epic/terminal-payments`| Cloud Terminal API payments, merchants, stores, terminals         |
+| `valedorsinho/epic/fleet-management` | Terminal fleet management, reassign                               |
+| `valedorsinho/epic/tools-and-setup`  | Config, auth, webhooks, payload validator, payload suggested      |
+| `valedorsinho/epic/webhooks`         | Webhook ingestion, viewer, HMAC signature validation              |
 
 Feature branches follow the same project prefix:
 `valedorsinho/feature/<description>` — branched from its parent epic.
