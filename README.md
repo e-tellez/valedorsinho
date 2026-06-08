@@ -167,11 +167,13 @@ API docs at http://localhost:8000/docs
 
 ## 🗂️ Epic Mapping
 
-| Epic branch                          | Features                                                          |
-|--------------------------------------|-------------------------------------------------------------------|
-| `valedorsinho/epic/digital`          | Checkout flows, payload validator, vertical suggestions           |
-| `valedorsinho/epic/unified-commerce` | Terminal payments, terminal fleet management                      |
-| `valedorsinho/epic/tools-and-setup`  | Config, auth, webhooks                                            |
+| Epic branch                             | Features                                                        |
+|-----------------------------------------|-----------------------------------------------------------------|
+| `valedorsinho/epic/online-checkout`     | Checkout flows, payload validator, vertical suggestions         |
+| `valedorsinho/epic/terminal-payments`   | Cloud Terminal API payments, merchants, stores, terminals       |
+| `valedorsinho/epic/fleet-management`    | Terminal fleet management, reassign                             |
+| `valedorsinho/epic/webhooks`            | Webhook ingestion, viewer, HMAC signature validation            |
+| `valedorsinho/epic/tools-and-setup`     | Config, auth, environment setup                                 |
 
 Feature branches follow the same project prefix:
 `valedorsinho/feature/<description>` — branched from its parent epic.
