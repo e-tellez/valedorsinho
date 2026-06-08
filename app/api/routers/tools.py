@@ -3,10 +3,10 @@
 import logging
 from typing import Any
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 
 from app.api.dependencies import get_tools_service
-from app.api.schemas.tools import ValidatePayloadBody
+from app.api.schemas.tools import PayloadSuggestedBody, ValidatePayloadBody
 from app.use_cases.tools_service import ToolsService
 
 logger = logging.getLogger(__name__)
@@ -37,3 +37,19 @@ async def get_verticals(
 ) -> list[dict[str, Any]]:
     """Return the list of merchant verticals with suggested payloads."""
     return service.get_verticals()
+
+
+# ---------------------------------------------------------------------------
+# POST /api/tools/payload-suggested
+# ---------------------------------------------------------------------------
+
+@router.post("/payload-suggested")
+async def get_payload_suggested(
+    body: PayloadSuggestedBody,
+    service: ToolsService = Depends(get_tools_service),
+) -> dict[str, Any]:
+    """Generate a suggested /payments payload for one or more merchant verticals."""
+    try:
+        return service.get_suggested_payload(body.verticals)
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error))

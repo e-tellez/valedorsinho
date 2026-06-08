@@ -451,6 +451,42 @@ Validate a `/payments` JSON payload against the Adyen OpenAPI spec.
 
 ---
 
+### POST /api/tools/payload-suggested
+
+Generate a suggested `/payments` payload for one or more merchant verticals.
+
+**Request Body:**
+
+```json
+{
+  "verticals": ["retail", "hotels"]
+}
+```
+
+| Field     | Type            | Required | Description                                          |
+|-----------|-----------------|----------|------------------------------------------------------|
+| verticals | array of string | Yes      | One or more vertical keys (e.g. `retail`, `hotels`)  |
+
+**Available vertical keys:** `minimum_mandatory`, `hotels`, `airlines`, `digital_wallet`, `subscription`, `ride_hailing`, `restaurants`, `retail`, `tickets`
+
+**Response `200`:**
+
+```json
+{
+  "payload": {
+    "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+    "reference": "order-001",
+    "amount": { "value": 1000, "currency": "EUR" },
+    "paymentMethod": { "type": "scheme" },
+    "returnUrl": "https://your-domain.com/redirect"
+  }
+}
+```
+
+> When multiple verticals are selected, their fields are deep-merged. Unknown vertical keys return `400`.
+
+---
+
 ## 6. Auth
 
 ### GET /api/auth/config

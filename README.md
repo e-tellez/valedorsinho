@@ -16,8 +16,9 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for branching, commit, and PR standards
 | **Checkout — Advanced Flow** | `POST /api/checkout/payments`, `POST /api/checkout/payments/details` | ✅ |
 | **Checkout — Sessions Flow** | `POST /api/checkout/sessions` | ✅ |
 | **Tokenisation** | `CardOnFile` via Advanced flow | ✅ |
-| **Payload Validator** | `POST /api/tools/validate` | ✅ |
-| **Vertical Suggestions** | `GET /api/tools/suggested/{vertical}` | ✅ |
+| **Payload Validator** | `POST /api/tools/validate-payload` | ✅ |
+| **Vertical Catalog** | `GET /api/tools/verticals` | ✅ |
+| **Payload Suggested** | `POST /api/tools/payload-suggested` | ✅ |
 
 ### 2. Unified Commerce
 | Feature | Endpoints | Status |
@@ -169,9 +170,11 @@ API docs at http://localhost:8000/docs
 
 | Epic branch                          | Features                                                          |
 |--------------------------------------|-------------------------------------------------------------------|
-| `valedorsinho/epic/digital`          | Checkout flows, payload validator, vertical suggestions           |
-| `valedorsinho/epic/unified-commerce` | Terminal payments, terminal fleet management                      |
-| `valedorsinho/epic/tools-and-setup`  | Config, auth, webhooks                                            |
+| `valedorsinho/epic/online-checkout`  | Checkout flows (Advanced, Sessions, Tokenisation)                 |
+| `valedorsinho/epic/terminal-payments`| Terminal payments                                                 |
+| `valedorsinho/epic/fleet-management` | Terminal fleet management                                         |
+| `valedorsinho/epic/tools-and-setup`  | Config, auth, webhooks, payload validator, payload suggested      |
+| `valedorsinho/epic/webhooks`         | Webhook ingest, listing, and retention                            |
 
 Feature branches follow the same project prefix:
 `valedorsinho/feature/<description>` — branched from its parent epic.
