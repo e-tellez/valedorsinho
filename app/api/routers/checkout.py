@@ -5,7 +5,7 @@ CheckoutService, and returns responses.
 """
 
 import logging
-from typing import Any
+from typing import Any, NoReturn
 
 import Adyen
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/checkout", tags=["checkout"])
 
 
-def _handle_adyen_error(error: Adyen.AdyenError) -> None:
+def _handle_adyen_error(error: Adyen.AdyenError) -> NoReturn:
     logger.error("Adyen API error: %s – %s", type(error).__name__, error)
     status_code = getattr(error, "status_code", 500) or 500
     raise HTTPException(status_code=status_code, detail=str(error))
