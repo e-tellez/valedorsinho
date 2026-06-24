@@ -146,7 +146,7 @@ class WebhookAdapter(WebhookGateway):
     @staticmethod
     def _row_to_event(row: dict[str, Any]) -> WebhookEvent:
         return WebhookEvent(
-            id=row.get("id"),
+            id=row["id"],
             user_id=row.get("user_id"),
             merchant_account=row["merchant_account"],
             event_code=row["event_code"],
@@ -157,14 +157,6 @@ class WebhookAdapter(WebhookGateway):
             success=row.get("success"),
             live=row.get("live", False),
             payload=row.get("payload", {}),
-            received_at=(
-                datetime.fromisoformat(row["received_at"])
-                if row.get("received_at")
-                else None
-            ),
-            expires_at=(
-                datetime.fromisoformat(row["expires_at"])
-                if row.get("expires_at")
-                else None
-            ),
+            received_at=datetime.fromisoformat(row["received_at"]),
+            expires_at=datetime.fromisoformat(row["expires_at"]),
         )
