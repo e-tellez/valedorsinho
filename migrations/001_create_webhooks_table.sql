@@ -49,7 +49,7 @@ BEGIN
     );
     RAISE NOTICE 'pg_cron job "cleanup-expired-webhooks" scheduled successfully';
 EXCEPTION
-    WHEN undefined_schema OR undefined_function THEN
+    WHEN invalid_schema_name OR undefined_function THEN
         RAISE NOTICE 'pg_cron not enabled — skipping cleanup schedule (enable it in Supabase Dashboard → Database → Extensions)';
 END;
 $$;
