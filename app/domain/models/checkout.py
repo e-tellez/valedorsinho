@@ -69,10 +69,17 @@ class AuthenticationData(AdyenModel):
 # ---------------------------------------------------------------------------
 
 class PaymentMethodsRequest(AdyenModel):
-    """Body for POST /paymentMethods."""
+    """Body for POST /paymentMethods.
+
+    ``amount`` is intentionally optional.  When omitted, Adyen returns the full
+    set of payment methods available for the merchant account and country,
+    including methods that have minimum/maximum amount restrictions (e.g. OXXO).
+    Only pass ``amount`` when you want Adyen to filter methods against a known
+    transaction value.
+    """
 
     merchant_account: str
-    amount: Amount
+    amount: Amount | None = None
     country_code: str
     shopper_reference: str | None = None
     shopper_locale: str = "en-US"

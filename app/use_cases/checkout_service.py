@@ -40,15 +40,20 @@ class CheckoutService:
 
     def get_payment_methods(
         self,
-        amount_value: int,
-        currency: str,
         country_code: str,
         shopper_locale: str,
         shopper_reference: str | None,
+        amount_value: int | None = None,
+        currency: str | None = None,
     ) -> dict[str, Any]:
+        amount = (
+            Amount(value=amount_value, currency=currency)
+            if amount_value is not None and currency
+            else None
+        )
         request_model = PaymentMethodsRequest(
             merchant_account=self._merchant_account,
-            amount=Amount(value=amount_value, currency=currency),
+            amount=amount,
             country_code=country_code,
             shopper_locale=shopper_locale,
             shopper_reference=shopper_reference,

@@ -38,20 +38,27 @@ def _handle_adyen_error(error: Adyen.AdyenError) -> None:
 @router.get("/payment-methods")
 async def payment_methods(
     service: CheckoutService = Depends(get_checkout_service),
-    amount_value: int = Query(default=1000, alias="amountValue"),
-    currency: str = Query(default="MXN"),
     country_code: str = Query(default="MX", alias="countryCode"),
     shopper_locale: str = Query(default="en-US", alias="shopperLocale"),
     shopper_reference: str | None = Query(default=None, alias="shopperReference"),
+    amount_value: int | None = Query(default=None, alias="amountValue"),
+    currency: str | None = Query(default=None),
 ) -> dict[str, Any]:
-    """Retrieve the payment methods available for this merchant."""
+    """Retrieve the payment methods available for this merchant.
+
+    ``amountValue`` and ``currency`` are optional.  Omitting them returns the
+    full set of payment methods without amount-based filtering (recommended for
+    payment method discovery).  Pass both to restrict results to methods that
+    support the given transaction amount (e.g. when pre-filtering before
+    presenting the drop-in).
+    """
     try:
         return service.get_payment_methods(
-            amount_value=amount_value,
-            currency=currency,
             country_code=country_code,
             shopper_locale=shopper_locale,
             shopper_reference=shopper_reference,
+            amount_value=amount_value,
+            currency=currency,
         )
     except Adyen.AdyenError as error:
         _handle_adyen_error(error)

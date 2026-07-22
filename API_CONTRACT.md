@@ -2,13 +2,9 @@
 
 > E-commerce and Adyen payment integration (Private)
 
-## Base URL
+**Base URL:** `https://<valedorsinho-service>.up.railway.app`
 
-```
-https://<valedorsinho-service>.onrender.com
-```
-
-> All routes are prefixed with `/api`. In development, the Next.js frontend rewrites `/api/*` → `http://localhost:8000/api/*` via `next.config.mjs`.
+In development, the Next.js frontend rewrites `/api/*` → `http://localhost:8000/api/*` via `next.config.mjs`.
 
 ## Authentication
 
@@ -20,7 +16,7 @@ All endpoints require a valid JWT in the `Authorization: Bearer <token>` header.
 
 ### GET /api/config/client
 
-Return the client-side Adyen configuration needed to initialize the SDK.
+Return the client-side Adyen configuration needed to initialize the Drop-in SDK.
 
 **Response `200`:**
 
@@ -36,17 +32,23 @@ Return the client-side Adyen configuration needed to initialize the SDK.
 
 ## 2. Online Checkout
 
+> **`requestBody` field:** All checkout responses include a `requestBody` key containing the raw Adyen API request sent by the backend. This is returned for debug display on the frontend only — it is not part of the Adyen response.
+
 ### GET /api/checkout/payment-methods
 
-Fetch available payment methods for the current shopper context. Used by both Advanced and Manage Payments flows.
+Fetch available payment methods for the current shopper. Used by the Advanced flow and the Manage Payments flow.
 
 **Query Parameters:**
 
-| Param            | Type   | Required | Description                          |
-|------------------|--------|----------|--------------------------------------|
-| countryCode      | string | Yes      | ISO 3166-1 alpha-2 (e.g. `MX`)      |
-| currency         | string | Yes      | ISO 4217 (e.g. `MXN`)               |
-| shopperReference | string | No       | Shopper ID — required to return stored methods |
+| Param            | Type   | Required | Default  | Description |
+|------------------|--------|----------|----------|-------------|
+| countryCode      | string | Yes      | `MX`     | ISO 3166-1 alpha-2 |
+| shopperLocale    | string | No       | `en-US`  | BCP 47 locale for method display names |
+| shopperReference | string | No       | —        | Shopper ID — include to also return stored methods |
+| amountValue      | int    | No       | —        | Transaction amount in minor units |
+| currency         | string | No       | —        | ISO 4217 (e.g. `MXN`) — required when `amountValue` is set |
+
+> **Amount filtering:** `amountValue` and `currency` are optional. When omitted, Adyen returns the complete set of payment methods for the merchant/country (recommended — avoids filtering out methods like OXXO that have amount restrictions). Pass both only when you need Adyen to pre-filter against a known transaction value.
 
 **Response `200`:**
 
@@ -72,8 +74,6 @@ Fetch available payment methods for the current shopper context. Used by both Ad
 }
 ```
 
-> `requestBody` is the raw Adyen API request — returned for debug display on the frontend.
-
 ---
 
 ### POST /api/checkout/sessions
@@ -94,7 +94,7 @@ Create an Adyen Sessions-flow session.
 }
 ```
 
-> `amountValue` is in **minor units** (e.g. `1000` = MXN 10.00). `shopperReference` and `shopperEmail` are omitted for guest shoppers.
+> `amountValue` is in **minor units** (e.g. `1000` = MXN 10.00). Omit `shopperReference` and `shopperEmail` for guest shoppers.
 
 **Response `200`:**
 
@@ -133,7 +133,7 @@ Create a payment — Advanced flow only.
 }
 ```
 
-> When saving a card without charging (Manage Payments flow), `amountValue` is `0` and `storePaymentMethod` is `true`.
+> When saving a card without charging (Manage Payments flow), set `amountValue: 0` and `storePaymentMethod: true`.
 
 **Response `200`:**
 
@@ -145,7 +145,7 @@ Create a payment — Advanced flow only.
 }
 ```
 
-> `action` is present for 3DS / redirect flows. The frontend calls `component.handleAction(action)` when it exists.
+> `action` is present for 3DS / redirect flows — call `component.handleAction(action)` when it exists.
 
 ---
 
@@ -168,7 +168,7 @@ Submit additional details for 3DS or redirect flows — Advanced flow only.
 
 ### POST /api/checkout/redirect
 
-Resolve the result after a browser redirect (both Advanced and Sessions flows).
+Resolve the result after a browser redirect (Advanced and Sessions flows).
 
 **Request Body:**
 
@@ -185,7 +185,7 @@ Resolve the result after a browser redirect (both Advanced and Sessions flows).
 
 ### POST /api/checkout/disable
 
-Remove a stored payment method for a shopper. Called by the Manage Payments Drop-in via `onDisableStoredPaymentMethod`.
+Remove a stored payment method. Called by the Manage Payments Drop-in via `onDisableStoredPaymentMethod`.
 
 **Request Body:**
 
@@ -277,9 +277,9 @@ List terminals for a merchant, optionally filtered by store.
 
 ### POST /api/terminal/make-payment
 
-Forward a Nexo `SaleToPOIRequest` to the target terminal. The backend proxies this to the Adyen Terminal API.
+Forward a Nexo `SaleToPOIRequest` to the target terminal (proxied to the Adyen Terminal API).
 
-**Request Body:** Raw `SaleToPOIRequest` object (Nexo Retailer protocol v3.0).
+**Request Body:** Raw `SaleToPOIRequest` (Nexo Retailer protocol v3.0).
 
 ```json
 {
@@ -311,17 +311,17 @@ Forward a Nexo `SaleToPOIRequest` to the target terminal. The backend proxies th
 }
 ```
 
-> `RequestedAmount` is in **major units** (e.g. `10.00` = MXN 10.00). `SaleToAcquirerData` is a base64-encoded JSON string. `TransactionConditions` and `SaleToAcquirerData` are optional.
+> `RequestedAmount` is in **major units** (e.g. `10.00` = MXN 10.00). `SaleToAcquirerData` and `TransactionConditions` are optional.
 
-**Response `200`:** Raw `SaleToPOIResponse` object from the terminal (pass-through).
+**Response `200`:** Raw `SaleToPOIResponse` (pass-through from terminal).
 
 ---
 
 ### POST /api/terminal/decode-response
 
-Decode a raw `SaleToPOIResponse` into a structured result for display.
+Decode a raw `SaleToPOIResponse` into a structured display result.
 
-**Request Body:** Raw `SaleToPOIResponse` object (as returned by `POST /api/terminal/make-payment`).
+**Request Body:** Raw `SaleToPOIResponse` as returned by `POST /api/terminal/make-payment`.
 
 **Response `200`:**
 
@@ -388,8 +388,6 @@ List stores for a merchant (fleet context). Same shape as `GET /api/terminal/sto
 |------------|--------|----------|------------------|
 | merchantId | string | Yes      | Merchant account |
 
-**Response `200`:** Same shape as `GET /api/terminal/stores`.
-
 ---
 
 ### POST /api/fleet/reassign
@@ -447,7 +445,39 @@ Validate a `/payments` JSON payload against the Adyen OpenAPI spec.
 }
 ```
 
-> `errors` is empty (or omitted) when `valid` is `true`.
+> `errors` is empty when `valid` is `true`.
+
+---
+
+### POST /api/tools/payload-suggested
+
+Generate a suggested `/payments` payload for one or more merchant verticals.
+
+**Request Body:**
+
+```json
+{
+  "verticals": ["retail", "hotels"]
+}
+```
+
+**Available vertical keys:** `minimum_mandatory`, `hotels`, `airlines`, `digital_wallet`, `subscription`, `ride_hailing`, `restaurants`, `retail`, `tickets`
+
+> When multiple verticals are selected their fields are deep-merged. Unknown vertical keys return `400`.
+
+**Response `200`:**
+
+```json
+{
+  "payload": {
+    "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
+    "reference": "order-001",
+    "amount": { "value": 1000, "currency": "EUR" },
+    "paymentMethod": { "type": "scheme" },
+    "returnUrl": "https://your-domain.com/redirect"
+  }
+}
+```
 
 ---
 
@@ -489,7 +519,7 @@ Save personal Adyen credentials. Allowed for `admin` and `im` roles only.
 
 **Response `200`:** Same shape as `GET /api/auth/config`.
 
-> Returns `403` if the role is `user` or if the existing config row has `locked = true`.
+> Returns `403` if role is `user` or if the existing config has `locked: true`.
 
 ---
 
@@ -497,44 +527,11 @@ Save personal Adyen credentials. Allowed for `admin` and `im` roles only.
 
 ### POST /api/webhooks/{user_id}
 
-Adyen notification listener. Receives standard Adyen webhook notifications and persists each item under the given user.
+Adyen notification listener. **Not called by the frontend** — Adyen calls this directly.
 
-**Auth:** None — Adyen calls this endpoint directly.
+> Configure this URL in Adyen Customer Area → Developers → Webhooks using the user's profile `id` (Supabase `auth.users.id`) as `user_id`. Auth is currently handled by Supabase.
 
-**Path Parameters:**
-
-| Param   | Type   | Description                                                   |
-|---------|--------|---------------------------------------------------------------|
-| user_id | string | Supabase profile `id` of the user who owns this webhook URL. Configure this URL in the Adyen Customer Area so each user has their own endpoint. |
-
-**Request Body:** Standard Adyen notification JSON:
-
-```json
-{
-  "live": "false",
-  "notificationItems": [
-    {
-      "NotificationRequestItem": {
-        "eventCode": "AUTHORISATION",
-        "merchantAccountCode": "string",
-        "pspReference": "string",
-        "merchantReference": "string",
-        "amount": { "currency": "EUR", "value": 1000 },
-        "success": "true",
-        "eventDate": "2025-01-01T00:00:00+00:00"
-      }
-    }
-  ]
-}
-```
-
-**Response `200`:**
-
-```json
-{ "notificationResponse": "[accepted]" }
-```
-
-> Always responds `[accepted]` regardless of validation outcome — per Adyen specification.
+**Response `200`:** Always `{ "notificationResponse": "[accepted]" }`.
 
 ---
 
@@ -588,38 +585,19 @@ Return a single webhook event including its full raw payload.
 }
 ```
 
-> Returns `404` if the webhook is not found, has expired, or belongs to a different user.
-
----
-
-## 8. E-Commerce (Planned)
-
-> Not yet consumed by the frontend. Implement once the e-commerce layer is active.
-
-### GET /api/products
-
-### POST /api/orders
-
-### GET /api/orders/{id}
+> Returns `404` if not found, expired, or belonging to a different user.
 
 ---
 
 ## Error Format
 
-FastAPI default error shape — the frontend `api.ts` reads `detail` first, then falls back to `error`:
-
 ```json
-{
-  "detail": "string"
-}
+{ "detail": "string" }
 ```
-
-**HTTP status codes used:**
 
 | Code | Meaning                          |
 |------|----------------------------------|
 | 200  | OK                               |
-| 201  | Created                          |
 | 400  | Bad Request / validation error   |
 | 401  | Unauthorized                     |
 | 422  | Unprocessable Entity (FastAPI)   |
@@ -627,38 +605,8 @@ FastAPI default error shape — the frontend `api.ts` reads `detail` first, then
 
 ---
 
-## Environment Variables
-
-### Backend (FastAPI — set in Render)
-
-| Variable                  | Description                                              |
-|---------------------------|----------------------------------------------------------|
-| `ADYEN_API_KEY`           | Adyen API key (from Adyen Customer Area)                 |
-| `ADYEN_MERCHANT_ACCOUNT`  | Default Adyen merchant account (env-var fallback)        |
-| `ADYEN_CLIENT_KEY`        | Default Adyen client key                                 |
-| `ADYEN_ENVIRONMENT`       | `test` or `live`                                         |
-| `ADYEN_HMAC_KEY`          | HMAC key for webhook signature validation (future use)   |
-| `CORS_ORIGINS`            | Comma-separated allowed origins (e.g. `https://etellez.com`) |
-| `SUPABASE_URL`            | Supabase project URL                                     |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key (bypasses RLS)               |
-| `SUPABASE_JWT_SECRET`     | Secret for verifying Supabase JWTs (HS256)               |
-| `SUPABASE_DATABASE_URL`   | Direct Postgres connection string (Transaction mode pooler, port 6543) — used by the migration runner on startup |
-
-### Frontend (Next.js — set in Vercel)
-
-| Variable                  | Description                                              |
-|---------------------------|----------------------------------------------------------|
-| `VALEDORSINHO_API_URL`    | Render service base URL (used in production rewrites)    |
-
-> **Never commit actual secrets.** Keep a `.env.example` with placeholder values in each repo.
-
----
-
 ## Notes
 
 - **Amount units:** Online checkout uses **minor units** (`amountValue: 1000` = 10.00). Terminal payments use **major units** (`RequestedAmount: 10.00`).
-- **Proxy:** `next.config.mjs` rewrites `/api/*` → `http://localhost:8000/api/*` in dev. In production, update the rewrite destination to `VALEDORSINHO_API_URL`.
-- **CORS:** Backend must allow `http://localhost:3000` (dev) and `https://etellez.com` (prod).
-- **Adyen webhook:** `POST /api/webhooks/{user_id}` receives Adyen notifications. Each user configures their own URL in the Adyen Customer Area under Developers → Webhooks using their Supabase profile `id`. The frontend does not call this directly.
-- **Webhook routing:** The `user_id` is embedded in the URL path, so routing is always stable even when a user rotates their Adyen credentials or merchant account.
-- **Webhook retention:** Admin users retain webhooks for 5 days; `im` and `user` roles retain for 3 days. Expired rows are filtered from all read queries. Automated cleanup runs daily via pg_cron (see `migrations/001_create_webhooks_table.sql`). Migrations are applied automatically on app startup.
+- **Proxy:** `next.config.mjs` rewrites `/api/*` → `http://localhost:8000/api/*` in dev. In production, `VALEDORSINHO_API_URL` (set in Vercel, pointing to the Railway service) is used as the rewrite destination.
+- **CORS:** Backend allows `http://localhost:3000` (dev) and `https://etellez.com` (prod).
