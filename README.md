@@ -8,6 +8,31 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for branching, commit, and PR standards
 
 ---
 
+## 🛠️ Tech Stack
+
+**Backend Framework:**
+- [FastAPI](https://fastapi.tiangolo.com/) — Modern Python web framework with automatic OpenAPI docs
+- [Uvicorn](https://www.uvicorn.org/) — ASGI server for development
+- [Gunicorn](https://gunicorn.org/) — Production WSGI server with Uvicorn workers
+
+**Payment Integration:**
+- [Adyen Python SDK](https://github.com/Adyen/adyen-python-api-library) — Official Adyen API client
+
+**Authentication & Database:**
+- [Supabase](https://supabase.com/) — PostgreSQL database + Auth (JWT verification)
+- [psycopg2](https://www.psycopg.org/) — PostgreSQL adapter for Python
+
+**Validation & Security:**
+- [Pydantic](https://docs.pydantic.dev/) — Data validation and settings management
+- [jsonschema](https://python-jsonschema.readthedocs.io/) — JSON Schema validation for payloads
+- [PyJWT](https://pyjwt.readthedocs.io/) — JWT token handling
+- [cryptography](https://cryptography.io/) — Cryptographic operations
+
+**Deployment:**
+- [Render](https://render.com/) — Cloud hosting platform
+
+---
+
 ## 🗺️ Feature Roadmap
 
 ### 1. Digital

@@ -1,8 +1,9 @@
-"""Application configuration and Adyen client initialization."""
+"""Application configuration — loads environment variables and exposes constants."""
 
+import logging
 import os
 
-import Adyen
+logger = logging.getLogger(__name__)
 
 
 def _load_env_file(*candidates: str) -> None:
@@ -34,6 +35,11 @@ def _load_env_file(*candidates: str) -> None:
                 # Do not override a value that was already set in the environment
                 if key and key not in os.environ:
                     os.environ[key] = value
+        if path.endswith(".env.example"):
+            logger.warning(
+                ".env not found — loaded placeholder values from .env.example. "
+                "Create a .env file with real credentials before running in production."
+            )
         break  # Stop after the first file that exists
 
 
@@ -55,16 +61,6 @@ if not os.environ.get("SSL_CERT_FILE"):
         os.environ["SSL_CERT_FILE"] = certifi.where()
     except ImportError:
         pass  # certifi not installed; user must set SSL_CERT_FILE manually
-
-# ---------------------------------------------------------------------------
-# Adyen client
-# ---------------------------------------------------------------------------
-
-adyen_client = Adyen.Adyen(
-    xapikey=os.getenv("ADYEN_API_KEY"),
-    platform=os.getenv("ADYEN_ENVIRONMENT", "test"),  # "test" or "live"
-    merchant_account=os.getenv("ADYEN_MERCHANT_ACCOUNT"),
-)
 
 # ---------------------------------------------------------------------------
 # Application constants read from environment

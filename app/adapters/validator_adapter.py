@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import threading
 from typing import Any
 
@@ -14,9 +15,12 @@ from app.ports.validator_port import PayloadValidator
 # OpenAPI spec fetching
 # ---------------------------------------------------------------------------
 
+# Version can be overridden via ADYEN_OPENAPI_SPEC_VERSION (e.g. "v71").
+# Update this default when Adyen releases a new Checkout API version.
+_SPEC_VERSION = os.getenv("ADYEN_OPENAPI_SPEC_VERSION", "v71")
 _SPEC_URL = (
-    "https://raw.githubusercontent.com/Adyen/adyen-openapi"
-    "/main/json/CheckoutService-v71.json"
+    f"https://raw.githubusercontent.com/Adyen/adyen-openapi"
+    f"/main/json/CheckoutService-{_SPEC_VERSION}.json"
 )
 
 _spec_cache: dict[str, Any] | None = None

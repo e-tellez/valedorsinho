@@ -4,12 +4,13 @@ Thin HTTP layer for terminal selection cascades and Cloud Terminal API payments.
 """
 
 import logging
-from typing import Any
+from typing import Any, NoReturn
 
 import Adyen
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.api.dependencies import get_terminal_payment_service
+from app.api.schemas.terminal import DecodeResponseBody, MakePaymentBody
 from app.use_cases.terminal_payment_service import TerminalPaymentService
 
 logger = logging.getLogger(__name__)
@@ -17,7 +18,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/terminal", tags=["terminal-payments"])
 
 
-def _handle_adyen_error(error: Adyen.AdyenError) -> None:
+def _handle_adyen_error(error: Adyen.AdyenError) -> NoReturn:
     logger.error("Adyen Management API error: %s – %s", type(error).__name__, error)
     status_code = getattr(error, "status_code", 500) or 500
     raise HTTPException(status_code=status_code, detail=str(error))
@@ -99,14 +100,11 @@ async def list_terminals(
 
 @router.post("/make-payment")
 async def make_payment(
-    request: Request,
+    body: MakePaymentBody,
     service: TerminalPaymentService = Depends(get_terminal_payment_service),
 ) -> dict[str, Any]:
     """Send a payment request to a terminal via the Adyen Terminal API (Cloud)."""
-    payment_request = await request.json()
-    if not payment_request:
-        raise HTTPException(status_code=400, detail="Request body is required")
-    return service.make_payment(payment_request)
+    return service.make_payment(body.model_dump())
 
 
 # ---------------------------------------------------------------------------
@@ -115,12 +113,11 @@ async def make_payment(
 
 @router.post("/decode-response")
 async def decode_response(
-    request: Request,
+    body: DecodeResponseBody,
     service: TerminalPaymentService = Depends(get_terminal_payment_service),
 ) -> dict[str, Any]:
     """Decode a terminal payment response and extract the payment summary."""
-    response_data = await request.json()
-    result = service.decode_response(response_data)
+    result = service.decode_response(body.model_dump(exclude_none=True))
     return {
         "success": result.success,
         "resultTitle": result.result_title,

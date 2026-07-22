@@ -9,7 +9,6 @@ from app.domain.models.auth import UserRole
 
 class AdyenConfigResponse(BaseModel):
     role: UserRole
-    api_key: str
     client_key: str
     merchant_account: str
     environment: str

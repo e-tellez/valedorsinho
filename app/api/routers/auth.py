@@ -24,7 +24,6 @@ def get_config(
     credentials = auth_service.resolve_credentials(current_user)
     return AdyenConfigResponse(
         role=current_user.role,
-        api_key=credentials.api_key,
         client_key=credentials.client_key,
         merchant_account=credentials.merchant_account,
         environment=credentials.environment,
@@ -54,7 +53,6 @@ def update_config(
         raise HTTPException(status_code=403, detail=str(error))
     return AdyenConfigResponse(
         role=current_user.role,
-        api_key=saved_credentials.api_key,
         client_key=saved_credentials.client_key,
         merchant_account=saved_credentials.merchant_account,
         environment=saved_credentials.environment,

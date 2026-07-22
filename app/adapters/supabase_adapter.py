@@ -102,6 +102,13 @@ class SupabaseAdapter(AuthGateway):
         )
 
     def upsert_adyen_config(self, user_id: str, credentials: AdyenCredentials) -> AdyenCredentials:
+        # NOTE (TOCTOU): the lock check and the upsert are two separate HTTP
+        # calls, so a concurrent request could change `locked` between them.
+        # The risk is low in practice (lock changes are rare admin operations),
+        # but for a fully race-free guarantee this check should be enforced at
+        # the database layer — e.g. via a Postgres trigger or stored procedure
+        # that refuses to overwrite a row where locked = true.
+        # TODO: move lock enforcement to a DB-level check (trigger/RPC).
         existing_credentials = self.get_adyen_config(user_id)
         if existing_credentials is not None and existing_credentials.locked:
             raise PermissionError("This configuration is locked and cannot be modified")

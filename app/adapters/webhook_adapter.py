@@ -145,6 +145,13 @@ class WebhookAdapter(WebhookGateway):
 
     @staticmethod
     def _row_to_event(row: dict[str, Any]) -> WebhookEvent:
+        # These fields are DB-guaranteed (PRIMARY KEY / NOT NULL with defaults).
+        # If any is absent the DB contract has been violated — fail loudly.
+        assert "id" in row, "_row_to_event: DB row missing 'id'"
+        assert "merchant_account" in row, "_row_to_event: DB row missing 'merchant_account'"
+        assert "event_code" in row, "_row_to_event: DB row missing 'event_code'"
+        assert "received_at" in row, "_row_to_event: DB row missing 'received_at'"
+        assert "expires_at" in row, "_row_to_event: DB row missing 'expires_at'"
         return WebhookEvent(
             id=row["id"],
             user_id=row.get("user_id"),
