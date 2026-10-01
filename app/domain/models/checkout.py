@@ -112,14 +112,8 @@ class PaymentRequest(AdyenModel):
 
     @computed_field  # type: ignore[prop-decorator]
     @property
-    def shopper_interaction(self) -> str | None:
-        """Ecommerce for new cards, ContAuth for stored (tokenised) cards.
-
-        Returns None for guest payments (no shopper_reference) so the field
-        is excluded from the serialised dict.
-        """
-        if not self.shopper_reference:
-            return None
+    def shopper_interaction(self) -> str:
+        """Ecommerce for new cards, ContAuth for stored (tokenised) cards."""
         if self.payment_method.get("storedPaymentMethodId"):
             return "ContAuth"
         return "Ecommerce"
