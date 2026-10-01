@@ -69,10 +69,17 @@ class AuthenticationData(AdyenModel):
 # ---------------------------------------------------------------------------
 
 class PaymentMethodsRequest(AdyenModel):
-    """Body for POST /paymentMethods."""
+    """Body for POST /paymentMethods.
+
+    ``amount`` is intentionally optional.  When omitted, Adyen returns the full
+    set of payment methods available for the merchant account and country,
+    including methods that have minimum/maximum amount restrictions (e.g. OXXO).
+    Only pass ``amount`` when you want Adyen to filter methods against a known
+    transaction value.
+    """
 
     merchant_account: str
-    amount: Amount
+    amount: Amount | None = None
     country_code: str
     shopper_reference: str | None = None
     shopper_locale: str = "en-US"
@@ -105,14 +112,8 @@ class PaymentRequest(AdyenModel):
 
     @computed_field  # type: ignore[prop-decorator]
     @property
-    def shopper_interaction(self) -> str | None:
-        """Ecommerce for new cards, ContAuth for stored (tokenised) cards.
-
-        Returns None for guest payments (no shopper_reference) so the field
-        is excluded from the serialised dict.
-        """
-        if not self.shopper_reference:
-            return None
+    def shopper_interaction(self) -> str:
+        """Ecommerce for new cards, ContAuth for stored (tokenised) cards."""
         if self.payment_method.get("storedPaymentMethodId"):
             return "ContAuth"
         return "Ecommerce"
