@@ -28,7 +28,7 @@ class FakeCheckoutGateway(CheckoutGateway):
         return {"epochTimestamp": 1}
 
 
-def test_create_payment_omits_unsupplied_billing_and_legacy_3ds_fields() -> None:
+def test_create_payment_omits_unsupplied_billing_and_requests_native_3ds() -> None:
     gateway = FakeCheckoutGateway()
     service = CheckoutService(gateway, "MerchantECOM")
 
@@ -45,8 +45,11 @@ def test_create_payment_omits_unsupplied_billing_and_legacy_3ds_fields() -> None
 
     assert gateway.payment_request is not None
     assert "billingAddress" not in gateway.payment_request
-    assert "authenticationData" not in gateway.payment_request
     assert "storePaymentMethod" not in gateway.payment_request
+    # Native 3DS2 must be requested, otherwise Adyen defaults to the redirect flow.
+    assert gateway.payment_request["authenticationData"] == {
+        "threeDSRequestData": {"nativeThreeDS": "preferred"}
+    }
 
 
 def test_apple_pay_payment_redacts_token_from_preview() -> None:
