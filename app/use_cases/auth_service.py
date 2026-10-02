@@ -38,14 +38,32 @@ class AuthService:
             return None
         return self._gateway.get_adyen_config(user.user_id)
 
-    def save_user_config(
-        self, user: UserProfile, credentials: AdyenCredentials
+    def update_user_config(
+        self,
+        user: UserProfile,
+        api_key: str | None,
+        client_key: str,
+        merchant_account: str,
     ) -> AdyenCredentials:
-        """Persist credentials for admin/im users.
-
-        Raises:
-            PermissionError: if the role is 'user' or the existing config is locked.
-        """
         if user.role not in (UserRole.ADMIN, UserRole.IM):
             raise PermissionError("Only admin and im users can set custom credentials")
-        return self._gateway.upsert_adyen_config(user.user_id, credentials)
+
+        existing = self._gateway.get_adyen_config(user.user_id)
+        resolved_api_key = api_key.strip() if api_key and api_key.strip() else ""
+        if not resolved_api_key and existing is not None:
+            resolved_api_key = existing.api_key
+
+        resolved_client_key = client_key.strip()
+        resolved_merchant_account = merchant_account.strip()
+        if not resolved_api_key or not resolved_client_key or not resolved_merchant_account:
+            raise ValueError("API key, client key, and merchant account are required")
+
+        return self._gateway.upsert_adyen_config(
+            user.user_id,
+            AdyenCredentials(
+                api_key=resolved_api_key,
+                client_key=resolved_client_key,
+                merchant_account=resolved_merchant_account,
+                environment=self._default_credentials.environment,
+            ),
+        )

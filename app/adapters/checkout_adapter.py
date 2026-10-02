@@ -37,3 +37,7 @@ class CheckoutAdapter(CheckoutGateway):
     def disable_stored_method(self, request_body: dict[str, Any]) -> dict[str, Any]:
         response = self._client.recurring.recurring_api.disable(request_body)
         return response.message
+
+    def create_apple_pay_session(self, request_body: dict[str, Any]) -> dict[str, Any]:
+        response = self._client.checkout.utility_api.get_apple_pay_session(request_body)
+        return response.message
