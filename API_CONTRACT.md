@@ -28,6 +28,14 @@ Return the client-side Adyen configuration needed to initialize the Drop-in SDK.
 }
 ```
 
+**Response `404`:** returned when no usable configuration is available (blank client key or merchant account). The frontend treats this as "setup required" and must not initialize the SDK. The API key is never returned by this endpoint.
+
+```json
+{
+  "detail": "No Adyen configuration found. Please complete the setup step first."
+}
+```
+
 ---
 
 ## 2. Online Checkout
