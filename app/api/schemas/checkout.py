@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from pydantic.alias_generators import to_camel
 
 
@@ -66,3 +66,25 @@ class RedirectBody(BaseModel):
 
     redirect_result: str
     payment_data: str | None = None
+
+
+class ApplePayPaymentMethodsBody(BaseModel):
+    model_config = {"alias_generator": to_camel, "populate_by_name": True}
+
+    country_code: str = "MX"
+    currency: str = "MXN"
+
+
+class ApplePaySessionBody(BaseModel):
+    model_config = {"alias_generator": to_camel, "populate_by_name": True}
+
+    merchant_identifier: str = Field(min_length=1)
+    display_name: str = Field(min_length=1)
+
+
+class ApplePayPaymentBody(BaseModel):
+    model_config = {"alias_generator": to_camel, "populate_by_name": True}
+
+    apple_pay_token: str = Field(min_length=1)
+    amount_value: int = Field(gt=0)
+    installment_count: Literal[3, 6, 9, 12]

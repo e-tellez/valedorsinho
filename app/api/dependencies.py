@@ -18,6 +18,8 @@ from app.adapters.webhook_adapter import WebhookAdapter
 from app.api.config import (
     ADYEN_API_KEY,
     ADYEN_ENVIRONMENT,
+    APPLE_PAY_DOMAIN_NAME,
+    APP_URL,
     CLIENT_KEY,
     MERCHANT_ACCOUNT,
     SUPABASE_JWT_SECRET,
@@ -112,6 +114,8 @@ def get_checkout_service(
     return CheckoutService(
         gateway=CheckoutAdapter(_build_adyen_client(credentials)),
         merchant_account=credentials.merchant_account,
+        apple_pay_domain=APPLE_PAY_DOMAIN_NAME,
+        app_url=APP_URL,
     )
 
 

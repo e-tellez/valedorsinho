@@ -4,10 +4,9 @@ import logging
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from app.api.config import ADYEN_ENVIRONMENT
 from app.api.dependencies import get_auth_service, get_current_user
 from app.api.schemas.auth import AdyenConfigResponse, UpsertAdyenConfigBody
-from app.domain.models.auth import AdyenCredentials, UserProfile, UserRole
+from app.domain.models.auth import UserProfile, UserRole
 from app.use_cases.auth_service import AuthService
 
 logger = logging.getLogger(__name__)
@@ -21,14 +20,20 @@ def get_config(
     auth_service: AuthService = Depends(get_auth_service),
 ) -> AdyenConfigResponse:
     """Return the active Adyen credentials for the authenticated user."""
-    credentials = auth_service.resolve_credentials(current_user)
+    personal_credentials = auth_service.get_user_config(current_user)
+    credentials = personal_credentials or auth_service.resolve_credentials(current_user)
     return AdyenConfigResponse(
         role=current_user.role,
         client_key=credentials.client_key,
         merchant_account=credentials.merchant_account,
         environment=credentials.environment,
-        is_custom=current_user.role in (UserRole.ADMIN, UserRole.IM),
-        locked=credentials.locked,
+        is_custom=personal_credentials is not None,
+        locked=personal_credentials.locked if personal_credentials else False,
+        api_key_configured=personal_credentials is not None and bool(personal_credentials.api_key),
+        can_configure=(
+            current_user.role in (UserRole.ADMIN, UserRole.IM)
+            and not (personal_credentials and personal_credentials.locked)
+        ),
     )
 
 
@@ -40,17 +45,16 @@ def update_config(
 ) -> AdyenConfigResponse:
     """Save personal Adyen credentials. Allowed for admin and im roles only."""
     try:
-        saved_credentials = auth_service.save_user_config(
+        saved_credentials = auth_service.update_user_config(
             user=current_user,
-            credentials=AdyenCredentials(
-                api_key=body.api_key,
-                client_key=body.client_key,
-                merchant_account=body.merchant_account,
-                environment=ADYEN_ENVIRONMENT,
-            ),
+            api_key=body.api_key,
+            client_key=body.client_key,
+            merchant_account=body.merchant_account,
         )
     except PermissionError as error:
         raise HTTPException(status_code=403, detail=str(error))
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error))
     return AdyenConfigResponse(
         role=current_user.role,
         client_key=saved_credentials.client_key,
@@ -58,4 +62,6 @@ def update_config(
         environment=saved_credentials.environment,
         is_custom=True,
         locked=saved_credentials.locked,
+        api_key_configured=True,
+        can_configure=True,
     )

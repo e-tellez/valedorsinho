@@ -12,6 +12,9 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 
 from app.api.dependencies import get_checkout_service
 from app.api.schemas.checkout import (
+    ApplePayPaymentBody,
+    ApplePayPaymentMethodsBody,
+    ApplePaySessionBody,
     CreatePaymentBody,
     CreateSessionBody,
     DisableStoredMethodBody,
@@ -171,6 +174,50 @@ async def handle_redirect(
         return service.handle_redirect(
             redirect_result=body.redirect_result,
             payment_data=body.payment_data,
+        )
+    except Adyen.AdyenError as error:
+        _handle_adyen_error(error)
+
+
+@router.post("/apple-pay/payment-methods")
+async def apple_pay_payment_methods(
+    body: ApplePayPaymentMethodsBody | None = None,
+    service: CheckoutService = Depends(get_checkout_service),
+) -> dict[str, Any]:
+    """Discover Apple Pay availability.
+
+    The body is optional; when omitted it defaults to the schema's MX/MXN.
+    """
+    resolved = body or ApplePayPaymentMethodsBody()
+    try:
+        return service.get_apple_pay_payment_methods(resolved.country_code, resolved.currency)
+    except Adyen.AdyenError as error:
+        _handle_adyen_error(error)
+
+
+@router.post("/apple-pay/validate-merchant")
+async def validate_apple_pay_merchant(
+    body: ApplePaySessionBody,
+    service: CheckoutService = Depends(get_checkout_service),
+) -> dict[str, Any]:
+    try:
+        return service.create_apple_pay_session(body.merchant_identifier, body.display_name)
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error))
+    except Adyen.AdyenError as error:
+        _handle_adyen_error(error)
+
+
+@router.post("/apple-pay/payments")
+async def apple_pay_payments(
+    body: ApplePayPaymentBody,
+    service: CheckoutService = Depends(get_checkout_service),
+) -> dict[str, Any]:
+    try:
+        return service.create_apple_pay_payment(
+            body.apple_pay_token,
+            body.amount_value,
+            body.installment_count,
         )
     except Adyen.AdyenError as error:
         _handle_adyen_error(error)

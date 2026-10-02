@@ -7,6 +7,7 @@ TerminalPaymentService as function references.
 from __future__ import annotations
 
 import base64
+import binascii
 import json
 from urllib.parse import parse_qs
 
@@ -19,6 +20,10 @@ def decode_additional_response(encoded_value: str) -> dict | str | None:
       - A Base64-encoded string (nexo EPAS standard) wrapping JSON
         or a URL-encoded query string (e.g. AMS1 terminals)
     Returns a dict, a plain string, or None if decoding fails.
+
+    Base64 is attempted *first* with strict validation: otherwise a padded
+    Base64 value such as ``cHNwUmVmZXJlbmNlPTEyMw==`` would be misread by
+    ``parse_qs`` as a query parameter before it was ever decoded.
     """
     if not encoded_value:
         return None
@@ -37,22 +42,29 @@ def decode_additional_response(encoded_value: str) -> dict | str | None:
             pass
         return None
 
-    # 1) Try the raw value directly (plain query string or JSON)
+    # 1) Try a strict Base64 decode first, then parse the decoded text.
+    #    validate=True rejects plain query strings and JSON (they contain
+    #    characters outside the Base64 alphabet), so they fall through to
+    #    step 2 untouched.
+    try:
+        decoded_string = base64.b64decode(encoded_value, validate=True).decode("utf-8")
+    except (binascii.Error, ValueError, UnicodeDecodeError):
+        decoded_string = None
+
+    if decoded_string is not None:
+        result = _try_parse(decoded_string)
+        if result:
+            return result
+        if decoded_string:
+            return decoded_string
+
+    # 2) Not valid Base64 (or decoded to nothing usable) — parse the raw
+    #    value as a plain query string or JSON.
     result = _try_parse(encoded_value)
     if result:
         return result
 
-    # 2) Try Base64 decoding
-    try:
-        decoded_string = base64.b64decode(encoded_value).decode("utf-8")
-    except Exception:
-        return None
-
-    result = _try_parse(decoded_string)
-    if result:
-        return result
-
-    return decoded_string if decoded_string else None
+    return None
 
 
 _SUMMARY_FIELDS = [

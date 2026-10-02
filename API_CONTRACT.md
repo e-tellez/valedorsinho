@@ -8,7 +8,7 @@ In development, the Next.js frontend rewrites `/api/*` → `http://localhost:800
 
 ## Authentication
 
-All endpoints require a valid JWT in the `Authorization: Bearer <token>` header.
+All endpoints require a valid JWT in the `Authorization: Bearer <token>` header except `POST /api/webhooks/{user_id}`, which is called directly by Adyen.
 
 ---
 
@@ -25,6 +25,14 @@ Return the client-side Adyen configuration needed to initialize the Drop-in SDK.
   "clientKey": "test_xxx",
   "environment": "test | live",
   "merchantAccount": "string"
+}
+```
+
+**Response `404`:** returned when no usable configuration is available (blank client key or merchant account). The frontend treats this as "setup required" and must not initialize the SDK. The API key is never returned by this endpoint.
+
+```json
+{
+  "detail": "No Adyen configuration found. Please complete the setup step first."
 }
 ```
 
@@ -203,6 +211,38 @@ Remove a stored payment method. Called by the Manage Payments Drop-in via `onDis
   "response": "[detail-successfully-disabled]"
 }
 ```
+
+---
+
+### POST /api/checkout/apple-pay/payment-methods
+
+Return Apple Pay availability using a non-zero discovery amount (1000 minor units, `channel: "Web"`). The request body is optional: omit it (or send `{}`) to default to `countryCode: "MX"` / `currency: "MXN"`.
+
+**Request (optional):**
+
+```json
+{
+  "countryCode": "MX",
+  "currency": "MXN"
+}
+```
+
+**Response `200`:**
+
+```json
+{
+  "requestBody": { "merchantAccount": "string", "countryCode": "MX", "amount": { "value": 1000, "currency": "MXN" }, "channel": "Web" },
+  "response": { "paymentMethods": [] }
+}
+```
+
+### POST /api/checkout/apple-pay/validate-merchant
+
+Create an Apple Pay merchant session. The body contains `merchantIdentifier` and `displayName`; the backend supplies the allowlisted `APPLE_PAY_DOMAIN_NAME`.
+
+### POST /api/checkout/apple-pay/payments
+
+Submit an Apple Pay MSI payment. The body contains `applePayToken`, a positive `amountValue`, and `installmentCount` of `3`, `6`, `9`, or `12`. The response includes a redacted `requestBody` and the Adyen `response`.
 
 ---
 
@@ -521,19 +561,20 @@ Generate a suggested `/payments` payload for one or more merchant verticals.
 
 ### GET /api/auth/config
 
-Return the active Adyen credentials for the authenticated user.
+Return non-secret metadata for the authenticated user's active Adyen configuration. The API key is write-only and is never returned.
 
 **Response `200`:**
 
 ```json
 {
   "role": "admin | im | user",
-  "api_key": "string",
-  "client_key": "string",
-  "merchant_account": "string",
+  "clientKey": "string",
+  "merchantAccount": "string",
   "environment": "test | live",
-  "is_custom": true,
-  "locked": false
+  "isCustom": true,
+  "locked": false,
+  "apiKeyConfigured": true,
+  "canConfigure": true
 }
 ```
 
@@ -547,13 +588,15 @@ Save personal Adyen credentials. Allowed for `admin` and `im` roles only.
 
 ```json
 {
-  "api_key": "string",
-  "client_key": "string",
-  "merchant_account": "string"
+  "apiKey": "string | null",
+  "clientKey": "string",
+  "merchantAccount": "string"
 }
 ```
 
-**Response `200`:** Same shape as `GET /api/auth/config`.
+Omit `apiKey` or send it blank to preserve an existing stored key. A key is required when creating a personal configuration for the first time.
+
+**Response `200`:** Same shape as `GET /api/auth/config`; the API key is not echoed.
 
 > Returns `403` if role is `user` or if the existing config has `locked: true`.
 

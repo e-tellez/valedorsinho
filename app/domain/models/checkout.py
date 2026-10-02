@@ -104,10 +104,10 @@ class PaymentRequest(AdyenModel):
     shopper_ip: str = Field(alias="shopperIP")
     shopper_email: str = "shopper@example.com"
     browser_info: dict[str, Any] | None = None
-    billing_address: BillingAddress = Field(default_factory=BillingAddress)
+    billing_address: BillingAddress | None = None
     store_payment_method: bool | None = None
     recurring_processing_model: str | None = None
-    authentication_data: AuthenticationData = Field(default_factory=AuthenticationData)
+    authentication_data: AuthenticationData | None = None
     channel: str = "Web"
 
     @computed_field  # type: ignore[prop-decorator]
