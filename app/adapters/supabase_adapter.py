@@ -88,7 +88,7 @@ class SupabaseAdapter(AuthGateway):
             },
             timeout=10,
         )
-        response.raise_for_status()
+        self._raise_for_status(response, "read adyen_configs")
         rows: list[dict[str, Any]] = response.json()
         if not rows or not rows[0].get("api_key"):
             return None
@@ -130,7 +130,7 @@ class SupabaseAdapter(AuthGateway):
         )
         if response.status_code in (400, 401, 403) and "locked" in response.text.lower():
             raise PermissionError("This configuration is locked and cannot be modified")
-        response.raise_for_status()
+        self._raise_for_status(response, "upsert adyen_configs")
         rows: list[dict[str, Any]] = response.json()
         row = rows[0]
         return AdyenCredentials(
@@ -145,6 +145,24 @@ class SupabaseAdapter(AuthGateway):
     # Private helpers
     # ------------------------------------------------------------------
 
+    def _raise_for_status(self, response: http_requests.Response, operation: str) -> None:
+        """Raise on a failed Supabase REST call, logging the underlying cause first.
+
+        Surfaces the real status code and response body (e.g. an RLS/permission
+        error on ``adyen_configs``) in the backend logs so an otherwise-opaque
+        500 is diagnosable instead of a generic "something went wrong".
+        """
+        try:
+            response.raise_for_status()
+        except http_requests.HTTPError:
+            logger.error(
+                "Supabase %s failed: HTTP %s – %s",
+                operation,
+                response.status_code,
+                response.text[:500],
+            )
+            raise
+
     def _fetch_role(self, user_id: str) -> UserRole:
         response = http_requests.get(
             f"{self._base_url}/rest/v1/profiles",
@@ -152,7 +170,7 @@ class SupabaseAdapter(AuthGateway):
             params={"id": f"eq.{user_id}", "select": "role"},
             timeout=10,
         )
-        response.raise_for_status()
+        self._raise_for_status(response, "read profiles role")
         rows: list[dict[str, Any]] = response.json()
         if not rows:
             return UserRole.USER
