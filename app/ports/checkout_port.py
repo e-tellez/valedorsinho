@@ -28,3 +28,7 @@ class CheckoutGateway(ABC):
     @abstractmethod
     def disable_stored_method(self, request_body: dict[str, Any]) -> dict[str, Any]:
         ...
+
+    @abstractmethod
+    def create_apple_pay_session(self, request_body: dict[str, Any]) -> dict[str, Any]:
+        ...

@@ -112,6 +112,7 @@ class SupabaseAdapter(AuthGateway):
                 **self._headers,
                 "Prefer": "resolution=merge-duplicates,return=representation",
             },
+            params={"on_conflict": "user_id"},
             json={
                 "user_id": user_id,
                 "api_key": credentials.api_key,
@@ -120,6 +121,8 @@ class SupabaseAdapter(AuthGateway):
             },
             timeout=10,
         )
+        if response.status_code in (400, 401, 403) and "locked" in response.text.lower():
+            raise PermissionError("This configuration is locked and cannot be modified")
         response.raise_for_status()
         rows: list[dict[str, Any]] = response.json()
         row = rows[0]
