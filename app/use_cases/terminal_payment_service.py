@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 from typing import Any
 
 from app.domain.models.terminal import DecodedTerminalResponse, PaymentSummaryField
@@ -19,8 +20,11 @@ class TerminalPaymentService:
         self,
         terminal_gateway: TerminalGateway,
         management_gateway: ManagementGateway,
-        decode_additional_response_fn,
-        extract_payment_summary_fn,
+        decode_additional_response_fn: Callable[[str], dict[str, Any] | str | None],
+        extract_payment_summary_fn: Callable[
+            [dict[str, Any] | str | None, dict[str, Any] | None],
+            list[tuple[str, str]],
+        ],
     ) -> None:
         self._terminal_gateway = terminal_gateway
         self._management_gateway = management_gateway

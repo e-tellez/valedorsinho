@@ -1,3 +1,7 @@
+# Devin AI
+.devin/
+.github/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

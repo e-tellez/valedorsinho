@@ -10,14 +10,14 @@ from pydantic import BaseModel
 
 class WebhookSummary(BaseModel):
     id: str
-    user_id: str | None
+    user_id: str | None = None
     merchant_account: str
     event_code: str
-    psp_reference: str | None
-    merchant_reference: str | None
-    amount_value: int | None
-    amount_currency: str | None
-    success: bool | None
+    psp_reference: str | None = None
+    merchant_reference: str | None = None
+    amount_value: int | None = None
+    amount_currency: str | None = None
+    success: bool | None = None
     live: bool
     received_at: datetime
     expires_at: datetime
