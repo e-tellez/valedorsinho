@@ -8,6 +8,12 @@ from app.ports.validator_port import PayloadValidator
 
 
 def _deep_merge(base: dict[str, Any], overlay: dict[str, Any]) -> dict[str, Any]:
+    """Recursively merge *overlay* into *base*, returning a new dict.
+
+    - Nested dicts are merged recursively.
+    - All other values (scalars, lists) use last-writer-wins (overlay wins).
+    - Neither *base* nor *overlay* is mutated.
+    """
     result = base.copy()
     for key, value in overlay.items():
         if key in result and isinstance(result[key], dict) and isinstance(value, dict):
@@ -27,7 +33,9 @@ class ToolsService:
     ) -> None:
         self._validator = validator
         self._verticals = verticals
-        self._vertical_index = {vertical["key"]: vertical["payload"] for vertical in verticals}
+        self._vertical_index: dict[str, dict[str, Any]] = {
+            v["key"]: v["payload"] for v in verticals
+        }
 
     def validate_payload(self, payload: dict[str, Any]) -> dict[str, Any]:
         errors = self._validator.validate(payload)
@@ -37,17 +45,17 @@ class ToolsService:
         return self._verticals
 
     def get_suggested_payload(self, vertical_keys: list[str]) -> dict[str, Any]:
-        unknown_keys = [key for key in vertical_keys if key not in self._vertical_index]
+        """Deep-merge the payloads for the requested vertical keys.
+
+        Raises:
+            ValueError: if any key is not a recognised vertical.
+        """
+        unknown_keys = [k for k in vertical_keys if k not in self._vertical_index]
         if unknown_keys:
             raise ValueError(f"Unknown vertical keys: {', '.join(unknown_keys)}")
 
-        payload: dict[str, Any] = {
-            "merchantAccount": "YOUR_MERCHANT_ACCOUNT",
-            "reference": "ORDER-REFERENCE",
-            "amount": {"value": 1000, "currency": "EUR"},
-            "paymentMethod": {"type": "scheme"},
-            "returnUrl": "https://your-website.com/checkout/result",
-        }
+        merged: dict[str, Any] = {}
         for key in vertical_keys:
-            payload = _deep_merge(payload, self._vertical_index[key])
-        return {"payload": payload}
+            merged = _deep_merge(merged, self._vertical_index[key])
+
+        return {"payload": merged}

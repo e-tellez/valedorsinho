@@ -14,4 +14,6 @@ class ValidatePayloadBody(BaseModel):
 
 
 class PayloadSuggestedBody(BaseModel):
+    """Body sent by the frontend to POST /api/tools/payload-suggested."""
+
     verticals: list[str]

@@ -42,12 +42,17 @@ async def get_verticals(
     return service.get_verticals()
 
 
+# ---------------------------------------------------------------------------
+# POST /api/tools/payload-suggested
+# ---------------------------------------------------------------------------
+
 @router.post("/payload-suggested")
 async def get_payload_suggested(
     body: PayloadSuggestedBody,
     service: ToolsService = Depends(get_tools_service),
     current_user: UserProfile = Depends(get_current_user),
 ) -> dict[str, Any]:
+    """Generate a suggested /payments payload for one or more merchant verticals."""
     try:
         return service.get_suggested_payload(body.verticals)
     except ValueError as error:
