@@ -687,5 +687,5 @@ Return a single webhook event including its full raw payload.
 ## Notes
 
 - **Amount units:** Online checkout uses **minor units** (`amountValue: 1000` = 10.00). Terminal payments use **major units** (`RequestedAmount: 10.00`).
-- **Proxy:** `next.config.mjs` rewrites `/api/*` → `http://localhost:8000/api/*` in dev. In production, `VALEDORSINHO_API_URL` (set in Vercel, pointing to the Railway service) is used as the rewrite destination.
+- **Proxy:** `next.config.mjs` rewrites `/api/*` → `http://localhost:8000/api/*` in dev. In production, `VALEDORSINHO_API_URL` (set on the frontend's Railway service, pointing to the backend Railway service) is used as the rewrite destination.
 - **CORS:** Backend allows `http://localhost:3000` (dev) and `https://etellez.com` (prod).
