@@ -16,20 +16,20 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for branching, commit, and PR standards
 | **Checkout — Advanced Flow** | `POST /api/checkout/payments`, `POST /api/checkout/payments/details` | ✅ |
 | **Checkout — Sessions Flow** | `POST /api/checkout/sessions` | ✅ |
 | **Tokenisation** | `CardOnFile` via Advanced flow | ✅ |
-| **Payload Validator** | `POST /api/tools/validate` | ✅ |
-| **Vertical Suggestions** | `GET /api/tools/suggested/{vertical}` | ✅ |
+| **Payload Validator** | `POST /api/tools/validate-payload` | ✅ |
+| **Vertical Suggestions** | `GET /api/tools/verticals`, `POST /api/tools/payload-suggested` | ✅ |
 
 ### 2. Unified Commerce
 | Feature | Endpoints | Status |
 |---------|-----------|--------|
-| **Terminal Payments** | `POST /api/terminal/payment` | ✅ |
+| **Terminal Payments** | `POST /api/terminal/make-payment` | ✅ |
 | **Terminal Fleet Management** | `GET /api/fleet/*` | ✅ |
 
 ### 3. Tools & Setup
 | Feature | Endpoints | Status |
 |---------|-----------|--------|
-| **Config** | `GET /api/config/client`, `GET /api/config/environment` | ✅ |
-| **Auth** | `GET /api/auth/config`, `POST /api/auth/config` | ✅ |
+| **Config** | `GET /api/config/client` | ✅ |
+| **Auth** | `GET /api/auth/config`, `PUT /api/auth/config` | ✅ |
 | **Webhooks** | `POST /api/webhooks/{user_id}`, `GET /api/webhooks`, `GET /api/webhooks/{id}` | ✅ |
 
 ---
@@ -148,6 +148,8 @@ cp .env.example .env
 | `ADYEN_MERCHANT_ACCOUNT` | Your merchant account name |
 | `ADYEN_CLIENT_KEY` | Served to the frontend via `/api/config/client` |
 | `ADYEN_ENVIRONMENT` | `test` or `live` |
+| `APPLE_PAY_DOMAIN_NAME` | Verified Apple Pay domain without protocol or path |
+| `APP_URL` | Frontend base URL used for payment return URLs |
 | `ADYEN_HMAC_KEY` | HMAC key for webhook signature validation |
 | `CORS_ORIGINS` | Comma-separated frontend origins (e.g. `http://localhost:3000`) |
 | `SUPABASE_URL` | Supabase project URL |
@@ -162,6 +164,13 @@ uvicorn app.main:app --reload --port 8000
 ```
 
 API docs at http://localhost:8000/docs
+
+## Tests
+
+```bash
+pip install -r requirements-dev.txt
+python3 -m pytest
+```
 
 ---
 
