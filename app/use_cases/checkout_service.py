@@ -32,9 +32,17 @@ def _generate_reference() -> str:
 class CheckoutService:
     """Application service that encapsulates all checkout use cases."""
 
-    def __init__(self, gateway: CheckoutGateway, merchant_account: str) -> None:
+    def __init__(
+        self,
+        gateway: CheckoutGateway,
+        merchant_account: str,
+        apple_pay_domain: str = "",
+        app_url: str = "",
+    ) -> None:
         self._gateway = gateway
         self._merchant_account = merchant_account
+        self._apple_pay_domain = apple_pay_domain
+        self._app_url = app_url.rstrip("/")
 
     # ----- /paymentMethods -----
 
@@ -93,7 +101,7 @@ class CheckoutService:
             shopper_ip=shopper_ip,
             shopper_email=shopper_email,
             browser_info=browser_info,
-            billing_address=BillingAddress(**billing_address) if billing_address else BillingAddress(),
+            billing_address=BillingAddress(**billing_address) if billing_address else None,
             store_payment_method=store_payment_method if not is_guest else None,
             recurring_processing_model="CardOnFile" if not is_guest and shopper_reference else None,
         )
@@ -176,3 +184,54 @@ class CheckoutService:
         return self._gateway.payment_details(
             details_request.model_dump(by_alias=True, exclude_none=True)
         )
+
+    def get_apple_pay_payment_methods(
+        self, country_code: str = "MX", currency: str = "MXN"
+    ) -> dict[str, Any]:
+        request_body = {
+            "merchantAccount": self._merchant_account,
+            "countryCode": country_code,
+            "amount": {"value": 1000, "currency": currency},
+            "channel": "Web",
+        }
+        return {
+            "requestBody": request_body,
+            "response": self._gateway.get_payment_methods(request_body),
+        }
+
+    def create_apple_pay_session(
+        self, merchant_identifier: str, display_name: str
+    ) -> dict[str, Any]:
+        if not self._apple_pay_domain:
+            raise ValueError("APPLE_PAY_DOMAIN_NAME is not configured")
+        request_body = {
+            "merchantAccount": self._merchant_account,
+            "merchantIdentifier": merchant_identifier,
+            "displayName": display_name,
+            "domainName": self._apple_pay_domain,
+        }
+        response = self._gateway.create_apple_pay_session(request_body)
+        return {"merchantSession": response, "requestBody": request_body, "response": response}
+
+    def create_apple_pay_payment(
+        self,
+        apple_pay_token: str,
+        amount_value: int,
+        installment_count: int,
+    ) -> dict[str, Any]:
+        request_body: dict[str, Any] = {
+            "merchantAccount": self._merchant_account,
+            "paymentMethod": {"type": "applepay", "applePayToken": apple_pay_token},
+            "amount": {"value": amount_value, "currency": "MXN"},
+            "reference": f"apple-pay-msi-{uuid.uuid4()}",
+            "countryCode": "MX",
+            "channel": "Web",
+            "installments": {"value": installment_count},
+            "returnUrl": f"{self._app_url}/apple-pay-msi",
+        }
+        response = self._gateway.make_payment(request_body)
+        preview_body = {
+            **request_body,
+            "paymentMethod": {"type": "applepay", "applePayToken": "[redacted]"},
+        }
+        return {"requestBody": preview_body, "response": response}

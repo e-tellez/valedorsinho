@@ -74,6 +74,8 @@ MERCHANT_ACCOUNT: str = os.getenv("ADYEN_MERCHANT_ACCOUNT", "")
 CLIENT_KEY: str = os.getenv("ADYEN_CLIENT_KEY", "")
 ADYEN_ENVIRONMENT: str = os.getenv("ADYEN_ENVIRONMENT", "test")
 ADYEN_API_KEY: str = os.getenv("ADYEN_API_KEY", "")
+APPLE_PAY_DOMAIN_NAME: str = os.getenv("APPLE_PAY_DOMAIN_NAME", "")
+APP_URL: str = os.getenv("APP_URL", "http://localhost:3000")
 CORS_ORIGINS: list[str] = os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
 
 # ---------------------------------------------------------------------------
