@@ -11,3 +11,7 @@ class ValidatePayloadBody(BaseModel):
     """Body sent by the frontend to POST /api/tools/validate-payload."""
 
     payload: dict[str, Any]
+
+
+class PayloadSuggestedBody(BaseModel):
+    verticals: list[str]
