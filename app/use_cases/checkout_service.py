@@ -8,6 +8,7 @@ from typing import Any
 
 from app.domain.models.checkout import (
     Amount,
+    AuthenticationData,
     BillingAddress,
     PaymentDetailsRequest,
     PaymentMethodsRequest,
@@ -104,6 +105,7 @@ class CheckoutService:
             billing_address=BillingAddress(**billing_address) if billing_address else None,
             store_payment_method=store_payment_method if not is_guest else None,
             recurring_processing_model="CardOnFile" if not is_guest and shopper_reference else None,
+            authentication_data=AuthenticationData(),
         )
         return self._gateway.make_payment(
             payment_request.model_dump(by_alias=True, exclude_none=True)
