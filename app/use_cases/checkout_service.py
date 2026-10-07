@@ -137,6 +137,7 @@ class CheckoutService:
         shopper_reference: str | None = None,
         is_guest: bool = False,
         shopper_email: str = "shopper@example.com",
+        shopper_locale: str = "en-US",
     ) -> dict[str, Any]:
         order_ref = _generate_reference()
         sessions_request = SessionsRequest(
@@ -147,6 +148,7 @@ class CheckoutService:
             return_url=return_url,
             shopper_reference=shopper_reference,
             shopper_email=shopper_email,
+            shopper_locale=shopper_locale,
             store_payment_method_mode=(
                 "askForConsent" if not is_guest and shopper_reference else None
             ),

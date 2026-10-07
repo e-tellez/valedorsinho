@@ -7,6 +7,7 @@ from app.use_cases.checkout_service import CheckoutService
 class FakeCheckoutGateway(CheckoutGateway):
     def __init__(self) -> None:
         self.payment_request: dict[str, Any] | None = None
+        self.session_request: dict[str, Any] | None = None
 
     def get_payment_methods(self, request_body: dict[str, Any]) -> dict[str, Any]:
         return {}
@@ -19,6 +20,7 @@ class FakeCheckoutGateway(CheckoutGateway):
         return {}
 
     def create_session(self, request_body: dict[str, Any]) -> dict[str, Any]:
+        self.session_request = request_body
         return {}
 
     def disable_stored_method(self, request_body: dict[str, Any]) -> dict[str, Any]:
@@ -50,6 +52,24 @@ def test_create_payment_omits_unsupplied_billing_and_requests_native_3ds() -> No
     assert gateway.payment_request["authenticationData"] == {
         "threeDSRequestData": {"nativeThreeDS": "preferred"}
     }
+
+
+def test_create_session_forwards_shopper_locale() -> None:
+    gateway = FakeCheckoutGateway()
+    service = CheckoutService(gateway, "MerchantECOM")
+
+    result = service.create_session(
+        amount_value=1000,
+        currency="MXN",
+        country_code="MX",
+        return_url="https://example.com/checkout/sessions/redirect",
+        is_guest=True,
+        shopper_locale="es-ES",
+    )
+
+    assert gateway.session_request is not None
+    assert gateway.session_request["shopperLocale"] == "es-ES"
+    assert result["requestBody"]["shopperLocale"] == "es-ES"
 
 
 def test_apple_pay_payment_redacts_token_from_preview() -> None:

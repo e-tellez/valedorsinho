@@ -133,6 +133,7 @@ class SessionsRequest(AdyenModel):
     return_url: str
     shopper_reference: str | None = None
     shopper_email: str = "shopper@example.com"
+    shopper_locale: str = "en-US"
     store_payment_method_mode: str | None = None
     recurring_processing_model: str | None = None
     channel: str = "Web"

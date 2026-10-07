@@ -136,6 +136,7 @@ async def sessions(
             shopper_reference=body.shopper_reference,
             is_guest=body.is_guest,
             shopper_email=body.shopper_email,
+            shopper_locale=body.shopper_locale,
         )
     except Adyen.AdyenError as error:
         _handle_adyen_error(error)

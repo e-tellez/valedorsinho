@@ -98,11 +98,12 @@ Create an Adyen Sessions-flow session.
   "shopperReference": "shopper_123",
   "isGuest": false,
   "shopperEmail": "shopper@example.com",
+  "shopperLocale": "es-ES",
   "returnUrl": "https://etellez.com/adyen/checkout/result"
 }
 ```
 
-> `amountValue` is in **minor units** (e.g. `1000` = MXN 10.00). Omit `shopperReference` and `shopperEmail` for guest shoppers.
+> `amountValue` is in **minor units** (e.g. `1000` = MXN 10.00). Omit `shopperReference` and `shopperEmail` for guest shoppers. `shopperLocale` is a BCP 47 locale (default `en-US`) that sets the Adyen-hosted session UI language.
 
 **Response `200`:**
 

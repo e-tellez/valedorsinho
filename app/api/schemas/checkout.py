@@ -38,6 +38,7 @@ class CreateSessionBody(BaseModel):
     shopper_reference: str | None = None
     is_guest: bool = False
     shopper_email: str = "shopper@example.com"
+    shopper_locale: str = "en-US"
     return_url: str
 
 
