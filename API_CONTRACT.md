@@ -559,6 +559,8 @@ Generate a suggested `/payments` payload for one or more merchant verticals.
 
 ## 6. Auth
 
+> Users may save multiple Adyen **company accounts** (see "Company accounts" below); exactly one is active at a time. `GET/PUT /api/auth/config` always operate on the **active** account. Switching the active account is a server-side setting (`profiles.active_adyen_config_id`). All accounts run in the `test` environment.
+
 ### GET /api/auth/config
 
 Return non-secret metadata for the authenticated user's active Adyen configuration. The API key is write-only and is never returned.
@@ -599,6 +601,72 @@ Omit `apiKey` or send it blank to preserve an existing stored key. A key is requ
 **Response `200`:** Same shape as `GET /api/auth/config`; the API key is not echoed.
 
 > Returns `403` if role is `user` or if the existing config has `locked: true`.
+
+---
+
+### Company accounts
+
+Manage the set of saved Adyen company accounts for the authenticated user. Allowed for `admin` and `im` roles only (`403` otherwise). The API key is write-only — accepted on create/update, never returned. Every account query is scoped to the authenticated user (ownership enforced server-side).
+
+The account object:
+
+```json
+{
+  "id": "uuid",
+  "label": "string",
+  "clientKey": "string",
+  "merchantAccount": "string",
+  "isActive": true,
+  "locked": false,
+  "apiKeyConfigured": true
+}
+```
+
+#### GET /api/auth/accounts
+
+List the user's saved accounts.
+
+**Response `200`:**
+
+```json
+{ "accounts": [ { "id": "uuid", "label": "string", "clientKey": "string", "merchantAccount": "string", "isActive": true, "locked": false, "apiKeyConfigured": true } ] }
+```
+
+#### POST /api/auth/accounts
+
+Create a new saved account. The user's first account automatically becomes active.
+
+**Request Body:**
+
+```json
+{ "label": "string", "apiKey": "string", "clientKey": "string", "merchantAccount": "string" }
+```
+
+**Response `200`:** The created account object. Returns `400` when required fields are missing.
+
+#### PUT /api/auth/accounts/{config_id}
+
+Update a saved account. Omit or blank `apiKey` to preserve the stored key.
+
+**Request Body:**
+
+```json
+{ "label": "string", "apiKey": "string | null", "clientKey": "string", "merchantAccount": "string" }
+```
+
+**Response `200`:** The updated account object. Returns `404` if the account is not found for this user, `403` if the account is `locked`, `400` on validation errors.
+
+#### DELETE /api/auth/accounts/{config_id}
+
+Delete a saved account. Deleting the active account clears the active pointer.
+
+**Response `204`:** No content. Returns `404` if not found for this user, `403` if the account is `locked`.
+
+#### PUT /api/auth/accounts/{config_id}/activate
+
+Make the given account the active one. This is the one tiny write that switches which account all flows (`/api/config/client`, checkout, `/api/auth/config`) resolve.
+
+**Response `200`:** The now-active account object. Returns `404` if not found for this user.
 
 ---
 
@@ -668,6 +736,46 @@ Return a single webhook event including its full raw payload.
 
 ---
 
+## 8. Admin
+
+User & role management. **Admin role only** — every endpoint returns `403` for `im` / `user`.
+
+### GET /api/admin/users
+
+List all users with their role.
+
+**Response `200`:**
+
+```json
+{
+  "users": [
+    { "userId": "uuid", "email": "string", "role": "admin | im | user" }
+  ]
+}
+```
+
+---
+
+### PUT /api/admin/users/{user_id}/role
+
+Change a user's role.
+
+**Request Body:**
+
+```json
+{ "role": "admin | im | user" }
+```
+
+**Response `200`:**
+
+```json
+{ "userId": "uuid", "email": "string", "role": "admin | im | user" }
+```
+
+> Returns `403` if the caller is not an admin, `400` if an admin tries to remove their own admin role, `422` for an invalid role value.
+
+---
+
 ## Error Format
 
 ```json
@@ -677,8 +785,11 @@ Return a single webhook event including its full raw payload.
 | Code | Meaning                          |
 |------|----------------------------------|
 | 200  | OK                               |
+| 204  | No Content (successful delete)   |
 | 400  | Bad Request / validation error   |
 | 401  | Unauthorized                     |
+| 403  | Forbidden (role / locked)        |
+| 404  | Not Found                        |
 | 422  | Unprocessable Entity (FastAPI)   |
 | 500  | Internal Server Error            |
 
